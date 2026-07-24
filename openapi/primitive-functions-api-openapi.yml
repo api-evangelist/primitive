@@ -1,0 +1,3389 @@
+openapi: 3.1.0
+info:
+  title: Primitive Account Functions API
+  version: 1.0.0
+  description: "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump."
+  contact:
+    name: Primitive
+    url: https://primitive.dev
+  license:
+    name: Proprietary
+    url: https://primitive.dev/terms
+  x-stability-level: stable
+  x-deprecation-policy: 'Breaking changes are announced at least 6 months in advance. Deprecated fields carry x-deprecated: true. The current stable version is v1.'
+servers:
+- url: https://api.primitive.dev/v1
+  description: Canonical API host (PRIMITIVE_API_BASE_URL). Carries every public API operation.
+tags:
+- name: Functions
+  description: 'Deploy JavaScript handlers that run on inbound mail. Each function
+
+    is a single ESM module whose default export is an object with an
+
+    async `fetch(request, env)` method, in the shape of a Workers-style
+
+    handler. Primitive signs each delivery and forwards the
+
+    `Primitive-Signature` header to the handler; verify the raw request
+
+    body with `PRIMITIVE_WEBHOOK_SECRET` before trusting the parsed event.
+
+    The `event` field is `email.received` for normal inbound mail, or a
+
+    machine-mail type (`email.bounced`, `email.tls_report`,
+
+    `email.dmarc_report`, `email.dmarc_failure`) for bounces and reports;
+
+    the payload shape is otherwise identical. Code runs on
+
+    Primitive''s edge runtime; there is no infrastructure to manage.
+
+    Secrets land in `env` as encrypted bindings and are refreshed on
+
+    every redeploy.
+
+    '
+paths:
+  /functions:
+    get:
+      operationId: listFunctions
+      summary: List functions
+      description: 'Returns every active (non-deleted) function in the org, newest
+
+        first. Each entry carries deploy status and timestamps. To
+
+        inspect the source code or deploy errors, use `GET /functions/{id}`.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: List of functions
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        description: One row from the function listing.
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Function id, also the script name in the edge runtime.
+                          name:
+                            type: string
+                            description: Slug-style name set on creation. Stable; cannot be changed.
+                          deploy_status:
+                            type: string
+                            enum:
+                            - pending
+                            - deployed
+                            - failed
+                            description: "Lifecycle state of the latest deploy attempt:\n  * `pending` — deploy in flight; the runtime has not yet\n    confirmed the new bundle is live.\n  * `deployed` — the running edge handler is the latest code.\n  * `failed` — the most recent deploy attempt failed; the\n    previously-live code (if any) is still running. The\n    `deploy_error` field carries the error message.\n"
+                          deployed_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                            description: Timestamp of the most recent successful deploy. Null until the first deploy succeeds.
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                        required:
+                        - id
+                        - name
+                        - deploy_status
+                        - created_at
+                        - updated_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+    post:
+      operationId: createFunction
+      summary: Deploy a function
+      description: 'Creates and deploys a new function. The handler must be a single
+
+        ESM module whose default export is an object with an async
+
+        `fetch(request, env)` method (Workers-style). Primitive signs
+
+        each delivery and forwards the `Primitive-Signature` header to
+
+        the handler. Verify the raw request body with
+
+        `PRIMITIVE_WEBHOOK_SECRET` before parsing JSON; after verification
+
+        the request body parses to a webhook event whose `event` field is
+
+        `email.received` for normal inbound mail, or a machine-mail type
+
+        (`email.bounced`, `email.tls_report`, `email.dmarc_report`,
+
+        `email.dmarc_failure`) for bounces and reports. Code is bundled
+
+        before being uploaded; ship a single self-contained file rather
+
+        than relying on external imports.
+
+
+        **Code limits.** `code` is capped at 1 MiB UTF-8. `sourceMap`
+
+        (optional) is capped at 5 MiB UTF-8, stored with each deployment
+
+        attempt, and sent to the runtime so stack traces can resolve to
+
+        original source files.
+
+
+        **Routing.** On successful deploy, the function code is live
+
+        in the runtime, but inbound mail will not reach it until at
+
+        least one route is bound. Routes are managed from the Primitive
+
+        dashboard. A `deploy_status` of `deployed` means the script is
+
+        installed, not that the function is receiving mail. The
+
+        internal runtime URL is not returned by the API and is not a
+
+        customer-facing integration surface.
+
+
+        **Secrets.** New functions ship with the managed secrets
+
+        (`PRIMITIVE_WEBHOOK_SECRET`, `PRIMITIVE_API_KEY`,
+
+        `PRIMITIVE_API_BASE_URL`) already bound. Add user-set secrets via
+
+        `POST /functions/{id}/secrets`; secret writes only land in the
+
+        running handler on the next redeploy.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  pattern: ^[a-z0-9_-]{1,64}$
+                  description: 'Slug-style name. Lowercase letters, digits, hyphens, and
+
+                    underscores. 1 to 64 characters. Must be unique within the
+
+                    org; a 409 is returned on collision.
+
+                    '
+                code:
+                  type: string
+                  minLength: 1
+                  maxLength: 1048576
+                  description: 'Pre-built handler as a single ESM module. Up to 1 MiB UTF-8.
+
+                    Must export a default `{ async fetch(req, env, ctx) { ... } }`
+
+                    object. Provide either `code` or `files`, not both.
+
+                    '
+                sourceMap:
+                  type: string
+                  minLength: 1
+                  maxLength: 5242880
+                  description: 'Optional source map for the bundle. Up to 5 MiB UTF-8.
+
+                    Stored with the deployment attempt and sent to the runtime
+
+                    to symbolicate stack traces in the function''s logs. Only
+
+                    valid with `code`.
+
+                    '
+                files:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: 'Source files for a managed build, as a map of path to file
+
+                    contents (for example {"package.json": "...",
+
+                    "src/index.ts": "..."}). Provide this INSTEAD of `code` to
+
+                    have the server install dependencies and bundle the source
+
+                    for the Workers runtime before deploying. Include a
+
+                    package.json (its `dependencies` are installed). Provide
+
+                    either `code` or `files`, not both.
+
+                    '
+              required:
+              - name
+      responses:
+        '201':
+          description: Function created and deployed
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST /functions on a successful deploy.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        deploy_status:
+                          type: string
+                          enum:
+                          - pending
+                          - deployed
+                          - failed
+                          description: "Lifecycle state of the latest deploy attempt:\n  * `pending` — deploy in flight; the runtime has not yet\n    confirmed the new bundle is live.\n  * `deployed` — the running edge handler is the latest code.\n  * `failed` — the most recent deploy attempt failed; the\n    previously-live code (if any) is still running. The\n    `deploy_error` field carries the error message.\n"
+                      required:
+                      - id
+                      - name
+                      - deploy_status
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters or customer-correctable deploy rejection
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '409':
+          $ref: '#/components/responses/Conflict'
+          description: A function with this name already exists in the org
+        '424':
+          $ref: '#/components/responses/FailedDependency'
+          description: Function deploy could not be completed; previously deployed code remains live
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Function deploy could not be completed; previously deployed code remains live
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+          description: Function deploy could not be completed; previously deployed code remains live
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /functions/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: getFunction
+      summary: Get a function
+      description: 'Returns the full record for a function, including its current
+
+        source code and the deploy status / error from the most recent
+
+        deploy attempt.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: Function record
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Full function record returned by GET / PUT.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        code:
+                          type: string
+                          description: 'The bundled handler source. UTF-8 string up to 1 MiB. The
+
+                            same value most recently passed as `code` to POST or PUT.
+
+                            '
+                        deploy_status:
+                          type: string
+                          enum:
+                          - pending
+                          - deployed
+                          - failed
+                          description: "Lifecycle state of the latest deploy attempt:\n  * `pending` — deploy in flight; the runtime has not yet\n    confirmed the new bundle is live.\n  * `deployed` — the running edge handler is the latest code.\n  * `failed` — the most recent deploy attempt failed; the\n    previously-live code (if any) is still running. The\n    `deploy_error` field carries the error message.\n"
+                        deploy_error:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'Error message from the most recent failed deploy, or null
+
+                            after a successful deploy. Surface this to users to explain
+
+                            a `failed` status without polling.
+
+                            '
+                        deployed_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - name
+                      - code
+                      - deploy_status
+                      - created_at
+                      - updated_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+    put:
+      operationId: updateFunction
+      summary: Update and redeploy a function
+      description: 'Replaces the function''s source code with the body''s `code` and
+
+        triggers a redeploy. Same size limits as `POST /functions`.
+
+        Use this verb to push secret writes into the running handler:
+
+        passing the same `code` re-runs the deploy and refreshes the
+
+        binding set with the latest values from the secrets table.
+
+
+        On deploy failure, the previously-deployed code stays live; the
+
+        runtime never serves a half-built bundle. The response uses
+
+        `error.code` `deploy_failed`, and the function''s `deploy_error`
+
+        field carries the latest deploy error for dashboard/API reads.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                code:
+                  type: string
+                  minLength: 1
+                  maxLength: 1048576
+                  description: New pre-built handler. Same rules as CreateFunctionInput.code. Provide either `code` or `files`, not both.
+                sourceMap:
+                  type: string
+                  minLength: 1
+                  maxLength: 5242880
+                files:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: 'Source files for a managed build, as a map of path to file
+
+                    contents. Provide this INSTEAD of `code` to rebuild and
+
+                    redeploy from source. Same rules as CreateFunctionInput.files.
+
+                    '
+              required: []
+      responses:
+        '200':
+          description: Updated function
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Full function record returned by GET / PUT.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        code:
+                          type: string
+                          description: 'The bundled handler source. UTF-8 string up to 1 MiB. The
+
+                            same value most recently passed as `code` to POST or PUT.
+
+                            '
+                        deploy_status:
+                          type: string
+                          enum:
+                          - pending
+                          - deployed
+                          - failed
+                          description: "Lifecycle state of the latest deploy attempt:\n  * `pending` — deploy in flight; the runtime has not yet\n    confirmed the new bundle is live.\n  * `deployed` — the running edge handler is the latest code.\n  * `failed` — the most recent deploy attempt failed; the\n    previously-live code (if any) is still running. The\n    `deploy_error` field carries the error message.\n"
+                        deploy_error:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'Error message from the most recent failed deploy, or null
+
+                            after a successful deploy. Surface this to users to explain
+
+                            a `failed` status without polling.
+
+                            '
+                        deployed_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - name
+                      - code
+                      - deploy_status
+                      - created_at
+                      - updated_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters or customer-correctable deploy rejection
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '424':
+          $ref: '#/components/responses/FailedDependency'
+          description: Function deploy could not be completed; previously deployed code remains live
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Function deploy could not be completed; previously deployed code remains live
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+          description: Function deploy could not be completed; previously deployed code remains live
+      security:
+      - BearerAuth: []
+    delete:
+      operationId: deleteFunction
+      summary: Delete a function
+      description: Delete a hosted inbound function. It stops running on future inbound messages.
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: Resource deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        deleted:
+                          type: boolean
+                          const: true
+                      required:
+                      - deleted
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '502':
+          $ref: '#/components/responses/BadGateway'
+          description: Primitive could not complete the downstream SMTP request
+      security:
+      - BearerAuth: []
+  /functions/{id}/test:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    post:
+      operationId: testFunction
+      summary: Send a test invocation
+      description: 'Sends a real test email from a Primitive-controlled sender to a
+
+        local-part on one of the org''s verified inbound domains. By
+
+        default the recipient is a synthetic
+
+        `__primitive_function_test+<random>@<domain>` address on a
+
+        domain selected to route to the function. Scoped functions use
+
+        their scoped domain; fallback functions use a domain that has
+
+        no enabled domain-scoped endpoint. Pass `local_part` to
+
+        override and exercise routing logic that branches on a specific
+
+        recipient (the common pattern when one function handles multiple
+
+        inboxes like `summarize@` and `action@`). The function fires
+
+        through the normal MX delivery path, so reply / send-mail calls
+
+        from inside the handler against the inbound''s `email.id` work
+
+        the same as in production. Returns immediately after the send is
+
+        queued; the invocation appears on the function''s invocations
+
+        list within a few seconds.
+
+
+        Requires that the function is currently `deployed`. Returns 422
+
+        if the function is in `pending` or `failed` state, or if the
+
+        org has no verified inbound domain to receive the test mail.
+
+        Returns 400 if `local_part` is set to a value that does not
+
+        match the local-part character set.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                local_part:
+                  type: string
+                  description: 'Override the synthetic local-part. When set, the
+
+                    test email is sent to `<local_part>@<picked-domain>`
+
+                    instead of the default
+
+                    `__primitive_function_test+<random>@<picked-domain>`.
+
+                    Must start with an alphanumeric and contain only
+
+                    letters, digits, dots, plus signs, hyphens, or
+
+                    underscores; 1-64 characters total.
+
+                    '
+                  minLength: 1
+                  maxLength: 64
+                  pattern: ^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$
+                  example: summarize
+      responses:
+        '200':
+          description: Test send queued
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: 'Metadata returned by POST /functions/{id}/test. The send is
+
+                        queued; poll `trace_url` to watch the run progress through
+
+                        send -> inbound -> webhook deliveries -> outbound requests,
+
+                        logs, and replies.
+
+                        '
+                      properties:
+                        test_run_id:
+                          type: string
+                          format: uuid
+                          description: Durable test run id used to fetch the run trace.
+                        inbound_domain:
+                          type: string
+                          description: Verified inbound domain the test email was sent to.
+                        to:
+                          type: string
+                          description: Synthetic local-part plus inbound_domain. Visible in the org's inbox.
+                        from:
+                          type: string
+                          description: Primitive-controlled outbound sender used for the test.
+                        send_id:
+                          type: string
+                          description: 'Outbound message id from the underlying send. NOT the
+
+                            inbound email''s id; the inbound id is created when the
+
+                            email arrives via MX and lands on the function''s
+
+                            invocations list.
+
+                            '
+                        subject:
+                          type: string
+                          description: Subject placed on the test email so it can be located in the inbox.
+                        poll_since:
+                          type: string
+                          format: date-time
+                          description: 'ISO timestamp suitable as a `since` lower bound when
+
+                            polling /emails for the inbound''s arrival. Captured
+
+                            slightly before the send to absorb light clock skew.
+
+                            '
+                        watch_url:
+                          type: string
+                          format: uri
+                          description: Function detail page where invocations show up live.
+                        trace_url:
+                          type: string
+                          description: Relative API URL for GET /functions/{id}/test-runs/{test_run_id}/trace.
+                      required:
+                      - test_run_id
+                      - inbound_domain
+                      - to
+                      - from
+                      - send_id
+                      - subject
+                      - poll_since
+                      - watch_url
+                      - trace_url
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+          description: Function not in a state that can be invoked, or no inbound domain configured
+        '502':
+          $ref: '#/components/responses/BadGateway'
+          description: Primitive could not complete the downstream SMTP request
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+          description: Sending agent misconfigured
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /functions/{id}/test-runs/{run_id}/trace:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    - name: run_id
+      in: path
+      required: true
+      description: Function test run id returned by POST /functions/{id}/test.
+      schema:
+        type: string
+        format: uuid
+    get:
+      operationId: getFunctionTestRunTrace
+      summary: Get a function test run trace
+      description: 'Returns the current end-to-end trace for a function test run.
+
+        The trace is intentionally partial while the test is still in
+
+        flight: callers can poll this endpoint and watch it fill in
+
+        from send -> inbound -> webhook deliveries -> outbound
+
+        requests, logs, and replies.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: Function test run trace
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: 'End-to-end trace for a `POST /functions/{id}/test` run. The
+
+                        shape is stable, but many nested sections are null or empty
+
+                        until the corresponding phase has happened.
+
+                        '
+                      properties:
+                        state:
+                          type: string
+                          description: "High-level state for a function test run trace:\n  - `send_failed`: the initial test email send failed.\n  - `waiting_for_send`: the test run was created but no send result has been recorded yet.\n  - `waiting_for_inbound`: the test send was queued and the matching inbound email has not arrived yet.\n  - `waiting_for_function`: the inbound email arrived and webhook/function processing is still in flight.\n  - `completed`: the function webhook completed successfully.\n  - `failed`: webhook delivery exhausted retries.\n"
+                          enum:
+                          - send_failed
+                          - waiting_for_send
+                          - waiting_for_inbound
+                          - waiting_for_function
+                          - completed
+                          - failed
+                        test_run:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            function_id:
+                              type: string
+                              format: uuid
+                            inbound_domain:
+                              type: string
+                            to:
+                              type: string
+                            from:
+                              type: string
+                            subject:
+                              type: string
+                            poll_since:
+                              type: string
+                              format: date-time
+                            created_at:
+                              type: string
+                              format: date-time
+                            sent_at:
+                              type:
+                              - string
+                              - 'null'
+                              format: date-time
+                            send_error:
+                              type:
+                              - string
+                              - 'null'
+                          required:
+                          - id
+                          - function_id
+                          - inbound_domain
+                          - to
+                          - from
+                          - subject
+                          - poll_since
+                          - created_at
+                          - sent_at
+                          - send_error
+                        test_send:
+                          type:
+                          - object
+                          - 'null'
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            status:
+                              type: string
+                              description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                              enum:
+                              - queued
+                              - submitted_to_agent
+                              - agent_failed
+                              - gate_denied
+                              - unknown
+                              - delivered
+                              - bounced
+                              - deferred
+                              - wait_timeout
+                            queue_id:
+                              type:
+                              - string
+                              - 'null'
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                          required:
+                          - id
+                          - status
+                          - queue_id
+                          - created_at
+                          - updated_at
+                        inbound_email:
+                          type:
+                          - object
+                          - 'null'
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            status:
+                              type: string
+                              description: "Lifecycle status of an INBOUND email (a row in the `emails`\ntable). Distinct from `SentEmailStatus`, which describes\nthe OUTBOUND lifecycle (the `sent_emails` table) and uses\na different vocabulary because the lifecycles differ.\nPossible values:\n\n  - `pending`: the row was inserted at ingestion (mx_main)\n    and has not yet completed the spam / filter / auth\n    pipeline. Body and parsed fields are present; webhook\n    delivery is not yet scheduled. Most rows transition out\n    of `pending` within seconds.\n  - `accepted`: the inbound passed the policy gates and is\n    queued for webhook delivery. The `webhook_status` field\n    tracks the separate webhook-delivery lifecycle from\n    this point.\n  - `completed`: terminal success. Webhook delivery\n    attempted and acknowledged by every active endpoint, OR\n    no endpoints are configured, so the row is durably\n    archived.\n  - `rejected`: terminal failure at ingestion (spam, blocked\n    sender, filter rule, malformed). The body and metadata\n    are stored for auditing but no webhook fires and the\n    row is not repliable.\n\nSee also `webhook_status` (separate enum tracking the\nwebhook-delivery state machine) and `SentEmailStatus` (the\noutbound vocabulary).\n"
+                              enum:
+                              - pending
+                              - accepted
+                              - completed
+                              - rejected
+                            received_at:
+                              type: string
+                              format: date-time
+                            from:
+                              type: string
+                            to:
+                              type: string
+                            subject:
+                              type:
+                              - string
+                              - 'null'
+                            webhook_status:
+                              type:
+                              - string
+                              - 'null'
+                              description: "Webhook-delivery state for an inbound email. Tracks a\nSEPARATE lifecycle from the email's `status` field; the\nsame row carries both. Possible values:\n\n  - `pending`: ingestion is past `pending` (the email itself\n    is `accepted`) but the webhook fan-out has not yet\n    started for this row.\n  - `in_flight`: at least one delivery attempt is in flight.\n  - `fired`: terminal success. Every active endpoint\n    acknowledged the delivery (or accepted it after retries).\n  - `failed`: terminal partial-failure. At least one endpoint\n    exhausted its retry budget; some endpoints may still\n    have succeeded.\n  - `exhausted`: terminal failure. Every endpoint exhausted\n    its retry budget without success.\n  - `null`: no endpoints configured, so no webhook lifecycle\n    applies.\n\nNote that the value `pending` here does NOT mean the email\nis `pending`; it means the email is past ingestion but\nwebhook delivery has not yet begun. Two overlapping uses\nof the word `pending` for distinct lifecycle phases.\n"
+                              enum:
+                              - pending
+                              - in_flight
+                              - fired
+                              - failed
+                              - exhausted
+                              - null
+                            webhook_attempt_count:
+                              type: integer
+                            webhook_last_status_code:
+                              type:
+                              - integer
+                              - 'null'
+                            webhook_last_error:
+                              type:
+                              - string
+                              - 'null'
+                          required:
+                          - id
+                          - status
+                          - received_at
+                          - from
+                          - to
+                          - subject
+                          - webhook_status
+                          - webhook_attempt_count
+                          - webhook_last_status_code
+                          - webhook_last_error
+                        deliveries:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: Webhook delivery id.
+                              endpoint_id:
+                                type: string
+                                format: uuid
+                              endpoint_url:
+                                type: string
+                                format: uri
+                              status:
+                                type: string
+                                enum:
+                                - pending
+                                - delivered
+                                - header_confirmed
+                                - failed
+                              attempt_count:
+                                type: integer
+                              duration_ms:
+                                type:
+                                - integer
+                                - 'null'
+                              last_error:
+                                type:
+                                - string
+                                - 'null'
+                              last_error_code:
+                                type:
+                                - string
+                                - 'null'
+                              created_at:
+                                type: string
+                                format: date-time
+                              updated_at:
+                                type: string
+                                format: date-time
+                              endpoint:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  id:
+                                    type: string
+                                    format: uuid
+                                  kind:
+                                    type: string
+                                    description: Endpoint kind. Current traces may include `http` or `function`; future endpoint kinds may appear.
+                                  function_id:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    format: uuid
+                                  function_name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  domain_id:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    format: uuid
+                                  enabled:
+                                    type: boolean
+                                  deactivated_at:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    format: date-time
+                                  is_current_function:
+                                    type: boolean
+                                required:
+                                - id
+                                - kind
+                                - function_id
+                                - function_name
+                                - domain_id
+                                - enabled
+                                - deactivated_at
+                                - is_current_function
+                            required:
+                            - id
+                            - endpoint_id
+                            - endpoint_url
+                            - status
+                            - attempt_count
+                            - duration_ms
+                            - last_error
+                            - last_error_code
+                            - created_at
+                            - updated_at
+                            - endpoint
+                        outbound_requests:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                              function_id:
+                                type: string
+                                format: uuid
+                              webhook_delivery_id:
+                                type:
+                                - string
+                                - 'null'
+                              email_id:
+                                type:
+                                - string
+                                - 'null'
+                                format: uuid
+                              endpoint_id:
+                                type:
+                                - string
+                                - 'null'
+                                format: uuid
+                              method:
+                                type: string
+                              url:
+                                type: string
+                                format: uri
+                              host:
+                                type: string
+                              path:
+                                type: string
+                              status_code:
+                                type:
+                                - integer
+                                - 'null'
+                              ok:
+                                type:
+                                - boolean
+                                - 'null'
+                              duration_ms:
+                                type: integer
+                              error:
+                                type:
+                                - string
+                                - 'null'
+                              ts:
+                                type: string
+                                format: date-time
+                            required:
+                            - id
+                            - function_id
+                            - webhook_delivery_id
+                            - email_id
+                            - endpoint_id
+                            - method
+                            - url
+                            - host
+                            - path
+                            - status_code
+                            - ok
+                            - duration_ms
+                            - error
+                            - ts
+                        logs:
+                          type: array
+                          items:
+                            type: object
+                            description: 'One row from GET /functions/{id}/logs. Represents a single
+
+                              captured log line emitted by the running handler (e.g. via
+
+                              `console.log` / `console.error`).
+
+                              '
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                                description: Unique log row id (stable across pages).
+                              function_id:
+                                type: string
+                                format: uuid
+                                description: The function this log row belongs to.
+                              level:
+                                type: string
+                                enum:
+                                - debug
+                                - log
+                                - info
+                                - warn
+                                - error
+                                description: 'Severity. `log` is the runtime''s default for unannotated
+
+                                  `console.log` calls; the other levels match standard
+
+                                  `console.*` methods.
+
+                                  '
+                              message:
+                                type: string
+                                description: 'The textual message body. The runtime stringifies non-string
+
+                                  arguments before persisting, so this is always a plain
+
+                                  string.
+
+                                  '
+                              ts:
+                                type: string
+                                format: date-time
+                                description: 'When the handler emitted this line. Newest-first ordering
+
+                                  on this column drives pagination; clock is the runtime''s,
+
+                                  not the gateway''s.
+
+                                  '
+                              metadata:
+                                type:
+                                - object
+                                - 'null'
+                                additionalProperties: true
+                                description: 'Optional structured payload the runtime attaches alongside
+
+                                  the message (e.g. extra args passed to `console.log`).
+
+                                  Shape is opaque; treat keys as untyped.
+
+                                  '
+                            required:
+                            - id
+                            - function_id
+                            - level
+                            - message
+                            - ts
+                        replies:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                              status:
+                                type: string
+                                description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                                enum:
+                                - queued
+                                - submitted_to_agent
+                                - agent_failed
+                                - gate_denied
+                                - unknown
+                                - delivered
+                                - bounced
+                                - deferred
+                                - wait_timeout
+                              to:
+                                type: string
+                              subject:
+                                type: string
+                              queue_id:
+                                type:
+                                - string
+                                - 'null'
+                              created_at:
+                                type: string
+                                format: date-time
+                            required:
+                            - id
+                            - status
+                            - to
+                            - subject
+                            - queue_id
+                            - created_at
+                      required:
+                      - state
+                      - test_run
+                      - test_send
+                      - inbound_email
+                      - deliveries
+                      - outbound_requests
+                      - logs
+                      - replies
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+  /functions/routing-topology:
+    get:
+      operationId: getOrgRoutingTopology
+      summary: Get the org's function routing topology
+      description: 'Returns a single snapshot of how inbound mail is routed across
+
+        this org''s active domains and functions: which active domain has
+
+        which function bound, the org''s fallback function (if any), and
+
+        every deployed function with no route bound. Use this to answer
+
+        "which of my functions actually receive mail?" diagnostically.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: Routing topology
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: 'Org-wide map of function routing: which domain points at which
+
+                        function, the org''s fallback binding (if any), and every
+
+                        deployed function with no route currently bound.
+
+                        '
+                      properties:
+                        domains:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              domain_id:
+                                type: string
+                                format: uuid
+                              domain:
+                                type: string
+                              routed_function:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  id:
+                                    type: string
+                                    format: uuid
+                                  name:
+                                    type: string
+                                required:
+                                - id
+                                - name
+                              endpoint_enabled:
+                                type:
+                                - boolean
+                                - 'null'
+                            required:
+                            - domain_id
+                            - domain
+                            - routed_function
+                            - endpoint_enabled
+                        fallback_function:
+                          type:
+                          - object
+                          - 'null'
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            name:
+                              type: string
+                          required:
+                          - id
+                          - name
+                        fallback_enabled:
+                          type:
+                          - boolean
+                          - 'null'
+                        unrouted_functions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                              name:
+                                type: string
+                            required:
+                            - id
+                            - name
+                      required:
+                      - domains
+                      - fallback_function
+                      - fallback_enabled
+                      - unrouted_functions
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+      security:
+      - BearerAuth: []
+  /functions/{id}/routing:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: getFunctionRouting
+      summary: Get a function's current route binding
+      description: 'Returns the endpoint binding for the function, or null when no
+
+        route is currently bound. The binding identifies whether the
+
+        function receives mail for a specific domain (scoped) or for any
+
+        active domain that has no scoped binding (fallback).
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: Function routing
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      oneOf:
+                      - type: object
+                        description: 'A single route binding for a function. `domain` is null when the
+
+                          binding is the org''s fallback (any active domain without a scoped
+
+                          binding); otherwise it carries the scoped domain. `rules` is
+
+                          reserved for future routing predicates.
+
+                          '
+                        properties:
+                          endpoint_id:
+                            type: string
+                            format: uuid
+                          enabled:
+                            type: boolean
+                          domain:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                              name:
+                                type:
+                                - string
+                                - 'null'
+                            required:
+                            - id
+                          rules:
+                            type: object
+                            description: Future routing predicates. Currently empty.
+                          delivery_count:
+                            type: integer
+                          success_count:
+                            type: integer
+                          failure_count:
+                            type: integer
+                          consecutive_fails:
+                            type: integer
+                          last_delivery_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                          last_success_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                          last_failure_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                        required:
+                        - endpoint_id
+                        - enabled
+                        - domain
+                        - rules
+                      - type: 'null'
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+  /functions/{id}/route:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    put:
+      operationId: setFunctionRoute
+      summary: Bind a route to a function
+      description: 'Binds inbound mail to this function. The route target is either
+
+        a specific verified domain (scoped) or the org''s fallback (any
+
+        active domain with no scoped binding). If another function is
+
+        already bound at the target, returns a `conflict` envelope
+
+        describing the holder; re-issue with `takeover: true` to
+
+        deactivate that prior binding and install this one.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 'Target for a route binding. Either a specific verified domain
+
+                (scoped) or the org-wide fallback. Pass `takeover: true` to
+
+                deactivate any conflicting binding before installing this one.
+
+                '
+              properties:
+                target:
+                  oneOf:
+                  - type: object
+                    properties:
+                      kind:
+                        type: string
+                        enum:
+                        - domain
+                      domainId:
+                        type: string
+                        format: uuid
+                    required:
+                    - kind
+                    - domainId
+                  - type: object
+                    properties:
+                      kind:
+                        type: string
+                        enum:
+                        - fallback
+                    required:
+                    - kind
+                takeover:
+                  type: boolean
+                  description: When true, deactivate any conflicting binding before installing this one.
+              required:
+              - target
+      responses:
+        '200':
+          description: Route bound, or conflict requiring takeover
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: 'On success, carries the new `routing`. On conflict, carries
+
+                        `conflict` describing the binding holder so the caller can
+
+                        re-issue with `takeover: true`.
+
+                        '
+                      properties:
+                        routing:
+                          oneOf:
+                          - type: object
+                            description: 'A single route binding for a function. `domain` is null when the
+
+                              binding is the org''s fallback (any active domain without a scoped
+
+                              binding); otherwise it carries the scoped domain. `rules` is
+
+                              reserved for future routing predicates.
+
+                              '
+                            properties:
+                              endpoint_id:
+                                type: string
+                                format: uuid
+                              enabled:
+                                type: boolean
+                              domain:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  id:
+                                    type: string
+                                    format: uuid
+                                  name:
+                                    type:
+                                    - string
+                                    - 'null'
+                                required:
+                                - id
+                              rules:
+                                type: object
+                                description: Future routing predicates. Currently empty.
+                              delivery_count:
+                                type: integer
+                              success_count:
+                                type: integer
+                              failure_count:
+                                type: integer
+                              consecutive_fails:
+                                type: integer
+                              last_delivery_at:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                              last_success_at:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                              last_failure_at:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                            required:
+                            - endpoint_id
+                            - enabled
+                            - domain
+                            - rules
+                          - type: 'null'
+                        conflict:
+                          type: object
+                          properties:
+                            kind:
+                              type: string
+                              enum:
+                              - http
+                              - function
+                            functionId:
+                              type:
+                              - string
+                              - 'null'
+                              format: uuid
+                            functionName:
+                              type:
+                              - string
+                              - 'null'
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                          required:
+                          - kind
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+    delete:
+      operationId: unsetFunctionRoute
+      summary: Unbind any route from a function
+      description: 'Deactivates every active endpoint bound to this function. The
+
+        function stays deployed but stops receiving inbound mail. Safe
+
+        to call when no route is currently bound (no-op).
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: Route unbound
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        unrouted:
+                          type: boolean
+                          enum:
+                          - true
+                      required:
+                      - unrouted
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+  /functions/{id}/secrets:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: listFunctionSecrets
+      summary: List a function's secrets
+      description: 'Returns metadata for every secret bound to the function, with
+
+        managed entries (provisioned by Primitive) listed first and
+
+        user-set entries listed alphabetically after. **Values are
+
+        never returned.** Secret writes are write-only.
+
+
+        Managed entries (e.g. `PRIMITIVE_WEBHOOK_SECRET`,
+
+        `PRIMITIVE_API_KEY`, `PRIMITIVE_API_BASE_URL`) carry a
+
+        `description` instead of `created_at` / `updated_at`. They
+
+        cannot be created, updated, or deleted via this API.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: List of secrets (metadata only, no values)
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            description: "One row from GET /functions/{id}/secrets. Discriminate on the\n`managed` field:\n  * `managed = true`  — system secret provisioned by Primitive.\n    `description` is set; `created_at` / `updated_at` are\n    null because the row is virtual (resolved at deploy time\n    from the managed registry, not stored in the secrets\n    table).\n  * `managed = false` — secret the user set via the API.\n    `created_at` / `updated_at` are set; `description` is\n    null.\n"
+                            properties:
+                              key:
+                                type: string
+                              managed:
+                                type: boolean
+                                description: True for managed system secrets, false for user-set entries.
+                              description:
+                                type:
+                                - string
+                                - 'null'
+                                description: Set on managed entries only; null on user-set entries.
+                              created_at:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Set on user-set entries only; null on managed entries.
+                              updated_at:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Set on user-set entries only; null on managed entries.
+                            required:
+                            - key
+                            - managed
+                      required:
+                      - items
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+    post:
+      operationId: createFunctionSecret
+      summary: Create or update a secret
+      description: 'Idempotent insert-or-update keyed on `(function_id, key)`.
+
+        Returns 201 the first time the key is set, 200 on subsequent
+
+        updates. Values are encrypted at rest and only become visible
+
+        to the running handler on the next deploy (`PUT /functions/{id}`
+
+        with the existing code is sufficient to refresh bindings).
+
+
+        Keys must match `^[A-Z_][A-Z0-9_]*$` (uppercase letters,
+
+        digits, underscores; first character is a letter or
+
+        underscore). Values are at most 4096 UTF-8 bytes. System-
+
+        managed keys are reserved and rejected.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              description: Body for POST /functions/{id}/secrets.
+              properties:
+                key:
+                  type: string
+                  pattern: ^[A-Z_][A-Z0-9_]*$
+                  description: 'Uppercase letters, digits, and underscores. Must start with
+
+                    a letter or underscore. System-managed keys (e.g.
+
+                    PRIMITIVE_WEBHOOK_SECRET, PRIMITIVE_API_KEY, and
+
+                    PRIMITIVE_API_BASE_URL) are reserved.
+
+                    '
+                value:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+                  description: 'Secret value, up to 4096 UTF-8 bytes. Encrypted at rest.
+
+                    Never returned by any read endpoint.
+
+                    '
+              required:
+              - key
+              - value
+      responses:
+        '200':
+          description: Secret updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '201':
+          description: Secret created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /functions/{id}/secrets/{key}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    - name: key
+      in: path
+      required: true
+      description: Secret key. Must match `^[A-Z_][A-Z0-9_]*$`.
+      schema:
+        type: string
+        pattern: ^[A-Z_][A-Z0-9_]*$
+    put:
+      operationId: setFunctionSecret
+      summary: Set a secret by key
+      description: 'Path-keyed companion to `POST /functions/{id}/secrets`.
+
+        Idempotent: returns 201 the first time the key is set, 200 on
+
+        subsequent updates. Same validation rules and same write-only
+
+        guarantees as the POST verb; the new value lands in the running
+
+        handler on the next deploy.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              description: Body for PUT /functions/{id}/secrets/{key}. Key comes from the path.
+              properties:
+                value:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+              required:
+              - value
+      responses:
+        '200':
+          description: Secret updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '201':
+          description: Secret created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+    delete:
+      operationId: deleteFunctionSecret
+      summary: Delete a secret
+      description: 'Removes the secret. The binding stays live in the running
+
+        handler until the next deploy refreshes the binding set
+
+        (`PUT /functions/{id}` with the existing code is sufficient).
+
+        Returns 404 if the key did not exist. Managed system keys
+
+        cannot be deleted.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '204':
+          description: Secret deleted
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+  /org/secrets:
+    get:
+      operationId: listOrgSecrets
+      summary: List org-level (global) secrets
+      description: 'Returns metadata for every org-level secret. Org secrets apply
+
+        to every function in the org and are read as `env.<KEY>` in
+
+        handlers. **Values are never returned.** Secret writes are
+
+        write-only. A function-level secret of the same name overrides
+
+        the org-level value for that function.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '200':
+          description: List of org secrets (metadata only, no values)
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            description: 'One row from GET /org/secrets. Org secrets are always user-set
+
+                              (there are no managed org secrets), so `created_at` /
+
+                              `updated_at` are always present.
+
+                              '
+                            properties:
+                              key:
+                                type: string
+                              created_at:
+                                type: string
+                                format: date-time
+                              updated_at:
+                                type: string
+                                format: date-time
+                            required:
+                            - key
+                            - created_at
+                            - updated_at
+                      required:
+                      - items
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+    post:
+      operationId: createOrgSecret
+      summary: Create or update an org secret
+      description: 'Idempotent insert-or-update keyed on `(org_id, key)`. Returns
+
+        201 the first time the key is set, 200 on subsequent updates.
+
+        Values are encrypted at rest. A changed value lands in a
+
+        function only on that function''s next deploy.
+
+
+        Keys must match `^[A-Z_][A-Z0-9_]*$` (uppercase letters,
+
+        digits, underscores; first character is a letter or
+
+        underscore). Values are at most 4096 UTF-8 bytes. System-
+
+        managed keys are reserved and rejected.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              description: Body for POST /org/secrets.
+              properties:
+                key:
+                  type: string
+                  pattern: ^[A-Z_][A-Z0-9_]*$
+                  description: 'Uppercase letters, digits, and underscores. Must start with
+
+                    a letter or underscore. System-managed keys are reserved.
+
+                    '
+                value:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+                  description: 'Secret value, up to 4096 UTF-8 bytes. Encrypted at rest.
+
+                    Never returned by any read endpoint.
+
+                    '
+              required:
+              - key
+              - value
+      responses:
+        '200':
+          description: Secret updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT org secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '201':
+          description: Secret created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT org secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /org/secrets/{key}:
+    parameters:
+    - name: key
+      in: path
+      required: true
+      description: Secret key. Must match `^[A-Z_][A-Z0-9_]*$`.
+      schema:
+        type: string
+        pattern: ^[A-Z_][A-Z0-9_]*$
+    put:
+      operationId: setOrgSecret
+      summary: Set an org secret by key
+      description: 'Path-keyed companion to `POST /org/secrets`. Idempotent:
+
+        returns 201 the first time the key is set, 200 on subsequent
+
+        updates. Same validation and write-only guarantees as POST.
+
+        '
+      tags:
+      - Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              description: Body for PUT /org/secrets/{key}. Key comes from the path.
+              properties:
+                value:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+              required:
+              - value
+      responses:
+        '200':
+          description: Secret updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT org secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '201':
+          description: Secret created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: Returned by POST and PUT org secret routes.
+                      properties:
+                        key:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        created:
+                          type: boolean
+                          description: True if this call inserted a new row, false if it updated an existing one.
+                      required:
+                      - key
+                      - created_at
+                      - updated_at
+                      - created
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+    delete:
+      operationId: deleteOrgSecret
+      summary: Delete an org secret
+      description: 'Removes the org secret. Functions keep the previous value until
+
+        each is redeployed. Returns 404 if the key did not exist.
+
+        '
+      tags:
+      - Functions
+      responses:
+        '204':
+          description: Secret deleted
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+  /functions/{id}/logs:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: listFunctionLogs
+      summary: List a function's execution logs
+      description: 'Returns the most recent `function_logs` rows for the function,
+
+        newest first. Each row is a single `console.log` / `console.error`
+
+        invocation captured from the running handler.
+
+
+        Page through history with the opaque `cursor` returned as
+
+        `next_cursor`; pass it back as the `cursor` query param on the
+
+        next call. `next_cursor` is `null` when there are no further
+
+        rows. The cursor format is an implementation detail and should
+
+        not be parsed by callers.
+
+        '
+      tags:
+      - Functions
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        description: 'Maximum number of rows to return. Clamped to 1..200; default
+
+          50.
+
+          '
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+      - name: cursor
+        in: query
+        required: false
+        description: 'Opaque pagination cursor from a previous response''s
+
+          `next_cursor`. Omit on the first call.
+
+          '
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of log rows (newest first) plus pagination cursor.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            description: 'One row from GET /functions/{id}/logs. Represents a single
+
+                              captured log line emitted by the running handler (e.g. via
+
+                              `console.log` / `console.error`).
+
+                              '
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                                description: Unique log row id (stable across pages).
+                              function_id:
+                                type: string
+                                format: uuid
+                                description: The function this log row belongs to.
+                              level:
+                                type: string
+                                enum:
+                                - debug
+                                - log
+                                - info
+                                - warn
+                                - error
+                                description: 'Severity. `log` is the runtime''s default for unannotated
+
+                                  `console.log` calls; the other levels match standard
+
+                                  `console.*` methods.
+
+                                  '
+                              message:
+                                type: string
+                                description: 'The textual message body. The runtime stringifies non-string
+
+                                  arguments before persisting, so this is always a plain
+
+                                  string.
+
+                                  '
+                              ts:
+                                type: string
+                                format: date-time
+                                description: 'When the handler emitted this line. Newest-first ordering
+
+                                  on this column drives pagination; clock is the runtime''s,
+
+                                  not the gateway''s.
+
+                                  '
+                              metadata:
+                                type:
+                                - object
+                                - 'null'
+                                additionalProperties: true
+                                description: 'Optional structured payload the runtime attaches alongside
+
+                                  the message (e.g. extra args passed to `console.log`).
+
+                                  Shape is opaque; treat keys as untyped.
+
+                                  '
+                            required:
+                            - id
+                            - function_id
+                            - level
+                            - message
+                            - ts
+                        next_cursor:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'Pass back as `cursor` to fetch the next
+
+                            page. `null` when no further rows exist.
+
+                            '
+                      required:
+                      - items
+                      - next_cursor
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+components:
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    ServiceUnavailable:
+      description: Primitive is temporarily unable to process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: outbound_capacity_exhausted
+              message: Outbound capacity is temporarily exhausted
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
+    FailedDependency:
+      description: The operation depends on another service or step that failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: deploy_failed
+              message: Function deploy failed
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    UnprocessableEntity:
+      description: 'The request was well-formed but could not be processed. For Payments
+
+        this covers a missing payout address, a failed payment verification, a
+
+        spend-policy decline, or an expired challenge; `error.code` distinguishes
+
+        them.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: payment_declined
+              message: payment exceeds the per-payment cap
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+    BadGateway:
+      description: Primitive could not complete the downstream SMTP request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: outbound_unreachable
+              message: Outbound SMTP service request failed
+  schemas:
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
+      - subject
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+              - forbidden
+              - not_found
+              - validation_error
+              - rate_limit_exceeded
+              - internal_error
+              - conflict
+              - mx_conflict
+              - outbound_disabled
+              - cannot_send_from_domain
+              - recipient_not_allowed
+              - outbound_key_missing
+              - outbound_unreachable
+              - outbound_key_invalid
+              - outbound_capacity_exhausted
+              - outbound_response_malformed
+              - outbound_relay_failed
+              - discard_not_enabled
+              - inbound_not_repliable
+              - search_timeout
+              - authorization_pending
+              - slow_down
+              - access_denied
+              - expired_token
+              - invalid_device_code
+              - invalid_signup_code
+              - invalid_signup_token
+              - invalid_verification_code
+              - email_delivery_failed
+              - clerk_signup_failed
+              - no_orgs_for_user
+              - org_not_accessible
+              - feature_disabled
+              - memory_conflict
+              - developer_usage_credit_exhausted
+              - no_payout_address
+              - ownership_proof_failed
+              - payment_verification_failed
+              - payment_declined
+              - challenge_expired
+              - settlement_failed
+              - template_not_installable
+              - scaffold_only
+              - invalid_variables
+              - unknown_secrets
+              - missing_secrets
+              - no_inbound_domain
+              - domain_cannot_send
+              - address_taken
+              - route_cap_reached
+              - name_exhausted
+            message:
+              type: string
+            details:
+              type: object
+              description: 'Optional structured data that callers can inspect to recover
+
+                from the error. The fields present depend on `code`. Additional
+
+                keys may be added over time without a major-version bump.
+
+                '
+              additionalProperties: true
+              properties:
+                mx_conflict:
+                  type: object
+                  description: Present when `code == mx_conflict`.
+                  required:
+                  - provider_name
+                  - suggested_subdomain
+                  properties:
+                    provider_name:
+                      type: string
+                      description: Human-readable name of the detected mailbox provider (e.g. "Google Workspace").
+                    suggested_subdomain:
+                      type: string
+                      description: Subdomain to try instead (e.g. "mail" for `mail.example.com`).
+                required_entitlements:
+                  type: array
+                  items:
+                    type: string
+                  description: Entitlements that would allow a denied send when no recipient-scope gate was granted.
+                sent_email_id:
+                  type: string
+                  description: ID of the persisted sent-email attempt associated with the error.
+                content_hash:
+                  type: string
+                  description: Content hash of the original request on idempotency cache-hit errors.
+                client_idempotency_key:
+                  type: string
+                  description: Effective idempotency key associated with the original request.
+            gates:
+              type: array
+              items:
+                $ref: '#/components/schemas/GateDenial'
+              description: Structured per-gate denial detail for recipient-scope send-mail failures.
+            request_id:
+              type: string
+              description: Server-issued request identifier for support and tracing.
+          required:
+          - code
+          - message
+      required:
+      - success
+      - error
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key with `prim_` prefix or OAuth access token with `prim_oat_` prefix: `Authorization: Bearer <token>`. Access is governed by the caller''s organization role (`owner`, `admin`, or `member`): API keys always act at `member` level regardless of who created them, and OAuth access tokens act with the authorizing user''s current organization role, resolved per request. Every operation in this spec is available to organization members; billing and organization administration are owner/admin actions performed in the dashboard and are not part of this API.'
+    DownloadToken:
+      type: apiKey
+      in: query
+      name: token
+      description: Signed download token provided in webhook payloads

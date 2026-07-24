@@ -1,0 +1,1044 @@
+openapi: 3.1.0
+info:
+  title: Primitive Account Templates API
+  version: 1.0.0
+  description: "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump."
+  contact:
+    name: Primitive
+    url: https://primitive.dev
+  license:
+    name: Proprietary
+    url: https://primitive.dev/terms
+  x-stability-level: stable
+  x-deprecation-policy: 'Breaking changes are announced at least 6 months in advance. Deprecated fields carry x-deprecated: true. The current stable version is v1.'
+servers:
+- url: https://api.primitive.dev/v1
+  description: Canonical API host (PRIMITIVE_API_BASE_URL). Carries every public API operation.
+tags:
+- name: Templates
+  description: Public Function template registry reads used to browse installable agent templates.
+paths:
+  /templates:
+    get:
+      operationId: listTemplates
+      summary: List function templates
+      description: List approved Function templates available for browsing and installation. Results are cacheable and paginated with `data.next_cursor`.
+      tags:
+      - Templates
+      security: []
+      parameters:
+      - name: q
+        in: query
+        required: false
+        description: Search templates by title, summary, or slug.
+        schema:
+          type: string
+          minLength: 1
+      - name: tag
+        in: query
+        required: false
+        description: Filter templates by an exact tag.
+        schema:
+          type: string
+          minLength: 1
+      - name: cursor
+        in: query
+        required: false
+        description: Cursor from a previous response `data.next_cursor` value.
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        description: Maximum number of templates to return. The server caps this at 100.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+      responses:
+        '200':
+          description: Paginated template registry summaries.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                              slug:
+                                type: string
+                                pattern: ^[a-z0-9][a-z0-9_-]{0,62}$
+                                description: Stable template slug used in template URLs and install commands.
+                              title:
+                                type: string
+                              summary:
+                                type: string
+                              author:
+                                type: object
+                                additionalProperties: false
+                                properties:
+                                  id:
+                                    type: string
+                                    minLength: 1
+                                  name:
+                                    type: string
+                                    minLength: 1
+                                  url:
+                                    type: string
+                                    format: uri
+                                required:
+                                - id
+                                - name
+                              tags:
+                                type: array
+                                items:
+                                  type: string
+                              verified:
+                                type: boolean
+                              install_count:
+                                type: integer
+                                minimum: 0
+                              github_repo:
+                                type: string
+                                pattern: ^[A-Za-z0-9-]+/[A-Za-z0-9_.-]+$
+                                description: GitHub repository in owner/repo form.
+                              created_at:
+                                type: string
+                                format: date-time
+                              updated_at:
+                                type: string
+                                format: date-time
+                            required:
+                            - id
+                            - slug
+                            - title
+                            - summary
+                            - author
+                            - tags
+                            - verified
+                            - install_count
+                            - github_repo
+                            - created_at
+                            - updated_at
+                        next_cursor:
+                          type:
+                          - string
+                          - 'null'
+                          description: Cursor to pass as the next `cursor` query value, or null when there are no more templates.
+                      required:
+                      - items
+                      - next_cursor
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+  /templates/{id}:
+    get:
+      operationId: getTemplate
+      summary: Get a function template
+      description: Fetch one approved Function template by slug, including its manifest snapshot and README. The stored source files used for install are not returned.
+      tags:
+      - Templates
+      security: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Template slug from the template manifest.
+        schema:
+          type: string
+          pattern: ^[a-z0-9][a-z0-9_-]{0,62}$
+          description: Template slug.
+      responses:
+        '200':
+          description: Template registry detail.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        slug:
+                          type: string
+                          pattern: ^[a-z0-9][a-z0-9_-]{0,62}$
+                          description: Stable template slug used in template URLs and install commands.
+                        title:
+                          type: string
+                        summary:
+                          type: string
+                        author:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                            name:
+                              type: string
+                              minLength: 1
+                            url:
+                              type: string
+                              format: uri
+                          required:
+                          - id
+                          - name
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        verified:
+                          type: boolean
+                        install_count:
+                          type: integer
+                          minimum: 0
+                        github_repo:
+                          type: string
+                          pattern: ^[A-Za-z0-9-]+/[A-Za-z0-9_.-]+$
+                          description: GitHub repository in owner/repo form.
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                        description:
+                          type:
+                          - string
+                          - 'null'
+                        github_sha:
+                          type: string
+                        github_path:
+                          type:
+                          - string
+                          - 'null'
+                        manifest:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            schemaVersion:
+                              type: integer
+                              const: 1
+                            id:
+                              type: string
+                              pattern: ^[a-z0-9][a-z0-9_-]{0,62}$
+                              description: Stable template slug from the manifest.
+                            title:
+                              type: string
+                              minLength: 1
+                            summary:
+                              type: string
+                              minLength: 1
+                            description:
+                              type: string
+                            author:
+                              type: object
+                              additionalProperties: false
+                              properties:
+                                id:
+                                  type: string
+                                  minLength: 1
+                                name:
+                                  type: string
+                                  minLength: 1
+                                url:
+                                  type: string
+                                  format: uri
+                              required:
+                              - id
+                              - name
+                            tags:
+                              type: array
+                              items:
+                                type: string
+                                minLength: 1
+                              default: []
+                            source:
+                              oneOf:
+                              - type: object
+                                additionalProperties: false
+                                properties:
+                                  mode:
+                                    type: string
+                                    const: managed-build
+                                  dir:
+                                    type: string
+                                    minLength: 1
+                                    default: .
+                                required:
+                                - mode
+                                - dir
+                              - type: object
+                                additionalProperties: false
+                                properties:
+                                  mode:
+                                    type: string
+                                    const: bundle
+                                  file:
+                                    type: string
+                                    minLength: 1
+                                required:
+                                - mode
+                                - file
+                            install:
+                              type: object
+                              additionalProperties: false
+                              properties:
+                                mode:
+                                  type: string
+                                  enum:
+                                  - deploy
+                                  - scaffold
+                                editFiles:
+                                  type: array
+                                  items:
+                                    type: string
+                                    minLength: 1
+                                  default: []
+                                reason:
+                                  type: string
+                                  default: ''
+                              required:
+                              - mode
+                              - editFiles
+                              - reason
+                            secrets:
+                              type: array
+                              items:
+                                type: object
+                                additionalProperties: false
+                                properties:
+                                  key:
+                                    type: string
+                                    pattern: ^[A-Z_][A-Z0-9_]*$
+                                  required:
+                                    type: boolean
+                                    default: true
+                                  description:
+                                    type: string
+                                required:
+                                - key
+                                - required
+                              default: []
+                            secretGroups:
+                              type: array
+                              items:
+                                type: object
+                                additionalProperties: false
+                                properties:
+                                  keys:
+                                    type: array
+                                    minItems: 2
+                                    items:
+                                      type: string
+                                      pattern: ^[A-Z_][A-Z0-9_]*$
+                                  min:
+                                    type: integer
+                                    minimum: 1
+                                    default: 1
+                                  description:
+                                    type: string
+                                required:
+                                - keys
+                                - min
+                              default: []
+                            variables:
+                              type: array
+                              items:
+                                type: object
+                                additionalProperties: false
+                                properties:
+                                  key:
+                                    type: string
+                                    minLength: 1
+                                  prompt:
+                                    type: string
+                                    minLength: 1
+                                  default:
+                                    type: string
+                                  file:
+                                    type: string
+                                    minLength: 1
+                                  type:
+                                    type: string
+                                    enum:
+                                    - string
+                                    - select
+                                    - url
+                                    - email
+                                    default: string
+                                  options:
+                                    type: array
+                                    items:
+                                      type: string
+                                      minLength: 1
+                                  validation:
+                                    type: object
+                                    additionalProperties: false
+                                    properties:
+                                      pattern:
+                                        type: string
+                                        minLength: 1
+                                      maxLength:
+                                        type: integer
+                                        minimum: 1
+                                required:
+                                - key
+                                - prompt
+                                - type
+                              default: []
+                            consumesVendors:
+                              type: array
+                              items:
+                                type: object
+                                additionalProperties: false
+                                properties:
+                                  slug:
+                                    type: string
+                                    minLength: 1
+                                  required:
+                                    type: boolean
+                                    default: true
+                                required:
+                                - slug
+                              default: []
+                            setup:
+                              type: object
+                              additionalProperties: false
+                              properties:
+                                agent:
+                                  type: string
+                                  minLength: 1
+                                prompt:
+                                  type: string
+                                  minLength: 1
+                                produces:
+                                  type: array
+                                  items:
+                                    type: string
+                                    minLength: 1
+                                  default: []
+                              required:
+                              - agent
+                              - prompt
+                              - produces
+                            postInstall:
+                              type: string
+                          required:
+                          - schemaVersion
+                          - id
+                          - title
+                          - summary
+                          - author
+                          - tags
+                          - source
+                          - install
+                          - secrets
+                          - secretGroups
+                          - variables
+                        readme:
+                          type:
+                          - string
+                          - 'null'
+                        status:
+                          type: string
+                          enum:
+                          - pending
+                          - approved
+                          - rejected
+                      required:
+                      - id
+                      - slug
+                      - title
+                      - summary
+                      - author
+                      - tags
+                      - verified
+                      - install_count
+                      - github_repo
+                      - created_at
+                      - updated_at
+                      - description
+                      - github_sha
+                      - github_path
+                      - manifest
+                      - readme
+                      - status
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+  /templates/{id}/install:
+    post:
+      operationId: installTemplate
+      summary: Install a function template
+      description: Start a one-shot deploy of an approved deploy-mode Function template. The response returns an install record immediately; poll `GET /templates/installs/{id}` for progress.
+      tags:
+      - Templates
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Template slug from the template manifest.
+        schema:
+          type: string
+          pattern: ^[a-z0-9][a-z0-9_-]{0,62}$
+          description: Template slug.
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                address:
+                  type: string
+                  pattern: ^[a-z0-9][a-z0-9._-]{0,63}$
+                  description: Localpart to claim on the selected inbound domain. Defaults to the template slug.
+                domain:
+                  type: string
+                  minLength: 3
+                  description: Org domain name to claim the address on. Defaults to the org's newest active domain.
+                variables:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Template variable values keyed by manifest variable key.
+                secrets:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Secret values keyed by manifest secret key.
+      responses:
+        '201':
+          description: Template install started.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        template_slug:
+                          type: string
+                          pattern: ^[a-z0-9][a-z0-9_-]{0,62}$
+                          description: Template slug for this install.
+                        state:
+                          type: string
+                          enum:
+                          - deploying
+                          - connecting
+                          - bound
+                          - tested
+                          - deploy_failed
+                          - bind_failed
+                          - test_failed
+                        address:
+                          type:
+                          - string
+                          - 'null'
+                        function_id:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                        error:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - template_slug
+                      - state
+                      - address
+                      - function_id
+                      - error
+                      - created_at
+                      - updated_at
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '409':
+          $ref: '#/components/responses/Conflict'
+          description: The request conflicts with the current state of the resource
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+          description: 'The request was well-formed but could not be processed. For Payments
+
+            this covers a missing payout address, a failed payment verification, a
+
+            spend-policy decline, or an expired challenge; `error.code` distinguishes
+
+            them.
+
+            '
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+  /templates/installs/{id}:
+    get:
+      operationId: getTemplateInstall
+      summary: Get template install status
+      description: Fetch the current state of a template install. Reads may advance the self-test phase when a reply effect has been observed.
+      tags:
+      - Templates
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Template install UUID.
+        schema:
+          type: string
+          format: uuid
+          pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+      responses:
+        '200':
+          description: Current template install status.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        template_slug:
+                          type: string
+                          pattern: ^[a-z0-9][a-z0-9_-]{0,62}$
+                          description: Template slug for this install.
+                        state:
+                          type: string
+                          enum:
+                          - deploying
+                          - connecting
+                          - bound
+                          - tested
+                          - deploy_failed
+                          - bind_failed
+                          - test_failed
+                        address:
+                          type:
+                          - string
+                          - 'null'
+                        function_id:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                        error:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - template_slug
+                      - state
+                      - address
+                      - function_id
+                      - error
+                      - created_at
+                      - updated_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+components:
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    UnprocessableEntity:
+      description: 'The request was well-formed but could not be processed. For Payments
+
+        this covers a missing payout address, a failed payment verification, a
+
+        spend-policy decline, or an expired challenge; `error.code` distinguishes
+
+        them.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: payment_declined
+              message: payment exceeds the per-payment cap
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+  schemas:
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
+      - subject
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+              - forbidden
+              - not_found
+              - validation_error
+              - rate_limit_exceeded
+              - internal_error
+              - conflict
+              - mx_conflict
+              - outbound_disabled
+              - cannot_send_from_domain
+              - recipient_not_allowed
+              - outbound_key_missing
+              - outbound_unreachable
+              - outbound_key_invalid
+              - outbound_capacity_exhausted
+              - outbound_response_malformed
+              - outbound_relay_failed
+              - discard_not_enabled
+              - inbound_not_repliable
+              - search_timeout
+              - authorization_pending
+              - slow_down
+              - access_denied
+              - expired_token
+              - invalid_device_code
+              - invalid_signup_code
+              - invalid_signup_token
+              - invalid_verification_code
+              - email_delivery_failed
+              - clerk_signup_failed
+              - no_orgs_for_user
+              - org_not_accessible
+              - feature_disabled
+              - memory_conflict
+              - developer_usage_credit_exhausted
+              - no_payout_address
+              - ownership_proof_failed
+              - payment_verification_failed
+              - payment_declined
+              - challenge_expired
+              - settlement_failed
+              - template_not_installable
+              - scaffold_only
+              - invalid_variables
+              - unknown_secrets
+              - missing_secrets
+              - no_inbound_domain
+              - domain_cannot_send
+              - address_taken
+              - route_cap_reached
+              - name_exhausted
+            message:
+              type: string
+            details:
+              type: object
+              description: 'Optional structured data that callers can inspect to recover
+
+                from the error. The fields present depend on `code`. Additional
+
+                keys may be added over time without a major-version bump.
+
+                '
+              additionalProperties: true
+              properties:
+                mx_conflict:
+                  type: object
+                  description: Present when `code == mx_conflict`.
+                  required:
+                  - provider_name
+                  - suggested_subdomain
+                  properties:
+                    provider_name:
+                      type: string
+                      description: Human-readable name of the detected mailbox provider (e.g. "Google Workspace").
+                    suggested_subdomain:
+                      type: string
+                      description: Subdomain to try instead (e.g. "mail" for `mail.example.com`).
+                required_entitlements:
+                  type: array
+                  items:
+                    type: string
+                  description: Entitlements that would allow a denied send when no recipient-scope gate was granted.
+                sent_email_id:
+                  type: string
+                  description: ID of the persisted sent-email attempt associated with the error.
+                content_hash:
+                  type: string
+                  description: Content hash of the original request on idempotency cache-hit errors.
+                client_idempotency_key:
+                  type: string
+                  description: Effective idempotency key associated with the original request.
+            gates:
+              type: array
+              items:
+                $ref: '#/components/schemas/GateDenial'
+              description: Structured per-gate denial detail for recipient-scope send-mail failures.
+            request_id:
+              type: string
+              description: Server-issued request identifier for support and tracing.
+          required:
+          - code
+          - message
+      required:
+      - success
+      - error
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key with `prim_` prefix or OAuth access token with `prim_oat_` prefix: `Authorization: Bearer <token>`. Access is governed by the caller''s organization role (`owner`, `admin`, or `member`): API keys always act at `member` level regardless of who created them, and OAuth access tokens act with the authorizing user''s current organization role, resolved per request. Every operation in this spec is available to organization members; billing and organization administration are owner/admin actions performed in the dashboard and are not part of this API.'
+    DownloadToken:
+      type: apiKey
+      in: query
+      name: token
+      description: Signed download token provided in webhook payloads

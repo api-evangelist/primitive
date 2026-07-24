@@ -1,0 +1,1431 @@
+openapi: 3.1.0
+info:
+  title: Primitive Account Wake API
+  version: 1.0.0
+  description: "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump."
+  contact:
+    name: Primitive
+    url: https://primitive.dev
+  license:
+    name: Proprietary
+    url: https://primitive.dev/terms
+  x-stability-level: stable
+  x-deprecation-policy: 'Breaking changes are announced at least 6 months in advance. Deprecated fields carry x-deprecated: true. The current stable version is v1.'
+servers:
+- url: https://api.primitive.dev/v1
+  description: Canonical API host (PRIMITIVE_API_BASE_URL). Carries every public API operation.
+tags:
+- name: Wake
+  description: 'Wake scheduling: schedule and send typed wake commands to your own
+
+    functions over real DKIM-signed email on a cron cadence, and manage the
+
+    per-target allowlist that authorizes which senders may wake a function.
+
+    '
+paths:
+  /wake/schedules:
+    get:
+      operationId: listWakeSchedules
+      summary: List wake schedules
+      description: Returns the org's wake.dispatch schedules.
+      tags:
+      - Wake
+      responses:
+        '200':
+          description: List of wake schedules
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        description: A cron schedule that sends a wake.dispatch command to a function.
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          from_address:
+                            type:
+                            - string
+                            - 'null'
+                            description: The sending identity the wake is signed as.
+                          target_address:
+                            type: string
+                            description: The function address the wake is delivered to.
+                          command:
+                            type: string
+                          args:
+                            type: object
+                            additionalProperties: true
+                          cron_expr:
+                            type: string
+                            description: 5-field cron expression.
+                          timezone:
+                            type: string
+                            description: IANA timezone the cron is evaluated in.
+                          next_run_at:
+                            type: string
+                            format: date-time
+                          last_run_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                          enabled:
+                            type: boolean
+                          note:
+                            type:
+                            - string
+                            - 'null'
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                        required:
+                        - id
+                        - target_address
+                        - command
+                        - cron_expr
+                        - timezone
+                        - next_run_at
+                        - enabled
+                        - created_at
+                        - updated_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+    post:
+      operationId: createWakeSchedule
+      summary: Create a wake schedule
+      description: 'Create a cron schedule that sends a wake.dispatch command to one of your
+
+        own function addresses. `from` and `to` must differ (no self-dispatch);
+
+        the cron expression and IANA timezone are validated and the first fire
+
+        time is computed without firing immediately.
+
+        '
+      tags:
+      - Wake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                from_address:
+                  type: string
+                  description: Sending identity (must be a domain the org can sign).
+                target_address:
+                  type: string
+                  description: Your function address (must differ from from_address).
+                command:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                args:
+                  type: object
+                  additionalProperties: true
+                  description: Optional JSON object passed through to the woken function.
+                cron_expr:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+                timezone:
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                  default: UTC
+                note:
+                  type: string
+                  maxLength: 2000
+              required:
+              - from_address
+              - target_address
+              - command
+              - cron_expr
+      responses:
+        '201':
+          description: Wake schedule created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: A cron schedule that sends a wake.dispatch command to a function.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        from_address:
+                          type:
+                          - string
+                          - 'null'
+                          description: The sending identity the wake is signed as.
+                        target_address:
+                          type: string
+                          description: The function address the wake is delivered to.
+                        command:
+                          type: string
+                        args:
+                          type: object
+                          additionalProperties: true
+                        cron_expr:
+                          type: string
+                          description: 5-field cron expression.
+                        timezone:
+                          type: string
+                          description: IANA timezone the cron is evaluated in.
+                        next_run_at:
+                          type: string
+                          format: date-time
+                        last_run_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        enabled:
+                          type: boolean
+                        note:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - target_address
+                      - command
+                      - cron_expr
+                      - timezone
+                      - next_run_at
+                      - enabled
+                      - created_at
+                      - updated_at
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /wake/schedules/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: getWakeSchedule
+      summary: Get a wake schedule
+      tags:
+      - Wake
+      responses:
+        '200':
+          description: The wake schedule
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: A cron schedule that sends a wake.dispatch command to a function.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        from_address:
+                          type:
+                          - string
+                          - 'null'
+                          description: The sending identity the wake is signed as.
+                        target_address:
+                          type: string
+                          description: The function address the wake is delivered to.
+                        command:
+                          type: string
+                        args:
+                          type: object
+                          additionalProperties: true
+                        cron_expr:
+                          type: string
+                          description: 5-field cron expression.
+                        timezone:
+                          type: string
+                          description: IANA timezone the cron is evaluated in.
+                        next_run_at:
+                          type: string
+                          format: date-time
+                        last_run_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        enabled:
+                          type: boolean
+                        note:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - target_address
+                      - command
+                      - cron_expr
+                      - timezone
+                      - next_run_at
+                      - enabled
+                      - created_at
+                      - updated_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+      description: Get a wake schedule
+    patch:
+      operationId: updateWakeSchedule
+      summary: Update a wake schedule
+      description: 'Update a schedule''s command, args, cadence, addresses, note, or enabled
+
+        state. Changing the cadence (or re-enabling) recomputes the next fire time.
+
+        '
+      tags:
+      - Wake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                enabled:
+                  type: boolean
+                command:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                args:
+                  type: object
+                  additionalProperties: true
+                cron_expr:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+                timezone:
+                  type: string
+                  minLength: 1
+                  maxLength: 64
+                from_address:
+                  type: string
+                target_address:
+                  type: string
+                note:
+                  type:
+                  - string
+                  - 'null'
+                  maxLength: 2000
+      responses:
+        '200':
+          description: Updated wake schedule
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: A cron schedule that sends a wake.dispatch command to a function.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        from_address:
+                          type:
+                          - string
+                          - 'null'
+                          description: The sending identity the wake is signed as.
+                        target_address:
+                          type: string
+                          description: The function address the wake is delivered to.
+                        command:
+                          type: string
+                        args:
+                          type: object
+                          additionalProperties: true
+                        cron_expr:
+                          type: string
+                          description: 5-field cron expression.
+                        timezone:
+                          type: string
+                          description: IANA timezone the cron is evaluated in.
+                        next_run_at:
+                          type: string
+                          format: date-time
+                        last_run_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        enabled:
+                          type: boolean
+                        note:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - target_address
+                      - command
+                      - cron_expr
+                      - timezone
+                      - next_run_at
+                      - enabled
+                      - created_at
+                      - updated_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+    delete:
+      operationId: deleteWakeSchedule
+      summary: Delete a wake schedule
+      tags:
+      - Wake
+      responses:
+        '200':
+          description: Resource deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        deleted:
+                          type: boolean
+                          const: true
+                      required:
+                      - deleted
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+      description: Delete a wake schedule
+  /wake/schedules/{id}/run:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    post:
+      operationId: runWakeSchedule
+      summary: Run a wake schedule now
+      description: 'Fire the schedule immediately, sending one wake.dispatch via the same
+
+        signed-send path as a scheduled fire. Does not change the schedule''s next
+
+        fire time.
+
+        '
+      tags:
+      - Wake
+      responses:
+        '200':
+          description: The wake interaction that was emitted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      additionalProperties: true
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /wake/authorizations:
+    get:
+      operationId: listWakeAuthorizations
+      summary: List wake authorizations
+      description: 'Returns the per-target allowlist grants that authorize which senders may
+
+        wake a function. Optionally filter by the target endpoint.
+
+        '
+      tags:
+      - Wake
+      parameters:
+      - name: recipient_endpoint_id
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+        description: Only return grants for this target endpoint
+      responses:
+        '200':
+          description: List of wake authorizations
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        description: A per-target allowlist grant authorizing a sender to wake a function.
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          recipient_endpoint_id:
+                            type: string
+                            format: uuid
+                          allowed_sender_domain:
+                            type: string
+                          allowed_sender_address:
+                            type:
+                            - string
+                            - 'null'
+                          allowed_commands:
+                            type:
+                            - array
+                            - 'null'
+                            items:
+                              type: string
+                          enabled:
+                            type: boolean
+                          note:
+                            type:
+                            - string
+                            - 'null'
+                          created_at:
+                            type: string
+                            format: date-time
+                        required:
+                        - id
+                        - recipient_endpoint_id
+                        - allowed_sender_domain
+                        - enabled
+                        - created_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+    post:
+      operationId: createWakeAuthorization
+      summary: Create a wake authorization
+      description: 'Grant a sender domain (and optionally a specific address and command set)
+
+        permission to wake a target function. The domain must be fully-qualified.
+
+        '
+      tags:
+      - Wake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                recipient_endpoint_id:
+                  type: string
+                  format: uuid
+                allowed_sender_domain:
+                  type: string
+                  minLength: 1
+                  maxLength: 253
+                  description: Fully-qualified sender domain (at least two labels).
+                allowed_sender_address:
+                  type:
+                  - string
+                  - 'null'
+                  description: Optional specific sender address to pin the grant to.
+                allowed_commands:
+                  type:
+                  - array
+                  - 'null'
+                  maxItems: 64
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 200
+                  description: Optional command allowlist; null = any command.
+                note:
+                  type: string
+                  maxLength: 2000
+              required:
+              - recipient_endpoint_id
+              - allowed_sender_domain
+      responses:
+        '201':
+          description: Wake authorization created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: A per-target allowlist grant authorizing a sender to wake a function.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        recipient_endpoint_id:
+                          type: string
+                          format: uuid
+                        allowed_sender_domain:
+                          type: string
+                        allowed_sender_address:
+                          type:
+                          - string
+                          - 'null'
+                        allowed_commands:
+                          type:
+                          - array
+                          - 'null'
+                          items:
+                            type: string
+                        enabled:
+                          type: boolean
+                        note:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - recipient_endpoint_id
+                      - allowed_sender_domain
+                      - enabled
+                      - created_at
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '409':
+          $ref: '#/components/responses/Conflict'
+          description: The request conflicts with the current state of the resource
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /wake/authorizations/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    patch:
+      operationId: updateWakeAuthorization
+      summary: Update a wake authorization
+      description: Toggle a wake authorization's enabled state.
+      tags:
+      - Wake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                enabled:
+                  type: boolean
+              required:
+              - enabled
+      responses:
+        '200':
+          description: Updated wake authorization
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: A per-target allowlist grant authorizing a sender to wake a function.
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        recipient_endpoint_id:
+                          type: string
+                          format: uuid
+                        allowed_sender_domain:
+                          type: string
+                        allowed_sender_address:
+                          type:
+                          - string
+                          - 'null'
+                        allowed_commands:
+                          type:
+                          - array
+                          - 'null'
+                          items:
+                            type: string
+                        enabled:
+                          type: boolean
+                        note:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                      required:
+                      - id
+                      - recipient_endpoint_id
+                      - allowed_sender_domain
+                      - enabled
+                      - created_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+    delete:
+      operationId: deleteWakeAuthorization
+      summary: Delete a wake authorization
+      tags:
+      - Wake
+      responses:
+        '200':
+          description: Resource deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        deleted:
+                          type: boolean
+                          const: true
+                      required:
+                      - deleted
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+      description: Delete a wake authorization
+  /wake/dispatches:
+    get:
+      operationId: listWakeDispatches
+      summary: List recent wake dispatches
+      description: Read-only audit of recent wake.dispatch interactions for the org.
+      tags:
+      - Wake
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+        description: Maximum number of rows to return (1-200, default 50)
+      responses:
+        '200':
+          description: List of recent wake dispatches
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        description: A recorded wake.dispatch interaction (audit row).
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          wire_id:
+                            type: string
+                          role:
+                            type: string
+                          state:
+                            type: string
+                          outcome:
+                            type:
+                            - string
+                            - 'null'
+                          awaiting:
+                            type:
+                            - string
+                            - 'null'
+                          counterparty_address:
+                            type: string
+                          our_address:
+                            type: string
+                          step_count:
+                            type: integer
+                          created_at:
+                            type: string
+                            format: date-time
+                          completed_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                        required:
+                        - id
+                        - wire_id
+                        - role
+                        - state
+                        - counterparty_address
+                        - our_address
+                        - created_at
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+components:
+  schemas:
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
+      - subject
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+              - forbidden
+              - not_found
+              - validation_error
+              - rate_limit_exceeded
+              - internal_error
+              - conflict
+              - mx_conflict
+              - outbound_disabled
+              - cannot_send_from_domain
+              - recipient_not_allowed
+              - outbound_key_missing
+              - outbound_unreachable
+              - outbound_key_invalid
+              - outbound_capacity_exhausted
+              - outbound_response_malformed
+              - outbound_relay_failed
+              - discard_not_enabled
+              - inbound_not_repliable
+              - search_timeout
+              - authorization_pending
+              - slow_down
+              - access_denied
+              - expired_token
+              - invalid_device_code
+              - invalid_signup_code
+              - invalid_signup_token
+              - invalid_verification_code
+              - email_delivery_failed
+              - clerk_signup_failed
+              - no_orgs_for_user
+              - org_not_accessible
+              - feature_disabled
+              - memory_conflict
+              - developer_usage_credit_exhausted
+              - no_payout_address
+              - ownership_proof_failed
+              - payment_verification_failed
+              - payment_declined
+              - challenge_expired
+              - settlement_failed
+              - template_not_installable
+              - scaffold_only
+              - invalid_variables
+              - unknown_secrets
+              - missing_secrets
+              - no_inbound_domain
+              - domain_cannot_send
+              - address_taken
+              - route_cap_reached
+              - name_exhausted
+            message:
+              type: string
+            details:
+              type: object
+              description: 'Optional structured data that callers can inspect to recover
+
+                from the error. The fields present depend on `code`. Additional
+
+                keys may be added over time without a major-version bump.
+
+                '
+              additionalProperties: true
+              properties:
+                mx_conflict:
+                  type: object
+                  description: Present when `code == mx_conflict`.
+                  required:
+                  - provider_name
+                  - suggested_subdomain
+                  properties:
+                    provider_name:
+                      type: string
+                      description: Human-readable name of the detected mailbox provider (e.g. "Google Workspace").
+                    suggested_subdomain:
+                      type: string
+                      description: Subdomain to try instead (e.g. "mail" for `mail.example.com`).
+                required_entitlements:
+                  type: array
+                  items:
+                    type: string
+                  description: Entitlements that would allow a denied send when no recipient-scope gate was granted.
+                sent_email_id:
+                  type: string
+                  description: ID of the persisted sent-email attempt associated with the error.
+                content_hash:
+                  type: string
+                  description: Content hash of the original request on idempotency cache-hit errors.
+                client_idempotency_key:
+                  type: string
+                  description: Effective idempotency key associated with the original request.
+            gates:
+              type: array
+              items:
+                $ref: '#/components/schemas/GateDenial'
+              description: Structured per-gate denial detail for recipient-scope send-mail failures.
+            request_id:
+              type: string
+              description: Server-issued request identifier for support and tracing.
+          required:
+          - code
+          - message
+      required:
+      - success
+      - error
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+  responses:
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key with `prim_` prefix or OAuth access token with `prim_oat_` prefix: `Authorization: Bearer <token>`. Access is governed by the caller''s organization role (`owner`, `admin`, or `member`): API keys always act at `member` level regardless of who created them, and OAuth access tokens act with the authorizing user''s current organization role, resolved per request. Every operation in this spec is available to organization members; billing and organization administration are owner/admin actions performed in the dashboard and are not part of this API.'
+    DownloadToken:
+      type: apiKey
+      in: query
+      name: token
+      description: Signed download token provided in webhook payloads

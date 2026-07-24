@@ -1,0 +1,2974 @@
+openapi: 3.1.0
+info:
+  title: Primitive Account Sending API
+  version: 1.0.0
+  description: "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump."
+  contact:
+    name: Primitive
+    url: https://primitive.dev
+  license:
+    name: Proprietary
+    url: https://primitive.dev/terms
+  x-stability-level: stable
+  x-deprecation-policy: 'Breaking changes are announced at least 6 months in advance. Deprecated fields carry x-deprecated: true. The current stable version is v1.'
+servers:
+- url: https://api.primitive.dev/v1
+  description: Canonical API host (PRIMITIVE_API_BASE_URL). Carries every public API operation.
+tags:
+- name: Sending
+  description: Send outbound emails through the Primitive API
+paths:
+  /emails/{id}/reply:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    post:
+      operationId: replyToEmail
+      summary: Reply to an inbound email
+      description: 'Sends an outbound reply to the inbound email identified by `id`.
+
+        Threading headers (`In-Reply-To`, `References`), recipient
+
+        derivation (Reply-To, then From, then bare sender), and the
+
+        `Re:` subject prefix are all derived server-side from the
+
+        stored inbound row. The request body carries only the message
+
+        body, optional From override, optional attachments, and optional
+
+        `wait` flag; passing any header or recipient override is
+
+        rejected by the schema (`additionalProperties: false`).
+
+
+        Forwards through the same gates as `/send-mail`: the response
+
+        status, error envelope, and `idempotent_replay` flag mirror
+
+        the send-mail contract verbatim.
+
+        '
+      servers:
+      - url: https://api.primitive.dev/v1
+        description: Canonical API host (recommended)
+      - url: https://www.primitive.dev/api/v1
+        description: Legacy compatibility host (Vercel body limit applies)
+      tags:
+      - Sending
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              description: 'Body shape for `/emails/{id}/reply`. Intentionally narrow:
+
+                recipients (`to`), subject, and threading headers
+
+                (`in_reply_to`, `references`) are derived server-side from
+
+                the inbound row referenced by the path id and are rejected by
+
+                `additionalProperties` if passed (returns 400).
+
+
+                `from` IS allowed because of legitimate use cases (display-name
+
+                addition, replying from a different verified outbound address,
+
+                multi-team triage). Send-mail''s per-send `canSendFrom` gate
+
+                validates the from-domain regardless, so the override carries
+
+                no extra privilege.
+
+                '
+              properties:
+                body_text:
+                  type: string
+                  description: Plain-text reply body. At least one of body_text or body_html is required. The combined UTF-8 byte length of body_text and body_html must be at most 262144 bytes (same cap as send-mail).
+                body_html:
+                  type: string
+                  description: HTML reply body. At least one of body_text or body_html is required.
+                from:
+                  type: string
+                  minLength: 3
+                  maxLength: 998
+                  description: 'Optional override for the reply''s From header. Defaults to
+
+                    the inbound''s recipient. Use to add a display name (`"Acme
+
+                    Support" <agent@company.com>`) or to reply from a different
+
+                    verified outbound address (e.g. multi-team routing where
+
+                    support@ triages to billing@). The from-domain must be a
+
+                    verified outbound domain for your org, same as send-mail.
+
+                    '
+                wait:
+                  type: boolean
+                  description: When true, wait for the first downstream SMTP delivery outcome before returning, mirroring the send-mail `wait` semantics.
+                attachments:
+                  type: array
+                  maxItems: 100
+                  description: Inline attachments for this reply. Use https://api.primitive.dev/v1 for replies with attachments. Combined raw decoded attachment bytes must be at most 31457280.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      filename:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Attachment filename. Control characters are rejected.
+                      content_type:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Optional MIME content type. Control characters are rejected.
+                      content_base64:
+                        type: string
+                        minLength: 1
+                        maxLength: 44040192
+                        description: Base64-encoded attachment bytes.
+                    required:
+                    - filename
+                    - content_base64
+      responses:
+        '200':
+          description: Outbound relay result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Persisted sent-email attempt ID.
+                        status:
+                          type: string
+                          description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                          enum:
+                          - queued
+                          - submitted_to_agent
+                          - agent_failed
+                          - gate_denied
+                          - unknown
+                          - delivered
+                          - bounced
+                          - deferred
+                          - wait_timeout
+                        from:
+                          type: string
+                          description: 'Bare from-address actually written on the wire. Echoed
+
+                            on every success branch so callers can confirm what
+
+                            went out, particularly useful for the /emails/{id}/reply
+
+                            path where `from` is server-derived from the inbound''s
+
+                            recipient when the caller doesn''t override.
+
+
+                            For sends where the caller passed a from-header that
+
+                            included a display name (e.g. `"Acme Support" <support@acme.test>`),
+
+                            this field is the parsed bare address (`support@acme.test`).
+
+                            The display name was sent on the wire intact; this field
+
+                            just makes the address easy to compare against allowlists.
+
+                            '
+                        queue_id:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'Message identifier assigned by Primitive''s OUTBOUND relay
+
+                            (the box that signs your mail and submits it to the
+
+                            receiving MTA). NOT the receiver''s queue id.
+
+
+                            The receiver may also report its own queue id in
+
+                            `smtp_response_text` (e.g. `"250 2.0.0 Ok: queued as
+
+                            99D111927CDA"` from a Postfix receiver). Those two ids
+
+                            refer to different mail systems and are NOT comparable.
+
+                            Treat `queue_id` as Primitive-internal and the
+
+                            receiver''s id as remote-system-internal.
+
+
+                            Null on rows that never reached the relay (queued,
+
+                            gate_denied, agent_failed before signing).
+
+                            '
+                        accepted:
+                          type: array
+                          items:
+                            type: string
+                          description: Recipient addresses accepted by the relay.
+                        rejected:
+                          type: array
+                          items:
+                            type: string
+                          description: Recipient addresses rejected by the relay.
+                        client_idempotency_key:
+                          type: string
+                          description: Effective idempotency key used for this send.
+                        request_id:
+                          type: string
+                          description: Server-issued request identifier for support and tracing.
+                        content_hash:
+                          type: string
+                          description: Stable hash of the canonical send payload.
+                        delivery_status:
+                          type: string
+                          description: 'Narrower enum covering only the four terminal delivery
+
+                            outcomes returned to a synchronous `wait: true` send.
+
+
+                            On the SendMailResult shape, `delivery_status` is always
+
+                            equal to `status` whenever both are present (i.e. on
+
+                            terminal-state replays and live wait=true responses).
+
+                            The two fields exist so callers that want to type-narrow
+
+                            on "this is a delivery outcome" can pattern-match against
+
+                            the four-value enum without handling the broader
+
+                            SentEmailStatus value set (which also covers `queued`,
+
+                            `submitted_to_agent`, `agent_failed`, `gate_denied`,
+
+                            `unknown`).
+
+
+                            On async-mode and pre-terminal responses, `delivery_status`
+
+                            is absent and only `status` is populated. Use `status` if
+
+                            you want a single field that''s always present.
+
+                            '
+                          enum:
+                          - delivered
+                          - bounced
+                          - deferred
+                          - wait_timeout
+                        smtp_response_code:
+                          type:
+                          - integer
+                          - 'null'
+                          description: SMTP response code from the first downstream delivery outcome when wait is true.
+                        smtp_response_text:
+                          type: string
+                          description: SMTP response text from the first downstream delivery outcome when wait is true.
+                        idempotent_replay:
+                          type: boolean
+                          description: 'True when the response replays a previously-recorded send
+
+                            keyed by `client_idempotency_key` (same key, same canonical
+
+                            payload). False on a fresh send and on gate-denied
+
+                            responses. Lets callers branch on cache state without
+
+                            diffing fields.
+
+                            '
+                      required:
+                      - id
+                      - status
+                      - from
+                      - queue_id
+                      - accepted
+                      - rejected
+                      - client_idempotency_key
+                      - request_id
+                      - content_hash
+                      - idempotent_replay
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+          description: 'Inbound is not repliable: the row exists but lacks a
+
+            `message_id` (no thread anchor) or a `recipient` (cannot
+
+            derive the From address).
+
+            '
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+        '500':
+          $ref: '#/components/responses/InternalError'
+          description: Primitive encountered an internal error
+        '502':
+          $ref: '#/components/responses/BadGateway'
+          description: Primitive could not complete the downstream SMTP request
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+          description: Primitive is temporarily unable to process the request
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /send-permissions:
+    get:
+      operationId: getSendPermissions
+      summary: List send-permission rules
+      description: "Returns a flat list of rules describing every recipient the\ncaller may send to. Each rule has a `type`, a kind-specific\npayload, and a human-readable `description`. If any rule\nmatches the recipient, /send-mail will accept the send under\nthe recipient-scope check.\n\nThe endpoint is the answer to \"where can I send\" without\nexposing internal entitlement names. Agents that don't\nrecognize a `type` can still read the `description` prose\nand act on it.\n\nRule kinds, ordered broadest-first so an agent can stop\nscanning at the first match:\n\n  1. `any_recipient` (one entry, only when the org can send\n     anywhere): every other rule below it is redundant.\n  2. `managed_zone` (always emitted, one per Primitive-managed\n     zone): sends to any address at *.primitive.email or\n     *.email.works always succeed; no entitlement required.\n  3. `your_domain` (one per active verified outbound domain\n     owned by the org): sends to that domain are approved.\n  4. `address` (one per address that has authenticated\n     inbound mail to the org, capped at `meta.address_cap`):\n     sends to that exact address are approved.\n\nThe list is informational, not an authorization check.\n/send-mail remains the source of truth on whether an\nindividual send will succeed (it also enforces the\nfrom-address and the `send_mail` entitlement, which are\nnot recipient-scope concerns and are not represented here).\n"
+      tags:
+      - Sending
+      responses:
+        '200':
+          description: Send-permission rules for the caller's org
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        description: 'One recipient-scope rule describing a destination the caller
+
+                          may send to. Discriminated on `type`. Each rule carries a
+
+                          human-prose `description` field intended for display.
+
+
+                          Rule kinds are stable within an SDK release. A response
+
+                          containing a `type` value not enumerated in this schema
+
+                          means the server is running a newer version than the SDK;
+
+                          upgrade the SDK to the release that matches the server''s
+
+                          schema. Strict-parsing SDKs (Go, Python) will raise a
+
+                          decode error in that case rather than silently dropping
+
+                          the unknown rule, since silent drops would let an outbound
+
+                          agent reason from an incomplete view of its own permissions.
+
+                          '
+                        discriminator:
+                          propertyName: type
+                          mapping:
+                            any_recipient: '#/components/schemas/SendPermissionAnyRecipient'
+                            managed_zone: '#/components/schemas/SendPermissionManagedZone'
+                            your_domain: '#/components/schemas/SendPermissionYourDomain'
+                            address: '#/components/schemas/SendPermissionAddress'
+                        oneOf:
+                        - type: object
+                          description: 'The caller can send to any recipient. When this rule is
+
+                            present, every other rule in the response is redundant.
+
+                            '
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - any_recipient
+                            description:
+                              type: string
+                              description: Human-prose summary of the rule.
+                          required:
+                          - type
+                          - description
+                        - type: object
+                          description: 'The caller can send to any address at the named
+
+                            Primitive-managed zone. Always emitted (no entitlement
+
+                            required) because Primitive owns the zone and every mailbox
+
+                            belongs to a Primitive customer by construction.
+
+                            '
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - managed_zone
+                            zone:
+                              type: string
+                              description: 'The managed apex domain. Sends are accepted to any
+
+                                address at the apex itself or any subdomain (e.g.
+
+                                `alice@primitive.email` and `alice@acme.primitive.email`
+
+                                both match the `primitive.email` zone rule).
+
+                                '
+                            description:
+                              type: string
+                              description: Human-prose summary of the rule.
+                          required:
+                          - type
+                          - zone
+                          - description
+                        - type: object
+                          description: 'The caller can send to any address at one of their own
+
+                            verified outbound domains. Emitted once per active row in
+
+                            the org''s `domains` table.
+
+                            '
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - your_domain
+                            domain:
+                              type: string
+                              description: A verified outbound domain owned by the caller's org.
+                            description:
+                              type: string
+                              description: Human-prose summary of the rule.
+                          required:
+                          - type
+                          - domain
+                          - description
+                        - type: object
+                          description: 'The caller can send to a specific address that has
+
+                            authenticated inbound mail to the org. Emitted once per row
+
+                            in the org''s `known_send_addresses` table, capped at
+
+                            `meta.address_cap`.
+
+                            '
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - address
+                            address:
+                              type: string
+                              description: The bare email address this rule grants sends to.
+                            last_received_at:
+                              type: string
+                              format: date-time
+                              description: 'Most recent inbound email from this address that
+
+                                authenticated successfully (DMARC pass + DKIM/SPF
+
+                                alignment). Updated on each new authenticated receipt.
+
+                                '
+                            received_count:
+                              type: integer
+                              description: 'Total number of authenticated inbound emails from this
+
+                                address. Increments only when `last_received_at` advances.
+
+                                '
+                            description:
+                              type: string
+                              description: Human-prose summary of the rule.
+                          required:
+                          - type
+                          - address
+                          - last_received_at
+                          - received_count
+                          - description
+                    meta:
+                      type: object
+                      description: 'Response metadata for /send-permissions. The `address_cap`
+
+                        bounds the size of the `address` rule subset; orgs with more
+
+                        than `address_cap` known addresses almost always also hold a
+
+                        broader rule type (`any_recipient` or `your_domain`), so the
+
+                        cap is a response-size bound rather than a meaningful
+
+                        product limit.
+
+                        '
+                      properties:
+                        address_cap:
+                          type: integer
+                          description: Maximum number of `address` rules included in `data`.
+                        truncated:
+                          type: boolean
+                          description: 'True when the org has more than `address_cap` known
+
+                            addresses and the list was truncated. False when every
+
+                            known address is represented or when the org holds no
+
+                            address rules at all.
+
+                            '
+                      required:
+                      - address_cap
+                      - truncated
+                  required:
+                  - data
+                  - meta
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+  /send-mail:
+    post:
+      operationId: sendEmail
+      summary: Send outbound email
+      description: 'Sends an outbound email through Primitive''s outbound relay. By default
+
+        the request returns once the relay accepts the message for delivery.
+
+        Set `wait: true` to wait for the first downstream SMTP delivery outcome.
+
+
+        **Host routing.** /send-mail is served by the canonical API host
+
+        (`https://api.primitive.dev/v1`) so the request body can carry
+
+        inline attachments up to ~30 MiB raw. The legacy dashboard
+
+        compatibility host (`https://www.primitive.dev/api/v1`) also accepts
+
+        /send-mail, but Vercel request body limits apply before proxying.
+
+        The typed SDKs route /send-mail to the canonical API host
+
+        automatically.
+
+        '
+      servers:
+      - url: https://api.primitive.dev/v1
+        description: Canonical API host (recommended)
+      - url: https://www.primitive.dev/api/v1
+        description: Legacy compatibility host (Vercel body limit applies)
+      tags:
+      - Sending
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ^[\x21-\x7E]+$
+        description: 'Optional customer-supplied idempotency key. If omitted, Primitive
+
+          derives one from the canonical request payload and echoes the
+
+          effective value in the `Idempotency-Key` response header.
+
+          '
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                from:
+                  type: string
+                  minLength: 3
+                  maxLength: 998
+                  description: RFC 5322 From header. The sender domain must be a verified outbound domain for your organization.
+                to:
+                  type: string
+                  minLength: 3
+                  maxLength: 320
+                  description: Recipient address. Recipient eligibility depends on your account's outbound entitlements.
+                subject:
+                  type: string
+                  minLength: 1
+                  maxLength: 998
+                  description: Subject line for the outbound message
+                body_text:
+                  type: string
+                  description: Plain-text message body. At least one of body_text or body_html is required. The combined UTF-8 byte length of body_text and body_html must be at most 262144 bytes.
+                body_html:
+                  type: string
+                  description: HTML message body. At least one of body_text or body_html is required. The combined UTF-8 byte length of body_text and body_html must be at most 262144 bytes.
+                in_reply_to:
+                  type: string
+                  minLength: 1
+                  maxLength: 998
+                  pattern: ^[^\x00-\x1F\x7F]+$
+                  description: Message-ID of the direct parent email when sending a threaded reply.
+                references:
+                  type: array
+                  maxItems: 100
+                  description: Full ordered message-id chain for the thread.
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 998
+                    pattern: ^[^\x00-\x1F\x7F]+$
+                attachments:
+                  type: array
+                  maxItems: 100
+                  description: Inline attachments. Send requests with attachments to https://api.primitive.dev/v1/send-mail. Combined raw decoded attachment bytes must be at most 31457280.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      filename:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Attachment filename. Control characters are rejected.
+                      content_type:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Optional MIME content type. Control characters are rejected.
+                      content_base64:
+                        type: string
+                        minLength: 1
+                        maxLength: 44040192
+                        description: Base64-encoded attachment bytes.
+                    required:
+                    - filename
+                    - content_base64
+                wait:
+                  type: boolean
+                  description: When true, wait for the first downstream SMTP delivery outcome before returning.
+                wait_timeout_ms:
+                  type: integer
+                  minimum: 1000
+                  maximum: 30000
+                  description: Maximum time to wait for a delivery outcome when wait is true. Defaults to 30000.
+              required:
+              - from
+              - to
+              - subject
+      responses:
+        '200':
+          description: Outbound relay result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Persisted sent-email attempt ID.
+                        status:
+                          type: string
+                          description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                          enum:
+                          - queued
+                          - submitted_to_agent
+                          - agent_failed
+                          - gate_denied
+                          - unknown
+                          - delivered
+                          - bounced
+                          - deferred
+                          - wait_timeout
+                        from:
+                          type: string
+                          description: 'Bare from-address actually written on the wire. Echoed
+
+                            on every success branch so callers can confirm what
+
+                            went out, particularly useful for the /emails/{id}/reply
+
+                            path where `from` is server-derived from the inbound''s
+
+                            recipient when the caller doesn''t override.
+
+
+                            For sends where the caller passed a from-header that
+
+                            included a display name (e.g. `"Acme Support" <support@acme.test>`),
+
+                            this field is the parsed bare address (`support@acme.test`).
+
+                            The display name was sent on the wire intact; this field
+
+                            just makes the address easy to compare against allowlists.
+
+                            '
+                        queue_id:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'Message identifier assigned by Primitive''s OUTBOUND relay
+
+                            (the box that signs your mail and submits it to the
+
+                            receiving MTA). NOT the receiver''s queue id.
+
+
+                            The receiver may also report its own queue id in
+
+                            `smtp_response_text` (e.g. `"250 2.0.0 Ok: queued as
+
+                            99D111927CDA"` from a Postfix receiver). Those two ids
+
+                            refer to different mail systems and are NOT comparable.
+
+                            Treat `queue_id` as Primitive-internal and the
+
+                            receiver''s id as remote-system-internal.
+
+
+                            Null on rows that never reached the relay (queued,
+
+                            gate_denied, agent_failed before signing).
+
+                            '
+                        accepted:
+                          type: array
+                          items:
+                            type: string
+                          description: Recipient addresses accepted by the relay.
+                        rejected:
+                          type: array
+                          items:
+                            type: string
+                          description: Recipient addresses rejected by the relay.
+                        client_idempotency_key:
+                          type: string
+                          description: Effective idempotency key used for this send.
+                        request_id:
+                          type: string
+                          description: Server-issued request identifier for support and tracing.
+                        content_hash:
+                          type: string
+                          description: Stable hash of the canonical send payload.
+                        delivery_status:
+                          type: string
+                          description: 'Narrower enum covering only the four terminal delivery
+
+                            outcomes returned to a synchronous `wait: true` send.
+
+
+                            On the SendMailResult shape, `delivery_status` is always
+
+                            equal to `status` whenever both are present (i.e. on
+
+                            terminal-state replays and live wait=true responses).
+
+                            The two fields exist so callers that want to type-narrow
+
+                            on "this is a delivery outcome" can pattern-match against
+
+                            the four-value enum without handling the broader
+
+                            SentEmailStatus value set (which also covers `queued`,
+
+                            `submitted_to_agent`, `agent_failed`, `gate_denied`,
+
+                            `unknown`).
+
+
+                            On async-mode and pre-terminal responses, `delivery_status`
+
+                            is absent and only `status` is populated. Use `status` if
+
+                            you want a single field that''s always present.
+
+                            '
+                          enum:
+                          - delivered
+                          - bounced
+                          - deferred
+                          - wait_timeout
+                        smtp_response_code:
+                          type:
+                          - integer
+                          - 'null'
+                          description: SMTP response code from the first downstream delivery outcome when wait is true.
+                        smtp_response_text:
+                          type: string
+                          description: SMTP response text from the first downstream delivery outcome when wait is true.
+                        idempotent_replay:
+                          type: boolean
+                          description: 'True when the response replays a previously-recorded send
+
+                            keyed by `client_idempotency_key` (same key, same canonical
+
+                            payload). False on a fresh send and on gate-denied
+
+                            responses. Lets callers branch on cache state without
+
+                            diffing fields.
+
+                            '
+                      required:
+                      - id
+                      - status
+                      - from
+                      - queue_id
+                      - accepted
+                      - rejected
+                      - client_idempotency_key
+                      - request_id
+                      - content_hash
+                      - idempotent_replay
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+            Idempotency-Key:
+              description: Effective idempotency key for this request. When the caller supplies an `Idempotency-Key` request header the same value is echoed; otherwise the server derives one from the canonical payload hash. Use this to correlate a request to its stored sent-email record via the `idempotency_key` filter on `GET /sent-emails`.
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 255
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+        '500':
+          $ref: '#/components/responses/InternalError'
+          description: Primitive encountered an internal error
+        '502':
+          $ref: '#/components/responses/BadGateway'
+          description: Primitive could not complete the downstream SMTP request
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+          description: Primitive is temporarily unable to process the request
+      security:
+      - BearerAuth: []
+  /sent-emails:
+    get:
+      operationId: listSentEmails
+      summary: List outbound sent emails
+      description: 'Returns a paginated list of OUTBOUND emails the caller''s
+
+        org has sent via /send-mail (and /emails/{id}/reply, which
+
+        forwards through /send-mail). Includes every recorded
+
+        attempt, including gate-denied attempts that the agent
+
+        never called and rows still in `queued` state.
+
+
+        For inbound mail received at your verified domains, see
+
+        /emails. There is no unified send/receive history endpoint;
+
+        the two surfaces are intentionally separate because the
+
+        underlying tables, statuses, and lifecycle differ.
+
+
+        Email bodies (`body_text`, `body_html`) are NOT included on
+
+        list rows so a 50-row page can''t balloon into a multi-MB
+
+        response when sends are near the 5MB body cap. Use
+
+        /sent-emails/{id} to fetch a single row with bodies, or
+
+        cross-reference by `client_idempotency_key` if the caller
+
+        already has the body locally.
+
+        '
+      tags:
+      - Sending
+      parameters:
+      - name: cursor
+        in: query
+        schema:
+          type: string
+        description: 'Pagination cursor from a previous response''s `meta.cursor` field.
+
+          Format: `{ISO-datetime}|{id}`
+
+          '
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Number of results per page
+      - name: status
+        in: query
+        schema:
+          type: string
+          description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+          enum:
+          - queued
+          - submitted_to_agent
+          - agent_failed
+          - gate_denied
+          - unknown
+          - delivered
+          - bounced
+          - deferred
+          - wait_timeout
+        description: 'Filter to rows in this status. Useful for polling
+
+          queued rows that haven''t transitioned, auditing
+
+          gate-denied attempts, or listing only successful
+
+          deliveries.
+
+          '
+      - name: request_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: 'Filter to the row matching a specific server-issued
+
+          `request_id`. The /send-mail response surfaces
+
+          `request_id` on every send; this lookup lets the
+
+          caller find the historical row for a given live call
+
+          without remembering its `id`.
+
+          '
+      - name: idempotency_key
+        in: query
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description: 'Filter to rows with the given `client_idempotency_key`.
+
+          Multiple rows can share a key (a retry that hit the
+
+          idempotent-replay path returns the same row, but a
+
+          retry with a DIFFERENT canonical payload under the
+
+          same key is rejected by /send-mail before the row is
+
+          written, so duplicates are bounded).
+
+          '
+      - name: date_from
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Inclusive lower bound on `created_at`.
+      - name: date_to
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Inclusive upper bound on `created_at`.
+      responses:
+        '200':
+          description: Page of sent-email summaries
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                    meta:
+                      type: object
+                      properties:
+                        total:
+                          type: integer
+                          description: Total number of matching records
+                        limit:
+                          type: integer
+                          description: Page size used for this request
+                        cursor:
+                          type:
+                          - string
+                          - 'null'
+                          description: Cursor for the next page, or null if no more results
+                      required:
+                      - total
+                      - limit
+                      - cursor
+                  required:
+                  - success
+                  - data
+                  - meta
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        description: 'List-row projection of a sent-email record. Drops
+
+                          `body_text` and `body_html` to keep paginated responses
+
+                          small; fetch /sent-emails/{id} for the full record with
+
+                          bodies.
+
+                          '
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          status:
+                            type: string
+                            description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                            enum:
+                            - queued
+                            - submitted_to_agent
+                            - agent_failed
+                            - gate_denied
+                            - unknown
+                            - delivered
+                            - bounced
+                            - deferred
+                            - wait_timeout
+                          status_changed_at:
+                            type: string
+                            format: date-time
+                            description: 'Timestamp of the most recent status transition.
+
+                              Polling clients should treat `status=''queued''` AND
+
+                              `status_changed_at` older than 5 minutes as
+
+                              "stuck-queued" (the post-tx UPDATE failed and the
+
+                              actual delivery state is recoverable from on-box logs
+
+                              via `queue_id` when populated, or `request_id`).
+
+                              '
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          client_idempotency_key:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Effective idempotency key used for this send. If the
+
+                              caller passed the `Idempotency-Key` header, this is
+
+                              that value; otherwise it''s a server-derived hash of
+
+                              the canonical request payload.
+
+                              '
+                          content_hash:
+                            type: string
+                            description: Stable hash of the canonical send payload.
+                          from_header:
+                            type: string
+                            description: 'Raw `From:` header as sent on the wire, including any
+
+                              display name (e.g. `"Acme Support" <agent@acme.test>`).
+
+                              '
+                          from_address:
+                            type: string
+                            description: Bare email address parsed from `from_header`.
+                          to_header:
+                            type: string
+                            description: 'Raw `To:` header as sent on the wire, including any
+
+                              display name.
+
+                              '
+                          to_address:
+                            type: string
+                            description: Bare email address parsed from `to_header`.
+                          subject:
+                            type: string
+                          body_size_bytes:
+                            type: integer
+                            description: 'Total UTF-8 byte length of `body_text` + `body_html`.
+
+                              Surfaced on the list endpoint so callers can see "this
+
+                              row has a 4MB body" without fetching it.
+
+                              '
+                          content_discarded_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                            description: 'Timestamp at which the bodies were discarded by an
+
+                              entitlement-driven retention policy. Null when bodies
+
+                              are still present. The detail endpoint returns
+
+                              null-valued `body_text`/`body_html` for discarded rows.
+
+                              '
+                          message_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Wire-level Message-ID assigned to the outbound message
+
+                              (RFC 5322). Null on rows that never reached signing
+
+                              (queued, gate_denied, agent_failed before signing).
+
+                              '
+                          in_reply_to:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Wire-level In-Reply-To header value, when this send
+
+                              was a reply.
+
+                              '
+                          email_references:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Wire-level References header value, when this send
+
+                              was a reply.
+
+                              '
+                          in_reply_to_email_id:
+                            type:
+                            - string
+                            - 'null'
+                            format: uuid
+                            description: 'Reference to the inbound `emails.id` that this send
+
+                              replied to, when known. Populated when the caller used
+
+                              /emails/{id}/reply or when /send-mail''s `in_reply_to`
+
+                              matched a stored inbound message_id in the same org.
+
+                              '
+                          thread_id:
+                            type:
+                            - string
+                            - 'null'
+                            format: uuid
+                            description: 'Conversation thread this send belongs to. A reply inherits
+
+                              the thread of the inbound it answers; a fresh send starts a
+
+                              new thread. Fetch `/threads/{thread_id}` for the full
+
+                              ordered thread (inbound + outbound interleaved). NULL on
+
+                              gate-denied sends and on sends created before threading was
+
+                              enabled.
+
+                              '
+                          queue_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Message identifier assigned by Primitive''s outbound
+
+                              relay once the agent accepts the message. Null on
+
+                              queued, gate_denied, and agent_failed rows.
+
+                              '
+                          smtp_response_code:
+                            type:
+                            - integer
+                            - 'null'
+                            description: 'Receiver''s 3-digit SMTP code (e.g. 250, 550, 451).
+
+                              Populated on terminal delivery statuses; may be null
+
+                              on a deferred where the agent never got an SMTP-level
+
+                              response (TCP refused, DNS failed, TLS handshake
+
+                              failed). `smtp_response_text` still carries Postfix''s
+
+                              descriptive text in those cases.
+
+                              '
+                          smtp_response_text:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Free-form text portion of the receiver''s SMTP
+
+                              response. The most useful debugging signal on a
+
+                              `bounced` or `deferred` row.
+
+                              '
+                          smtp_enhanced_status_code:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'RFC 3463 enhanced status code (e.g. `5.1.1` for "Bad
+
+                              destination mailbox address"). Distinct from
+
+                              `smtp_response_code`: the basic 3-digit code is coarse
+
+                              (550 = "permanent failure"), the enhanced code is
+
+                              finer-grained.
+
+                              '
+                          dkim_selector:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'DKIM selector used to sign the outbound message.
+
+                              Public DNS data; useful for diagnosing why a downstream
+
+                              verifier rejected the signature.
+
+                              '
+                          dkim_domain:
+                            type:
+                            - string
+                            - 'null'
+                            description: DKIM signing domain.
+                          error_code:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Stable public error code on `agent_failed` rows. The
+
+                              agent''s internal codes are remapped to a stable public
+
+                              taxonomy (see `publicAgentError` in the server) so this
+
+                              field is safe to branch on across agent versions.
+
+                              '
+                          error_message:
+                            type:
+                            - string
+                            - 'null'
+                            description: Free-form error message accompanying `error_code`.
+                          gates:
+                            type:
+                            - array
+                            - 'null'
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  enum:
+                                  - send_to_confirmed_domains
+                                  - send_to_known_addresses
+                                  description: Public recipient-scope gate name that denied the send.
+                                reason:
+                                  type: string
+                                  enum:
+                                  - domain_not_confirmed
+                                  - recipient_unauthenticated
+                                  - recipient_not_known
+                                  description: Stable machine-readable denial reason.
+                                message:
+                                  type: string
+                                  description: Human-readable explanation of the gate denial.
+                                subject:
+                                  type: string
+                                  description: Domain or address the gate evaluated.
+                                fix:
+                                  type: object
+                                  properties:
+                                    action:
+                                      type: string
+                                      enum:
+                                      - confirm_domain
+                                      - sender_must_fix_authentication
+                                      - wait_for_inbound
+                                      description: Suggested next action for the caller.
+                                    subject:
+                                      type: string
+                                      description: Entity the action applies to.
+                                  required:
+                                  - action
+                                  - subject
+                                docs_url:
+                                  type: string
+                                  description: Public docs URL with more context.
+                              required:
+                              - name
+                              - reason
+                              - message
+                              - subject
+                            description: 'Gate-denial detail on `gate_denied` rows. Mirrors the
+
+                              synchronous /send-mail 403 contract so a caller''s
+
+                              GateDenial handler is the same across live denies and
+
+                              historical lookups. Null on every other status.
+
+                              '
+                          request_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Server-issued request identifier from the original
+
+                              /send-mail call. Surfaced as the `X-Request-Id`
+
+                              response header on the live send and recorded here
+
+                              for support escalation.
+
+                              '
+                        required:
+                        - id
+                        - status
+                        - status_changed_at
+                        - created_at
+                        - updated_at
+                        - content_hash
+                        - from_header
+                        - from_address
+                        - to_header
+                        - to_address
+                        - subject
+                        - body_size_bytes
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+  /sent-emails/{id}:
+    get:
+      operationId: getSentEmail
+      summary: Get a sent email by id
+      description: 'Returns the full sent-email record by id, including
+
+        `body_text` and `body_html` (omitted from the listing
+
+        endpoint to keep paginated responses small). Use this when
+
+        diagnosing a specific send, e.g. inspecting the receiver''s
+
+        SMTP response on a `bounced` row or pulling the gate
+
+        denial detail on a `gate_denied` row.
+
+        '
+      tags:
+      - Sending
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Resource UUID
+      responses:
+        '200':
+          description: Sent-email detail
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      description: 'Full sent-email record, including `body_text` and
+
+                        `body_html`. Returned by /sent-emails/{id}.
+
+                        '
+                      allOf:
+                      - type: object
+                        description: 'List-row projection of a sent-email record. Drops
+
+                          `body_text` and `body_html` to keep paginated responses
+
+                          small; fetch /sent-emails/{id} for the full record with
+
+                          bodies.
+
+                          '
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          status:
+                            type: string
+                            description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                            enum:
+                            - queued
+                            - submitted_to_agent
+                            - agent_failed
+                            - gate_denied
+                            - unknown
+                            - delivered
+                            - bounced
+                            - deferred
+                            - wait_timeout
+                          status_changed_at:
+                            type: string
+                            format: date-time
+                            description: 'Timestamp of the most recent status transition.
+
+                              Polling clients should treat `status=''queued''` AND
+
+                              `status_changed_at` older than 5 minutes as
+
+                              "stuck-queued" (the post-tx UPDATE failed and the
+
+                              actual delivery state is recoverable from on-box logs
+
+                              via `queue_id` when populated, or `request_id`).
+
+                              '
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+                          client_idempotency_key:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Effective idempotency key used for this send. If the
+
+                              caller passed the `Idempotency-Key` header, this is
+
+                              that value; otherwise it''s a server-derived hash of
+
+                              the canonical request payload.
+
+                              '
+                          content_hash:
+                            type: string
+                            description: Stable hash of the canonical send payload.
+                          from_header:
+                            type: string
+                            description: 'Raw `From:` header as sent on the wire, including any
+
+                              display name (e.g. `"Acme Support" <agent@acme.test>`).
+
+                              '
+                          from_address:
+                            type: string
+                            description: Bare email address parsed from `from_header`.
+                          to_header:
+                            type: string
+                            description: 'Raw `To:` header as sent on the wire, including any
+
+                              display name.
+
+                              '
+                          to_address:
+                            type: string
+                            description: Bare email address parsed from `to_header`.
+                          subject:
+                            type: string
+                          body_size_bytes:
+                            type: integer
+                            description: 'Total UTF-8 byte length of `body_text` + `body_html`.
+
+                              Surfaced on the list endpoint so callers can see "this
+
+                              row has a 4MB body" without fetching it.
+
+                              '
+                          content_discarded_at:
+                            type:
+                            - string
+                            - 'null'
+                            format: date-time
+                            description: 'Timestamp at which the bodies were discarded by an
+
+                              entitlement-driven retention policy. Null when bodies
+
+                              are still present. The detail endpoint returns
+
+                              null-valued `body_text`/`body_html` for discarded rows.
+
+                              '
+                          message_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Wire-level Message-ID assigned to the outbound message
+
+                              (RFC 5322). Null on rows that never reached signing
+
+                              (queued, gate_denied, agent_failed before signing).
+
+                              '
+                          in_reply_to:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Wire-level In-Reply-To header value, when this send
+
+                              was a reply.
+
+                              '
+                          email_references:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Wire-level References header value, when this send
+
+                              was a reply.
+
+                              '
+                          in_reply_to_email_id:
+                            type:
+                            - string
+                            - 'null'
+                            format: uuid
+                            description: 'Reference to the inbound `emails.id` that this send
+
+                              replied to, when known. Populated when the caller used
+
+                              /emails/{id}/reply or when /send-mail''s `in_reply_to`
+
+                              matched a stored inbound message_id in the same org.
+
+                              '
+                          thread_id:
+                            type:
+                            - string
+                            - 'null'
+                            format: uuid
+                            description: 'Conversation thread this send belongs to. A reply inherits
+
+                              the thread of the inbound it answers; a fresh send starts a
+
+                              new thread. Fetch `/threads/{thread_id}` for the full
+
+                              ordered thread (inbound + outbound interleaved). NULL on
+
+                              gate-denied sends and on sends created before threading was
+
+                              enabled.
+
+                              '
+                          queue_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Message identifier assigned by Primitive''s outbound
+
+                              relay once the agent accepts the message. Null on
+
+                              queued, gate_denied, and agent_failed rows.
+
+                              '
+                          smtp_response_code:
+                            type:
+                            - integer
+                            - 'null'
+                            description: 'Receiver''s 3-digit SMTP code (e.g. 250, 550, 451).
+
+                              Populated on terminal delivery statuses; may be null
+
+                              on a deferred where the agent never got an SMTP-level
+
+                              response (TCP refused, DNS failed, TLS handshake
+
+                              failed). `smtp_response_text` still carries Postfix''s
+
+                              descriptive text in those cases.
+
+                              '
+                          smtp_response_text:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Free-form text portion of the receiver''s SMTP
+
+                              response. The most useful debugging signal on a
+
+                              `bounced` or `deferred` row.
+
+                              '
+                          smtp_enhanced_status_code:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'RFC 3463 enhanced status code (e.g. `5.1.1` for "Bad
+
+                              destination mailbox address"). Distinct from
+
+                              `smtp_response_code`: the basic 3-digit code is coarse
+
+                              (550 = "permanent failure"), the enhanced code is
+
+                              finer-grained.
+
+                              '
+                          dkim_selector:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'DKIM selector used to sign the outbound message.
+
+                              Public DNS data; useful for diagnosing why a downstream
+
+                              verifier rejected the signature.
+
+                              '
+                          dkim_domain:
+                            type:
+                            - string
+                            - 'null'
+                            description: DKIM signing domain.
+                          error_code:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Stable public error code on `agent_failed` rows. The
+
+                              agent''s internal codes are remapped to a stable public
+
+                              taxonomy (see `publicAgentError` in the server) so this
+
+                              field is safe to branch on across agent versions.
+
+                              '
+                          error_message:
+                            type:
+                            - string
+                            - 'null'
+                            description: Free-form error message accompanying `error_code`.
+                          gates:
+                            type:
+                            - array
+                            - 'null'
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  enum:
+                                  - send_to_confirmed_domains
+                                  - send_to_known_addresses
+                                  description: Public recipient-scope gate name that denied the send.
+                                reason:
+                                  type: string
+                                  enum:
+                                  - domain_not_confirmed
+                                  - recipient_unauthenticated
+                                  - recipient_not_known
+                                  description: Stable machine-readable denial reason.
+                                message:
+                                  type: string
+                                  description: Human-readable explanation of the gate denial.
+                                subject:
+                                  type: string
+                                  description: Domain or address the gate evaluated.
+                                fix:
+                                  type: object
+                                  properties:
+                                    action:
+                                      type: string
+                                      enum:
+                                      - confirm_domain
+                                      - sender_must_fix_authentication
+                                      - wait_for_inbound
+                                      description: Suggested next action for the caller.
+                                    subject:
+                                      type: string
+                                      description: Entity the action applies to.
+                                  required:
+                                  - action
+                                  - subject
+                                docs_url:
+                                  type: string
+                                  description: Public docs URL with more context.
+                              required:
+                              - name
+                              - reason
+                              - message
+                              - subject
+                            description: 'Gate-denial detail on `gate_denied` rows. Mirrors the
+
+                              synchronous /send-mail 403 contract so a caller''s
+
+                              GateDenial handler is the same across live denies and
+
+                              historical lookups. Null on every other status.
+
+                              '
+                          request_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Server-issued request identifier from the original
+
+                              /send-mail call. Surfaced as the `X-Request-Id`
+
+                              response header on the live send and recorded here
+
+                              for support escalation.
+
+                              '
+                        required:
+                        - id
+                        - status
+                        - status_changed_at
+                        - created_at
+                        - updated_at
+                        - content_hash
+                        - from_header
+                        - from_address
+                        - to_header
+                        - to_address
+                        - subject
+                        - body_size_bytes
+                      - type: object
+                        properties:
+                          body_text:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'Plain-text body sent on the wire. Null when the
+
+                              send carried only an HTML body, or when bodies have
+
+                              been discarded post-send (`content_discarded_at`
+
+                              set).
+
+                              '
+                          body_html:
+                            type:
+                            - string
+                            - 'null'
+                            description: 'HTML body sent on the wire. Null when the send
+
+                              carried only a plain-text body, or when bodies
+
+                              have been discarded post-send.
+
+                              '
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+  /send-mail/demo:
+    post:
+      operationId: sendMailDemo
+      summary: Try send-mail without authentication (simulation)
+      description: 'Unauthenticated sandbox for `POST /send-mail`. Accepts the same request body, validates it identically, and returns a realistic synthetic success envelope with `demo: true`. **No email is sent, queued, or stored.** Use this to exercise the send flow without credentials; to send real mail, sign up at https://primitive.dev/signup for an API key and call `POST /send-mail` with `Authorization: Bearer prim_<key>`.'
+      tags:
+      - Sending
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                from:
+                  type: string
+                  minLength: 3
+                  maxLength: 998
+                  description: RFC 5322 From header. The sender domain must be a verified outbound domain for your organization.
+                to:
+                  type: string
+                  minLength: 3
+                  maxLength: 320
+                  description: Recipient address. Recipient eligibility depends on your account's outbound entitlements.
+                subject:
+                  type: string
+                  minLength: 1
+                  maxLength: 998
+                  description: Subject line for the outbound message
+                body_text:
+                  type: string
+                  description: Plain-text message body. At least one of body_text or body_html is required. The combined UTF-8 byte length of body_text and body_html must be at most 262144 bytes.
+                body_html:
+                  type: string
+                  description: HTML message body. At least one of body_text or body_html is required. The combined UTF-8 byte length of body_text and body_html must be at most 262144 bytes.
+                in_reply_to:
+                  type: string
+                  minLength: 1
+                  maxLength: 998
+                  pattern: ^[^\x00-\x1F\x7F]+$
+                  description: Message-ID of the direct parent email when sending a threaded reply.
+                references:
+                  type: array
+                  maxItems: 100
+                  description: Full ordered message-id chain for the thread.
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 998
+                    pattern: ^[^\x00-\x1F\x7F]+$
+                attachments:
+                  type: array
+                  maxItems: 100
+                  description: Inline attachments. Send requests with attachments to https://api.primitive.dev/v1/send-mail. Combined raw decoded attachment bytes must be at most 31457280.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      filename:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Attachment filename. Control characters are rejected.
+                      content_type:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Optional MIME content type. Control characters are rejected.
+                      content_base64:
+                        type: string
+                        minLength: 1
+                        maxLength: 44040192
+                        description: Base64-encoded attachment bytes.
+                    required:
+                    - filename
+                    - content_base64
+                wait:
+                  type: boolean
+                  description: When true, wait for the first downstream SMTP delivery outcome before returning.
+                wait_timeout_ms:
+                  type: integer
+                  minimum: 1000
+                  maximum: 30000
+                  description: Maximum time to wait for a delivery outcome when wait is true. Defaults to 30000.
+              required:
+              - from
+              - to
+              - subject
+            example:
+              from: agent@your-subdomain.primitive.email
+              to: someone@example.com
+              subject: Hello from my agent
+              body_text: This is a test send via the public demo endpoint.
+      responses:
+        '200':
+          description: Simulated send accepted. Identical shape to a fresh asynchronous /send-mail response, plus a top-level `demo` flag. No mail was sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  demo:
+                    type: boolean
+                    const: true
+                  note:
+                    type: string
+                    description: Human-readable reminder that the response is simulated.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Persisted sent-email attempt ID.
+                      status:
+                        type: string
+                        description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                        enum:
+                        - queued
+                        - submitted_to_agent
+                        - agent_failed
+                        - gate_denied
+                        - unknown
+                        - delivered
+                        - bounced
+                        - deferred
+                        - wait_timeout
+                      from:
+                        type: string
+                        description: 'Bare from-address actually written on the wire. Echoed
+
+                          on every success branch so callers can confirm what
+
+                          went out, particularly useful for the /emails/{id}/reply
+
+                          path where `from` is server-derived from the inbound''s
+
+                          recipient when the caller doesn''t override.
+
+
+                          For sends where the caller passed a from-header that
+
+                          included a display name (e.g. `"Acme Support" <support@acme.test>`),
+
+                          this field is the parsed bare address (`support@acme.test`).
+
+                          The display name was sent on the wire intact; this field
+
+                          just makes the address easy to compare against allowlists.
+
+                          '
+                      queue_id:
+                        type:
+                        - string
+                        - 'null'
+                        description: 'Message identifier assigned by Primitive''s OUTBOUND relay
+
+                          (the box that signs your mail and submits it to the
+
+                          receiving MTA). NOT the receiver''s queue id.
+
+
+                          The receiver may also report its own queue id in
+
+                          `smtp_response_text` (e.g. `"250 2.0.0 Ok: queued as
+
+                          99D111927CDA"` from a Postfix receiver). Those two ids
+
+                          refer to different mail systems and are NOT comparable.
+
+                          Treat `queue_id` as Primitive-internal and the
+
+                          receiver''s id as remote-system-internal.
+
+
+                          Null on rows that never reached the relay (queued,
+
+                          gate_denied, agent_failed before signing).
+
+                          '
+                      accepted:
+                        type: array
+                        items:
+                          type: string
+                        description: Recipient addresses accepted by the relay.
+                      rejected:
+                        type: array
+                        items:
+                          type: string
+                        description: Recipient addresses rejected by the relay.
+                      client_idempotency_key:
+                        type: string
+                        description: Effective idempotency key used for this send.
+                      request_id:
+                        type: string
+                        description: Server-issued request identifier for support and tracing.
+                      content_hash:
+                        type: string
+                        description: Stable hash of the canonical send payload.
+                      delivery_status:
+                        type: string
+                        description: 'Narrower enum covering only the four terminal delivery
+
+                          outcomes returned to a synchronous `wait: true` send.
+
+
+                          On the SendMailResult shape, `delivery_status` is always
+
+                          equal to `status` whenever both are present (i.e. on
+
+                          terminal-state replays and live wait=true responses).
+
+                          The two fields exist so callers that want to type-narrow
+
+                          on "this is a delivery outcome" can pattern-match against
+
+                          the four-value enum without handling the broader
+
+                          SentEmailStatus value set (which also covers `queued`,
+
+                          `submitted_to_agent`, `agent_failed`, `gate_denied`,
+
+                          `unknown`).
+
+
+                          On async-mode and pre-terminal responses, `delivery_status`
+
+                          is absent and only `status` is populated. Use `status` if
+
+                          you want a single field that''s always present.
+
+                          '
+                        enum:
+                        - delivered
+                        - bounced
+                        - deferred
+                        - wait_timeout
+                      smtp_response_code:
+                        type:
+                        - integer
+                        - 'null'
+                        description: SMTP response code from the first downstream delivery outcome when wait is true.
+                      smtp_response_text:
+                        type: string
+                        description: SMTP response text from the first downstream delivery outcome when wait is true.
+                      idempotent_replay:
+                        type: boolean
+                        description: 'True when the response replays a previously-recorded send
+
+                          keyed by `client_idempotency_key` (same key, same canonical
+
+                          payload). False on a fresh send and on gate-denied
+
+                          responses. Lets callers branch on cache state without
+
+                          diffing fields.
+
+                          '
+                    required:
+                    - id
+                    - status
+                    - from
+                    - queue_id
+                    - accepted
+                    - rejected
+                    - client_idempotency_key
+                    - request_id
+                    - content_hash
+                    - idempotent_replay
+                required:
+                - success
+                - demo
+                - data
+              example:
+                success: true
+                demo: true
+                note: 'Simulated response. No email was sent. Sign up at https://primitive.dev/signup for an API key, then POST the same body to /v1/send-mail with Authorization: Bearer prim_<key>.'
+                data:
+                  id: 3f1c0a9e-2b7d-4e5a-9c6f-8d2e1a4b5c6d
+                  status: queued
+                  from: agent@your-subdomain.primitive.email
+                  queue_id: demo_9a3f1c0a
+                  accepted:
+                  - someone@example.com
+                  rejected: []
+                  client_idempotency_key: null
+                  request_id: 7b2e4d6a-1c3f-4a5b-8d9e-0f1a2b3c4d5e
+                  content_hash: a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90
+                  idempotent_replay: false
+                  dedup_reason: null
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+          description: Request body exceeds the demo size cap.
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+          description: Content-Type must be application/json.
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Demo rate limit reached.
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /send-mail/batch:
+    post:
+      operationId: sendMailBatch
+      summary: Send a batch of emails in one request
+      description: 'Send up to 100 independent messages in a single call. Each message uses the same body schema and the same send path as `POST /send-mail`, so auth, validation, rate limiting, and idempotency apply per message. Messages are processed independently: one failing does not fail the others — every message gets an entry in `results` carrying either `data` (on success) or `error` (on failure), with the original `index`.'
+      tags:
+      - Sending
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - messages
+              properties:
+                messages:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  description: The messages to send. Each item is a standard send-mail request body.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      from:
+                        type: string
+                        minLength: 3
+                        maxLength: 998
+                        description: RFC 5322 From header. The sender domain must be a verified outbound domain for your organization.
+                      to:
+                        type: string
+                        minLength: 3
+                        maxLength: 320
+                        description: Recipient address. Recipient eligibility depends on your account's outbound entitlements.
+                      subject:
+                        type: string
+                        minLength: 1
+                        maxLength: 998
+                        description: Subject line for the outbound message
+                      body_text:
+                        type: string
+                        description: Plain-text message body. At least one of body_text or body_html is required. The combined UTF-8 byte length of body_text and body_html must be at most 262144 bytes.
+                      body_html:
+                        type: string
+                        description: HTML message body. At least one of body_text or body_html is required. The combined UTF-8 byte length of body_text and body_html must be at most 262144 bytes.
+                      in_reply_to:
+                        type: string
+                        minLength: 1
+                        maxLength: 998
+                        pattern: ^[^\x00-\x1F\x7F]+$
+                        description: Message-ID of the direct parent email when sending a threaded reply.
+                      references:
+                        type: array
+                        maxItems: 100
+                        description: Full ordered message-id chain for the thread.
+                        items:
+                          type: string
+                          minLength: 1
+                          maxLength: 998
+                          pattern: ^[^\x00-\x1F\x7F]+$
+                      attachments:
+                        type: array
+                        maxItems: 100
+                        description: Inline attachments. Send requests with attachments to https://api.primitive.dev/v1/send-mail. Combined raw decoded attachment bytes must be at most 31457280.
+                        items:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            filename:
+                              type: string
+                              minLength: 1
+                              maxLength: 255
+                              description: Attachment filename. Control characters are rejected.
+                            content_type:
+                              type: string
+                              minLength: 1
+                              maxLength: 255
+                              description: Optional MIME content type. Control characters are rejected.
+                            content_base64:
+                              type: string
+                              minLength: 1
+                              maxLength: 44040192
+                              description: Base64-encoded attachment bytes.
+                          required:
+                          - filename
+                          - content_base64
+                      wait:
+                        type: boolean
+                        description: When true, wait for the first downstream SMTP delivery outcome before returning.
+                      wait_timeout_ms:
+                        type: integer
+                        minimum: 1000
+                        maximum: 30000
+                        description: Maximum time to wait for a delivery outcome when wait is true. Defaults to 30000.
+                    required:
+                    - from
+                    - to
+                    - subject
+            example:
+              messages:
+              - from: agent@your-subdomain.primitive.email
+                to: a@example.com
+                subject: Hi A
+                body_text: Hello A
+              - from: agent@your-subdomain.primitive.email
+                to: b@example.com
+                subject: Hi B
+                body_text: Hello B
+      responses:
+        '200':
+          description: Per-message results. The request as a whole returns HTTP 200 even when individual messages fail; inspect each `results` entry.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - success
+                - data
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    required:
+                    - count
+                    - results
+                    properties:
+                      count:
+                        type: integer
+                        description: Number of messages in the batch.
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - index
+                          - success
+                          properties:
+                            index:
+                              type: integer
+                              description: Zero-based position of this message in the request array.
+                            success:
+                              type: boolean
+                            data:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  description: Persisted sent-email attempt ID.
+                                status:
+                                  type: string
+                                  description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                                  enum:
+                                  - queued
+                                  - submitted_to_agent
+                                  - agent_failed
+                                  - gate_denied
+                                  - unknown
+                                  - delivered
+                                  - bounced
+                                  - deferred
+                                  - wait_timeout
+                                from:
+                                  type: string
+                                  description: 'Bare from-address actually written on the wire. Echoed
+
+                                    on every success branch so callers can confirm what
+
+                                    went out, particularly useful for the /emails/{id}/reply
+
+                                    path where `from` is server-derived from the inbound''s
+
+                                    recipient when the caller doesn''t override.
+
+
+                                    For sends where the caller passed a from-header that
+
+                                    included a display name (e.g. `"Acme Support" <support@acme.test>`),
+
+                                    this field is the parsed bare address (`support@acme.test`).
+
+                                    The display name was sent on the wire intact; this field
+
+                                    just makes the address easy to compare against allowlists.
+
+                                    '
+                                queue_id:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: 'Message identifier assigned by Primitive''s OUTBOUND relay
+
+                                    (the box that signs your mail and submits it to the
+
+                                    receiving MTA). NOT the receiver''s queue id.
+
+
+                                    The receiver may also report its own queue id in
+
+                                    `smtp_response_text` (e.g. `"250 2.0.0 Ok: queued as
+
+                                    99D111927CDA"` from a Postfix receiver). Those two ids
+
+                                    refer to different mail systems and are NOT comparable.
+
+                                    Treat `queue_id` as Primitive-internal and the
+
+                                    receiver''s id as remote-system-internal.
+
+
+                                    Null on rows that never reached the relay (queued,
+
+                                    gate_denied, agent_failed before signing).
+
+                                    '
+                                accepted:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: Recipient addresses accepted by the relay.
+                                rejected:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: Recipient addresses rejected by the relay.
+                                client_idempotency_key:
+                                  type: string
+                                  description: Effective idempotency key used for this send.
+                                request_id:
+                                  type: string
+                                  description: Server-issued request identifier for support and tracing.
+                                content_hash:
+                                  type: string
+                                  description: Stable hash of the canonical send payload.
+                                delivery_status:
+                                  type: string
+                                  description: 'Narrower enum covering only the four terminal delivery
+
+                                    outcomes returned to a synchronous `wait: true` send.
+
+
+                                    On the SendMailResult shape, `delivery_status` is always
+
+                                    equal to `status` whenever both are present (i.e. on
+
+                                    terminal-state replays and live wait=true responses).
+
+                                    The two fields exist so callers that want to type-narrow
+
+                                    on "this is a delivery outcome" can pattern-match against
+
+                                    the four-value enum without handling the broader
+
+                                    SentEmailStatus value set (which also covers `queued`,
+
+                                    `submitted_to_agent`, `agent_failed`, `gate_denied`,
+
+                                    `unknown`).
+
+
+                                    On async-mode and pre-terminal responses, `delivery_status`
+
+                                    is absent and only `status` is populated. Use `status` if
+
+                                    you want a single field that''s always present.
+
+                                    '
+                                  enum:
+                                  - delivered
+                                  - bounced
+                                  - deferred
+                                  - wait_timeout
+                                smtp_response_code:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  description: SMTP response code from the first downstream delivery outcome when wait is true.
+                                smtp_response_text:
+                                  type: string
+                                  description: SMTP response text from the first downstream delivery outcome when wait is true.
+                                idempotent_replay:
+                                  type: boolean
+                                  description: 'True when the response replays a previously-recorded send
+
+                                    keyed by `client_idempotency_key` (same key, same canonical
+
+                                    payload). False on a fresh send and on gate-denied
+
+                                    responses. Lets callers branch on cache state without
+
+                                    diffing fields.
+
+                                    '
+                              required:
+                              - id
+                              - status
+                              - from
+                              - queue_id
+                              - accepted
+                              - rejected
+                              - client_idempotency_key
+                              - request_id
+                              - content_hash
+                              - idempotent_replay
+                            error:
+                              type: object
+                              required:
+                              - code
+                              - message
+                              properties:
+                                code:
+                                  type: string
+                                message:
+                                  type: string
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+components:
+  responses:
+    InternalError:
+      description: Primitive encountered an internal error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: internal_error
+              message: Internal server error
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    ServiceUnavailable:
+      description: Primitive is temporarily unable to process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: outbound_capacity_exhausted
+              message: Outbound capacity is temporarily exhausted
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    UnprocessableEntity:
+      description: 'The request was well-formed but could not be processed. For Payments
+
+        this covers a missing payout address, a failed payment verification, a
+
+        spend-policy decline, or an expired challenge; `error.code` distinguishes
+
+        them.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: payment_declined
+              message: payment exceeds the per-payment cap
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+    BadGateway:
+      description: Primitive could not complete the downstream SMTP request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: outbound_unreachable
+              message: Outbound SMTP service request failed
+    UnsupportedMediaType:
+      description: Content-Type must be application/json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Content-Type must be application/json
+    PayloadTooLarge:
+      description: Request body is too large.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Request body is too large
+  schemas:
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
+      - subject
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+              - forbidden
+              - not_found
+              - validation_error
+              - rate_limit_exceeded
+              - internal_error
+              - conflict
+              - mx_conflict
+              - outbound_disabled
+              - cannot_send_from_domain
+              - recipient_not_allowed
+              - outbound_key_missing
+              - outbound_unreachable
+              - outbound_key_invalid
+              - outbound_capacity_exhausted
+              - outbound_response_malformed
+              - outbound_relay_failed
+              - discard_not_enabled
+              - inbound_not_repliable
+              - search_timeout
+              - authorization_pending
+              - slow_down
+              - access_denied
+              - expired_token
+              - invalid_device_code
+              - invalid_signup_code
+              - invalid_signup_token
+              - invalid_verification_code
+              - email_delivery_failed
+              - clerk_signup_failed
+              - no_orgs_for_user
+              - org_not_accessible
+              - feature_disabled
+              - memory_conflict
+              - developer_usage_credit_exhausted
+              - no_payout_address
+              - ownership_proof_failed
+              - payment_verification_failed
+              - payment_declined
+              - challenge_expired
+              - settlement_failed
+              - template_not_installable
+              - scaffold_only
+              - invalid_variables
+              - unknown_secrets
+              - missing_secrets
+              - no_inbound_domain
+              - domain_cannot_send
+              - address_taken
+              - route_cap_reached
+              - name_exhausted
+            message:
+              type: string
+            details:
+              type: object
+              description: 'Optional structured data that callers can inspect to recover
+
+                from the error. The fields present depend on `code`. Additional
+
+                keys may be added over time without a major-version bump.
+
+                '
+              additionalProperties: true
+              properties:
+                mx_conflict:
+                  type: object
+                  description: Present when `code == mx_conflict`.
+                  required:
+                  - provider_name
+                  - suggested_subdomain
+                  properties:
+                    provider_name:
+                      type: string
+                      description: Human-readable name of the detected mailbox provider (e.g. "Google Workspace").
+                    suggested_subdomain:
+                      type: string
+                      description: Subdomain to try instead (e.g. "mail" for `mail.example.com`).
+                required_entitlements:
+                  type: array
+                  items:
+                    type: string
+                  description: Entitlements that would allow a denied send when no recipient-scope gate was granted.
+                sent_email_id:
+                  type: string
+                  description: ID of the persisted sent-email attempt associated with the error.
+                content_hash:
+                  type: string
+                  description: Content hash of the original request on idempotency cache-hit errors.
+                client_idempotency_key:
+                  type: string
+                  description: Effective idempotency key associated with the original request.
+            gates:
+              type: array
+              items:
+                $ref: '#/components/schemas/GateDenial'
+              description: Structured per-gate denial detail for recipient-scope send-mail failures.
+            request_id:
+              type: string
+              description: Server-issued request identifier for support and tracing.
+          required:
+          - code
+          - message
+      required:
+      - success
+      - error
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key with `prim_` prefix or OAuth access token with `prim_oat_` prefix: `Authorization: Bearer <token>`. Access is governed by the caller''s organization role (`owner`, `admin`, or `member`): API keys always act at `member` level regardless of who created them, and OAuth access tokens act with the authorizing user''s current organization role, resolved per request. Every operation in this spec is available to organization members; billing and organization administration are owner/admin actions performed in the dashboard and are not part of this API.'
+    DownloadToken:
+      type: apiKey
+      in: query
+      name: token
+      description: Signed download token provided in webhook payloads

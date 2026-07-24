@@ -1,0 +1,2443 @@
+openapi: 3.1.0
+info:
+  title: Primitive Account Emails API
+  version: 1.0.0
+  description: "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump."
+  contact:
+    name: Primitive
+    url: https://primitive.dev
+  license:
+    name: Proprietary
+    url: https://primitive.dev/terms
+  x-stability-level: stable
+  x-deprecation-policy: 'Breaking changes are announced at least 6 months in advance. Deprecated fields carry x-deprecated: true. The current stable version is v1.'
+servers:
+- url: https://api.primitive.dev/v1
+  description: Canonical API host (PRIMITIVE_API_BASE_URL). Carries every public API operation.
+tags:
+- name: Emails
+  description: List, inspect, and manage received emails
+paths:
+  /emails:
+    get:
+      operationId: listEmails
+      summary: List inbound emails
+      description: 'Returns a paginated list of INBOUND emails received at your
+
+        verified domains. Outbound messages sent via /send-mail are
+
+        not included; this endpoint is the inbox view, not a
+
+        unified send/receive history.
+
+
+        Supports filtering by domain, status, date range, and
+
+        free-text search across subject, sender, and recipient
+
+        fields.
+
+
+        For a compact text-table summary of the most recent N
+
+        inbounds (no filters, no cursor pagination), the CLI ships
+
+        `primitive emails:latest` as a one-line-per-email shortcut.
+
+        It''s TTY-aware so id columns are full UUIDs when piped, and
+
+        a `--json` flag returns the same envelope this endpoint
+
+        does. Use whichever fits the call site.
+
+        '
+      tags:
+      - Emails
+      parameters:
+      - name: cursor
+        in: query
+        schema:
+          type: string
+        description: 'Pagination cursor from a previous response''s `meta.cursor` field.
+
+          Format: `{ISO-datetime}|{id}`
+
+          '
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Number of results per page
+      - name: domain_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by domain ID
+      - name: status
+        in: query
+        schema:
+          type: string
+          description: "Lifecycle status of an INBOUND email (a row in the `emails`\ntable). Distinct from `SentEmailStatus`, which describes\nthe OUTBOUND lifecycle (the `sent_emails` table) and uses\na different vocabulary because the lifecycles differ.\nPossible values:\n\n  - `pending`: the row was inserted at ingestion (mx_main)\n    and has not yet completed the spam / filter / auth\n    pipeline. Body and parsed fields are present; webhook\n    delivery is not yet scheduled. Most rows transition out\n    of `pending` within seconds.\n  - `accepted`: the inbound passed the policy gates and is\n    queued for webhook delivery. The `webhook_status` field\n    tracks the separate webhook-delivery lifecycle from\n    this point.\n  - `completed`: terminal success. Webhook delivery\n    attempted and acknowledged by every active endpoint, OR\n    no endpoints are configured, so the row is durably\n    archived.\n  - `rejected`: terminal failure at ingestion (spam, blocked\n    sender, filter rule, malformed). The body and metadata\n    are stored for auditing but no webhook fires and the\n    row is not repliable.\n\nSee also `webhook_status` (separate enum tracking the\nwebhook-delivery state machine) and `SentEmailStatus` (the\noutbound vocabulary).\n"
+          enum:
+          - pending
+          - accepted
+          - completed
+          - rejected
+        description: 'Filter inbound rows by lifecycle status. See `EmailStatus`
+
+          for what each value means. Note that the webhook delivery
+
+          state is a SEPARATE lifecycle on the same row; filter by
+
+          `webhook_status` semantics is not currently supported on
+
+          this endpoint.
+
+          '
+      - name: search
+        in: query
+        schema:
+          type: string
+          maxLength: 500
+        description: Search subject, sender, and recipient (case-insensitive)
+      - name: date_from
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter emails created on or after this timestamp
+      - name: date_to
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter emails created on or before this timestamp
+      - name: since
+        in: query
+        schema:
+          type: string
+          maxLength: 200
+        description: 'Forward-tail cursor. Returns rows that became visible AFTER this
+
+          cursor, oldest-first, so a caller can stream new inbound mail by
+
+          re-passing the cursor from each response. Mutually exclusive with
+
+          `cursor` (which pages history newest-first). Pass the `meta.cursor`
+
+          from the previous `since` response; an empty page means caught up.
+
+          '
+      - name: wait
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 30
+        description: 'Long-poll: hold the request up to this many seconds waiting for new
+
+          mail past `since`, returning as soon as any arrives (or an empty
+
+          page when the wait elapses). Requires `since`. Omitted means no wait
+
+          (returns immediately); the server treats an absent value as 0. NOT
+
+          given an OpenAPI `default` on purpose: a default makes some
+
+          generators (e.g. openapi-python-client) send `wait=0` on every call,
+
+          which then fails the `wait` requires `since` check for plain history
+
+          listings.
+
+          '
+      responses:
+        '200':
+          description: Paginated list of emails
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                    meta:
+                      type: object
+                      properties:
+                        total:
+                          type: integer
+                          description: Total number of matching records
+                        limit:
+                          type: integer
+                          description: Page size used for this request
+                        cursor:
+                          type:
+                          - string
+                          - 'null'
+                          description: Cursor for the next page, or null if no more results
+                      required:
+                      - total
+                      - limit
+                      - cursor
+                  required:
+                  - success
+                  - data
+                  - meta
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          message_id:
+                            type:
+                            - string
+                            - 'null'
+                          domain_id:
+                            type:
+                            - string
+                            - 'null'
+                            format: uuid
+                          org_id:
+                            type:
+                            - string
+                            - 'null'
+                            format: uuid
+                          status:
+                            type: string
+                            description: "Lifecycle status of an INBOUND email (a row in the `emails`\ntable). Distinct from `SentEmailStatus`, which describes\nthe OUTBOUND lifecycle (the `sent_emails` table) and uses\na different vocabulary because the lifecycles differ.\nPossible values:\n\n  - `pending`: the row was inserted at ingestion (mx_main)\n    and has not yet completed the spam / filter / auth\n    pipeline. Body and parsed fields are present; webhook\n    delivery is not yet scheduled. Most rows transition out\n    of `pending` within seconds.\n  - `accepted`: the inbound passed the policy gates and is\n    queued for webhook delivery. The `webhook_status` field\n    tracks the separate webhook-delivery lifecycle from\n    this point.\n  - `completed`: terminal success. Webhook delivery\n    attempted and acknowledged by every active endpoint, OR\n    no endpoints are configured, so the row is durably\n    archived.\n  - `rejected`: terminal failure at ingestion (spam, blocked\n    sender, filter rule, malformed). The body and metadata\n    are stored for auditing but no webhook fires and the\n    row is not repliable.\n\nSee also `webhook_status` (separate enum tracking the\nwebhook-delivery state machine) and `SentEmailStatus` (the\noutbound vocabulary).\n"
+                            enum:
+                            - pending
+                            - accepted
+                            - completed
+                            - rejected
+                          sender:
+                            type: string
+                            description: 'SMTP envelope sender (return-path) the inbound mail server
+
+                              accepted. For most legitimate mail this equals the bare
+
+                              address in the From header; for mailing lists, bounce
+
+                              handlers, and forwarders it is typically the bounce address
+
+                              rather than the human-visible sender.
+
+
+                              For the parsed From-header value (with display name handling
+
+                              and a sender-fallback when the header is unparseable), GET
+
+                              the email by id and use `from_email`.
+
+                              '
+                          recipient:
+                            type: string
+                          subject:
+                            type:
+                            - string
+                            - 'null'
+                          domain:
+                            type: string
+                          spam_score:
+                            type:
+                            - number
+                            - 'null'
+                          created_at:
+                            type: string
+                            format: date-time
+                          received_at:
+                            type: string
+                            format: date-time
+                          raw_size_bytes:
+                            type:
+                            - integer
+                            - 'null'
+                          webhook_status:
+                            type:
+                            - string
+                            - 'null'
+                            description: "Webhook-delivery state for an inbound email. Tracks a\nSEPARATE lifecycle from the email's `status` field; the\nsame row carries both. Possible values:\n\n  - `pending`: ingestion is past `pending` (the email itself\n    is `accepted`) but the webhook fan-out has not yet\n    started for this row.\n  - `in_flight`: at least one delivery attempt is in flight.\n  - `fired`: terminal success. Every active endpoint\n    acknowledged the delivery (or accepted it after retries).\n  - `failed`: terminal partial-failure. At least one endpoint\n    exhausted its retry budget; some endpoints may still\n    have succeeded.\n  - `exhausted`: terminal failure. Every endpoint exhausted\n    its retry budget without success.\n  - `null`: no endpoints configured, so no webhook lifecycle\n    applies.\n\nNote that the value `pending` here does NOT mean the email\nis `pending`; it means the email is past ingestion but\nwebhook delivery has not yet begun. Two overlapping uses\nof the word `pending` for distinct lifecycle phases.\n"
+                            enum:
+                            - pending
+                            - in_flight
+                            - fired
+                            - failed
+                            - exhausted
+                            - null
+                          webhook_attempt_count:
+                            type: integer
+                          thread_id:
+                            type:
+                            - string
+                            - 'null'
+                            format: uuid
+                            description: 'Conversation thread this message belongs to. Fetch
+
+                              `/threads/{thread_id}` for the full ordered thread. NULL on
+
+                              messages received before threading was enabled.
+
+                              '
+                        required:
+                        - id
+                        - status
+                        - sender
+                        - recipient
+                        - domain
+                        - created_at
+                        - received_at
+                        - webhook_attempt_count
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+      security:
+      - BearerAuth: []
+  /emails/search:
+    get:
+      operationId: searchEmails
+      summary: Search inbound emails
+      description: 'Searches inbound emails with structured filters and optional
+
+        full-text matching across parsed email fields. This endpoint is
+
+        optimized for filtered inbox views and CLI polling workflows:
+
+        callers that only need new accepted mail can pass
+
+        `sort=received_at_asc`, `snippet=false`, `include_facets=false`,
+
+        and a `date_from` timestamp.
+
+
+        `q`, `subject`, and `body` use the same English full-text index
+
+        as the web inbox search. Structured filters such as `from`, `to`,
+
+        `domain_id`, status, attachment presence, and spam score bounds
+
+        are combined with the text query.
+
+        '
+      tags:
+      - Emails
+      parameters:
+      - name: q
+        in: query
+        schema:
+          type: string
+          maxLength: 500
+        description: Full-text search DSL query.
+      - name: from
+        in: query
+        schema:
+          type: string
+          maxLength: 255
+        description: Filter by sender address or sender domain.
+      - name: to
+        in: query
+        schema:
+          type: string
+          maxLength: 255
+        description: Filter by recipient address or recipient domain.
+      - name: subject
+        in: query
+        schema:
+          type: string
+          maxLength: 500
+        description: Full-text search restricted to the subject field.
+      - name: body
+        in: query
+        schema:
+          type: string
+          maxLength: 2000
+        description: Full-text search restricted to the parsed text body.
+      - name: domain_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: Filter by domain ID.
+      - name: reply_to_sent_email_id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        description: 'Filter to inbound emails that are replies to a specific
+
+          outbound send. The value is a `sent_emails.id` (UUID). At
+
+          inbound ingest, Primitive matches the parsed In-Reply-To
+
+          header (or References as a fallback) against
+
+          `sent_emails.message_id` in the same org and records the
+
+          resolved id on `emails.reply_to_sent_email_id`. This filter
+
+          is the strict-threading lookup behind `primitive chat` and
+
+          any UI that wants to show the inbound reply to a given
+
+          send. NULL on inbound that isn''t a threaded reply to one
+
+          of your sends, so existing emails received before this
+
+          ingestion landed will not match.
+
+          '
+      - name: status
+        in: query
+        schema:
+          type: string
+          description: "Lifecycle status of an INBOUND email (a row in the `emails`\ntable). Distinct from `SentEmailStatus`, which describes\nthe OUTBOUND lifecycle (the `sent_emails` table) and uses\na different vocabulary because the lifecycles differ.\nPossible values:\n\n  - `pending`: the row was inserted at ingestion (mx_main)\n    and has not yet completed the spam / filter / auth\n    pipeline. Body and parsed fields are present; webhook\n    delivery is not yet scheduled. Most rows transition out\n    of `pending` within seconds.\n  - `accepted`: the inbound passed the policy gates and is\n    queued for webhook delivery. The `webhook_status` field\n    tracks the separate webhook-delivery lifecycle from\n    this point.\n  - `completed`: terminal success. Webhook delivery\n    attempted and acknowledged by every active endpoint, OR\n    no endpoints are configured, so the row is durably\n    archived.\n  - `rejected`: terminal failure at ingestion (spam, blocked\n    sender, filter rule, malformed). The body and metadata\n    are stored for auditing but no webhook fires and the\n    row is not repliable.\n\nSee also `webhook_status` (separate enum tracking the\nwebhook-delivery state machine) and `SentEmailStatus` (the\noutbound vocabulary).\n"
+          enum:
+          - pending
+          - accepted
+          - completed
+          - rejected
+        description: Filter by inbound email lifecycle status.
+      - name: date_from
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter emails received on or after this timestamp.
+      - name: date_to
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter emails received on or before this timestamp.
+      - name: has_attachment
+        in: query
+        schema:
+          type: string
+          enum:
+          - 'true'
+          - 'false'
+        description: Filter by whether the email has one or more attachments.
+      - name: spam_score_lt
+        in: query
+        schema:
+          type: number
+        description: Filter to emails with spam score below this value.
+      - name: spam_score_gte
+        in: query
+        schema:
+          type: number
+        description: Filter to emails with spam score greater than or equal to this value.
+      - name: sort
+        in: query
+        schema:
+          type: string
+          enum:
+          - relevance
+          - received_at_desc
+          - received_at_asc
+        description: 'Sort mode. Defaults to relevance when a text query is present,
+
+          otherwise `received_at_desc`.
+
+          '
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 200
+        description: Opaque pagination cursor from a previous search response.
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        description: Number of results per page
+      - name: snippet
+        in: query
+        schema:
+          type: string
+          enum:
+          - 'true'
+          - 'false'
+          default: 'true'
+        description: Include subject/body highlight snippets when text search is active.
+      - name: include_facets
+        in: query
+        schema:
+          type: string
+          enum:
+          - 'true'
+          - 'false'
+          default: 'true'
+        description: Include facet counts for sender, domain, status, and attachment presence.
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            message_id:
+                              type:
+                              - string
+                              - 'null'
+                            domain_id:
+                              type:
+                              - string
+                              - 'null'
+                              format: uuid
+                            org_id:
+                              type:
+                              - string
+                              - 'null'
+                              format: uuid
+                            status:
+                              type: string
+                              description: "Lifecycle status of an INBOUND email (a row in the `emails`\ntable). Distinct from `SentEmailStatus`, which describes\nthe OUTBOUND lifecycle (the `sent_emails` table) and uses\na different vocabulary because the lifecycles differ.\nPossible values:\n\n  - `pending`: the row was inserted at ingestion (mx_main)\n    and has not yet completed the spam / filter / auth\n    pipeline. Body and parsed fields are present; webhook\n    delivery is not yet scheduled. Most rows transition out\n    of `pending` within seconds.\n  - `accepted`: the inbound passed the policy gates and is\n    queued for webhook delivery. The `webhook_status` field\n    tracks the separate webhook-delivery lifecycle from\n    this point.\n  - `completed`: terminal success. Webhook delivery\n    attempted and acknowledged by every active endpoint, OR\n    no endpoints are configured, so the row is durably\n    archived.\n  - `rejected`: terminal failure at ingestion (spam, blocked\n    sender, filter rule, malformed). The body and metadata\n    are stored for auditing but no webhook fires and the\n    row is not repliable.\n\nSee also `webhook_status` (separate enum tracking the\nwebhook-delivery state machine) and `SentEmailStatus` (the\noutbound vocabulary).\n"
+                              enum:
+                              - pending
+                              - accepted
+                              - completed
+                              - rejected
+                            sender:
+                              type: string
+                              description: 'SMTP envelope sender (return-path) the inbound mail server
+
+                                accepted. For most legitimate mail this equals the bare
+
+                                address in the From header; for mailing lists, bounce
+
+                                handlers, and forwarders it is typically the bounce address
+
+                                rather than the human-visible sender.
+
+
+                                For the parsed From-header value (with display name handling
+
+                                and a sender-fallback when the header is unparseable), GET
+
+                                the email by id and use `from_email`.
+
+                                '
+                            recipient:
+                              type: string
+                            subject:
+                              type:
+                              - string
+                              - 'null'
+                            domain:
+                              type: string
+                            spam_score:
+                              type:
+                              - number
+                              - 'null'
+                            created_at:
+                              type: string
+                              format: date-time
+                            received_at:
+                              type: string
+                              format: date-time
+                            raw_size_bytes:
+                              type:
+                              - integer
+                              - 'null'
+                            webhook_status:
+                              type:
+                              - string
+                              - 'null'
+                              description: "Webhook-delivery state for an inbound email. Tracks a\nSEPARATE lifecycle from the email's `status` field; the\nsame row carries both. Possible values:\n\n  - `pending`: ingestion is past `pending` (the email itself\n    is `accepted`) but the webhook fan-out has not yet\n    started for this row.\n  - `in_flight`: at least one delivery attempt is in flight.\n  - `fired`: terminal success. Every active endpoint\n    acknowledged the delivery (or accepted it after retries).\n  - `failed`: terminal partial-failure. At least one endpoint\n    exhausted its retry budget; some endpoints may still\n    have succeeded.\n  - `exhausted`: terminal failure. Every endpoint exhausted\n    its retry budget without success.\n  - `null`: no endpoints configured, so no webhook lifecycle\n    applies.\n\nNote that the value `pending` here does NOT mean the email\nis `pending`; it means the email is past ingestion but\nwebhook delivery has not yet begun. Two overlapping uses\nof the word `pending` for distinct lifecycle phases.\n"
+                              enum:
+                              - pending
+                              - in_flight
+                              - fired
+                              - failed
+                              - exhausted
+                              - null
+                            webhook_attempt_count:
+                              type: integer
+                            thread_id:
+                              type:
+                              - string
+                              - 'null'
+                              format: uuid
+                              description: 'Conversation thread this message belongs to. Fetch
+
+                                `/threads/{thread_id}` for the full ordered thread. NULL on
+
+                                messages received before threading was enabled.
+
+                                '
+                          required:
+                          - id
+                          - status
+                          - sender
+                          - recipient
+                          - domain
+                          - created_at
+                          - received_at
+                          - webhook_attempt_count
+                        - type: object
+                          properties:
+                            attachment_count:
+                              type: integer
+                              description: Number of parsed attachments on the email.
+                            from_known_address:
+                              type: boolean
+                              description: Whether the parsed From address is known to this org from prior authenticated inbound mail.
+                            score:
+                              type: number
+                              description: Relevance score. Present only when sorting by relevance.
+                            highlights:
+                              type: object
+                              properties:
+                                subject:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: Subject snippets with matching terms highlighted.
+                                body:
+                                  type: array
+                                  items:
+                                    type: string
+                                  description: Body snippets with matching terms highlighted.
+                              required:
+                              - subject
+                              - body
+                          required:
+                          - attachment_count
+                          - from_known_address
+                    meta:
+                      type: object
+                      properties:
+                        total:
+                          type: integer
+                          description: Total number of matching records, capped when `total_capped` is true.
+                        total_capped:
+                          type: boolean
+                          description: Whether `total` was capped instead of counted exactly.
+                        limit:
+                          type: integer
+                          description: Page size used for this request.
+                        cursor:
+                          type:
+                          - string
+                          - 'null'
+                          description: Cursor for the next search page, or null if no more results.
+                        sort:
+                          type: string
+                          enum:
+                          - relevance
+                          - received_at_desc
+                          - received_at_asc
+                          description: Sort mode used for the result page.
+                      required:
+                      - total
+                      - total_capped
+                      - limit
+                      - cursor
+                      - sort
+                    facets:
+                      type: object
+                      properties:
+                        by_sender:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              value:
+                                type:
+                                - string
+                                - 'null'
+                              count:
+                                type: integer
+                            required:
+                            - value
+                            - count
+                        by_domain:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              value:
+                                type:
+                                - string
+                                - 'null'
+                              count:
+                                type: integer
+                            required:
+                            - value
+                            - count
+                        by_status:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              value:
+                                type:
+                                - string
+                                - 'null'
+                              count:
+                                type: integer
+                            required:
+                            - value
+                            - count
+                        has_attachment:
+                          type: object
+                          properties:
+                            'true':
+                              type: integer
+                            'false':
+                              type: integer
+                          required:
+                          - 'true'
+                          - 'false'
+                      required:
+                      - by_sender
+                      - by_domain
+                      - by_status
+                      - has_attachment
+                  required:
+                  - data
+                  - meta
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+          description: Search query timed out
+      security:
+      - BearerAuth: []
+  /emails/{id}:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: getEmail
+      summary: Get inbound email by id
+      description: 'Returns the full record for an inbound email received at one
+
+        of your verified domains, including the parsed text and HTML
+
+        bodies, threading metadata, SMTP envelope detail, webhook
+
+        delivery state, and a `replies` array for any outbound sends
+
+        recorded as replies to this inbound.
+
+
+        For listing inbound emails (with cursor pagination, status
+
+        and date filters, and free-text search), use
+
+        `/emails`. Outbound (sent) email records are NOT returned
+
+        here; use `/sent-emails/{id}` for those.
+
+
+        The response carries four sender-shaped fields whose
+
+        meanings overlap. `from_email` is the canonical "who sent
+
+        this" field for most use cases (parsed bare address from
+
+        the `From:` header, with a `sender` fallback). `from_header`
+
+        is the raw header including any display name. `sender` and
+
+        `smtp_mail_from` both carry the SMTP envelope MAIL FROM
+
+        (return-path) and are equal by construction; `sender` is
+
+        the older field name retained for compatibility. See
+
+        `primitive describe emails:get-email | jq ''.responseSchema.properties''`
+
+        for per-field detail.
+
+        '
+      tags:
+      - Emails
+      responses:
+        '200':
+          description: Email details
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        message_id:
+                          type:
+                          - string
+                          - 'null'
+                        domain_id:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                        org_id:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                        sender:
+                          type: string
+                          description: 'SMTP envelope sender (return-path) the inbound mail server
+
+                            accepted. Same value as `smtp_mail_from`; both fields exist
+
+                            so protocol-aware tooling can use whichever name it expects.
+
+
+                            For most legitimate mail this equals `from_email`; for
+
+                            mailing lists, bounce handlers, and forwarders it is
+
+                            typically the bounce-handling address rather than the
+
+                            human-visible sender.
+
+
+                            **For the canonical "who sent this email" value, use
+
+                            `from_email`.**
+
+                            '
+                        recipient:
+                          type: string
+                        subject:
+                          type:
+                          - string
+                          - 'null'
+                        body_text:
+                          type:
+                          - string
+                          - 'null'
+                          description: Plain-text body parsed from the inbound MIME, matching the `email.parsed.body_text` field on the webhook payload. Null when the message had no text part or parsing failed.
+                        body_html:
+                          type:
+                          - string
+                          - 'null'
+                          description: HTML body parsed from the inbound MIME, matching the `email.parsed.body_html` field on the webhook payload. Null when the message had no HTML part or parsing failed.
+                        status:
+                          type: string
+                          description: "Lifecycle status of an INBOUND email (a row in the `emails`\ntable). Distinct from `SentEmailStatus`, which describes\nthe OUTBOUND lifecycle (the `sent_emails` table) and uses\na different vocabulary because the lifecycles differ.\nPossible values:\n\n  - `pending`: the row was inserted at ingestion (mx_main)\n    and has not yet completed the spam / filter / auth\n    pipeline. Body and parsed fields are present; webhook\n    delivery is not yet scheduled. Most rows transition out\n    of `pending` within seconds.\n  - `accepted`: the inbound passed the policy gates and is\n    queued for webhook delivery. The `webhook_status` field\n    tracks the separate webhook-delivery lifecycle from\n    this point.\n  - `completed`: terminal success. Webhook delivery\n    attempted and acknowledged by every active endpoint, OR\n    no endpoints are configured, so the row is durably\n    archived.\n  - `rejected`: terminal failure at ingestion (spam, blocked\n    sender, filter rule, malformed). The body and metadata\n    are stored for auditing but no webhook fires and the\n    row is not repliable.\n\nSee also `webhook_status` (separate enum tracking the\nwebhook-delivery state machine) and `SentEmailStatus` (the\noutbound vocabulary).\n"
+                          enum:
+                          - pending
+                          - accepted
+                          - completed
+                          - rejected
+                        domain:
+                          type: string
+                        spam_score:
+                          type:
+                          - number
+                          - 'null'
+                        raw_size_bytes:
+                          type:
+                          - integer
+                          - 'null'
+                        raw_sha256:
+                          type:
+                          - string
+                          - 'null'
+                        created_at:
+                          type: string
+                          format: date-time
+                        received_at:
+                          type: string
+                          format: date-time
+                        rejection_reason:
+                          type:
+                          - string
+                          - 'null'
+                        webhook_status:
+                          type:
+                          - string
+                          - 'null'
+                          description: "Webhook-delivery state for an inbound email. Tracks a\nSEPARATE lifecycle from the email's `status` field; the\nsame row carries both. Possible values:\n\n  - `pending`: ingestion is past `pending` (the email itself\n    is `accepted`) but the webhook fan-out has not yet\n    started for this row.\n  - `in_flight`: at least one delivery attempt is in flight.\n  - `fired`: terminal success. Every active endpoint\n    acknowledged the delivery (or accepted it after retries).\n  - `failed`: terminal partial-failure. At least one endpoint\n    exhausted its retry budget; some endpoints may still\n    have succeeded.\n  - `exhausted`: terminal failure. Every endpoint exhausted\n    its retry budget without success.\n  - `null`: no endpoints configured, so no webhook lifecycle\n    applies.\n\nNote that the value `pending` here does NOT mean the email\nis `pending`; it means the email is past ingestion but\nwebhook delivery has not yet begun. Two overlapping uses\nof the word `pending` for distinct lifecycle phases.\n"
+                          enum:
+                          - pending
+                          - in_flight
+                          - fired
+                          - failed
+                          - exhausted
+                          - null
+                        webhook_attempt_count:
+                          type: integer
+                        webhook_last_attempt_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        webhook_last_status_code:
+                          type:
+                          - integer
+                          - 'null'
+                        webhook_last_error:
+                          type:
+                          - string
+                          - 'null'
+                        webhook_fired_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        smtp_helo:
+                          type:
+                          - string
+                          - 'null'
+                        smtp_mail_from:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'SMTP envelope MAIL FROM (return-path), as accepted by the
+
+                            inbound mail server. Same value as `sender`; both fields
+
+                            exist so protocol-aware tooling can use whichever name it
+
+                            expects.
+
+
+                            For the canonical "who sent this email" value (display name
+
+                            stripped, From-header preferred), use `from_email`.
+
+                            '
+                        smtp_rcpt_to:
+                          type:
+                          - array
+                          - 'null'
+                          items:
+                            type: string
+                        from_header:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'Raw `From:` header from the message body, including any
+
+                            display name (e.g. `"Alice Example" <alice@example.com>`).
+
+                            Use this when you need the display name for rendering.
+
+
+                            For the bare email address (display name stripped), use
+
+                            `from_email`.
+
+                            '
+                        content_discarded_at:
+                          type:
+                          - string
+                          - 'null'
+                          format: date-time
+                        content_discarded_by_delivery_id:
+                          type:
+                          - string
+                          - 'null'
+                        from_email:
+                          type: string
+                          description: 'Bare email address parsed from the `From:` header, with
+
+                            display name stripped (e.g. `alice@example.com`). Falls
+
+                            back to `sender` (the SMTP envelope MAIL FROM) when the
+
+                            `From:` header cannot be parsed.
+
+
+                            **This is the canonical "who sent this email" field for
+
+                            most use cases**, including comparing against allowlists,
+
+                            routing replies, or displaying the sender to a user. Use
+
+                            `from_header` when you specifically need the display name,
+
+                            or `sender`/`smtp_mail_from` when you need the SMTP
+
+                            envelope value (e.g. to follow a bounce).
+
+                            '
+                        to_email:
+                          type: string
+                          description: Parsed to address (same as recipient)
+                        from_known_address:
+                          type: boolean
+                          description: 'True when the inbound''s sender address has a matching grant
+
+                            in the org''s known-send-addresses list. Advisory: a true
+
+                            value does not by itself guarantee that a reply will be
+
+                            accepted by send-mail''s gates; the per-send check at send
+
+                            time remains authoritative.
+
+                            '
+                        replies:
+                          type: array
+                          description: 'Sent emails recorded as replies to this inbound, in send
+
+                            order (ascending). Populated when a customer''s send-mail
+
+                            request carries an `in_reply_to` Message-ID that matches
+
+                            this inbound''s `message_id` in the same org. Includes
+
+                            attempts that were gate-denied, so the array reflects every
+
+                            recorded reply attempt regardless of outcome.
+
+                            '
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                format: uuid
+                                description: Sent-email row id.
+                              status:
+                                type: string
+                                description: "Lifecycle status of a sent_emails row. Possible values:\n\n  - `queued`: pre-call INSERT; the outbound agent has not\n    yet replied.\n  - `submitted_to_agent`: agent accepted; `queue_id` is set.\n  - `agent_failed`: agent rejected; `error_code` and\n    `error_message` carry the reason.\n  - `gate_denied`: a recipient-scope gate denied the send;\n    the agent was never called. The `gates` array carries\n    the denial detail. /send-mail returns 403 in this case\n    so callers see the denial synchronously; /sent-emails\n    additionally records the row for historical lookup,\n    which is when this status appears in a listing.\n  - `unknown`: terminal indeterminate; the on-box log\n    poller couldn't classify the receiver's response.\n  - `delivered` / `bounced` / `deferred` / `wait_timeout`:\n    terminal delivery outcomes (see DeliveryStatus).\n"
+                                enum:
+                                - queued
+                                - submitted_to_agent
+                                - agent_failed
+                                - gate_denied
+                                - unknown
+                                - delivered
+                                - bounced
+                                - deferred
+                                - wait_timeout
+                              to_address:
+                                type: string
+                                description: Recipient address as recorded on the sent_emails row.
+                              subject:
+                                type:
+                                - string
+                                - 'null'
+                              created_at:
+                                type: string
+                                format: date-time
+                              queue_id:
+                                type:
+                                - string
+                                - 'null'
+                                description: Outbound relay queue identifier when available.
+                            required:
+                            - id
+                            - status
+                            - to_address
+                            - created_at
+                        reply_to_sent_email_id:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                          description: 'The `sent_emails.id` of the outbound this inbound was a
+
+                            reply to, when resolvable. Set at inbound ingest by
+
+                            matching the parsed In-Reply-To (or References, as a
+
+                            fallback) against `sent_emails.message_id` in the same
+
+                            org. The mirror of `sent_emails.in_reply_to_email_id` for
+
+                            the inbound side of a thread. NULL when the inbound is
+
+                            not a threaded reply to one of your sends, when neither
+
+                            header survived the path through intermediate MTAs, or on
+
+                            inbound received before this auto-link landed.
+
+                            '
+                        thread_id:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                          description: 'Conversation thread this message belongs to. Inbound and
+
+                            outbound messages in the same conversation share a
+
+                            `thread_id`; fetch `/threads/{thread_id}` for the full
+
+                            ordered thread. Assigned at ingest. NULL on messages
+
+                            received before threading was enabled (until backfilled).
+
+                            '
+                        parsed:
+                          allOf:
+                          - type: object
+                            description: 'Parsed MIME content for an inbound email. Mirrors the
+
+                              `email.parsed` object on the webhook payload so a single parser
+
+                              handles both surfaces. `status` is `complete` when parsing
+
+                              succeeded; on `failed` the body/address/attachment fields are
+
+                              absent and `error` describes why.
+
+                              '
+                            properties:
+                              status:
+                                type: string
+                                enum:
+                                - complete
+                                - failed
+                              body_text:
+                                type:
+                                - string
+                                - 'null'
+                                description: Plain-text body. Present when `status` is `complete`.
+                              body_html:
+                                type:
+                                - string
+                                - 'null'
+                                description: HTML body. Present when `status` is `complete`.
+                              reply_to:
+                                type:
+                                - array
+                                - 'null'
+                                items:
+                                  type: object
+                                  description: A parsed RFC 5322 address with optional display name.
+                                  properties:
+                                    name:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Display name, when present (e.g. `Alice Example`).
+                                    address:
+                                      type: string
+                                      description: Bare email address (e.g. `alice@example.com`).
+                                  required:
+                                  - address
+                                description: Parsed `Reply-To` header addresses.
+                              cc:
+                                type:
+                                - array
+                                - 'null'
+                                items:
+                                  type: object
+                                  description: A parsed RFC 5322 address with optional display name.
+                                  properties:
+                                    name:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Display name, when present (e.g. `Alice Example`).
+                                    address:
+                                      type: string
+                                      description: Bare email address (e.g. `alice@example.com`).
+                                  required:
+                                  - address
+                                description: Parsed `Cc` header addresses.
+                              bcc:
+                                type:
+                                - array
+                                - 'null'
+                                items:
+                                  type: object
+                                  description: A parsed RFC 5322 address with optional display name.
+                                  properties:
+                                    name:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Display name, when present (e.g. `Alice Example`).
+                                    address:
+                                      type: string
+                                      description: Bare email address (e.g. `alice@example.com`).
+                                  required:
+                                  - address
+                                description: Parsed `Bcc` header addresses (rarely present on inbound).
+                              to_addresses:
+                                type:
+                                - array
+                                - 'null'
+                                items:
+                                  type: object
+                                  description: A parsed RFC 5322 address with optional display name.
+                                  properties:
+                                    name:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Display name, when present (e.g. `Alice Example`).
+                                    address:
+                                      type: string
+                                      description: Bare email address (e.g. `alice@example.com`).
+                                  required:
+                                  - address
+                                description: Parsed `To` header addresses.
+                              in_reply_to:
+                                type:
+                                - array
+                                - 'null'
+                                items:
+                                  type: string
+                                description: Message-IDs from the `In-Reply-To` header.
+                              references:
+                                type:
+                                - array
+                                - 'null'
+                                items:
+                                  type: string
+                                description: Message-IDs from the `References` header.
+                              attachments:
+                                type: array
+                                items:
+                                  type: object
+                                  description: 'Metadata for one attachment. The bytes are not inline; download
+
+                                    all attachments for a message as a gzipped tarball via
+
+                                    `/emails/{id}/attachments.tar.gz`. `sha256` lets you verify a
+
+                                    specific part after extraction.
+
+                                    '
+                                  properties:
+                                    filename:
+                                      type:
+                                      - string
+                                      - 'null'
+                                    content_type:
+                                      type:
+                                      - string
+                                      - 'null'
+                                    size_bytes:
+                                      type: integer
+                                    sha256:
+                                      type:
+                                      - string
+                                      - 'null'
+                                    part_index:
+                                      type: integer
+                                      description: Zero-based index of this part within the message.
+                                  required:
+                                  - size_bytes
+                                description: Attachment metadata. Empty array when none.
+                              error:
+                                type:
+                                - object
+                                - 'null'
+                                description: 'Present (non-null) only when `status` is `failed`. When
+
+                                  present, all three fields are populated, so a consumer can
+
+                                  branch on `code` without defensive null checks.
+
+                                  '
+                                properties:
+                                  code:
+                                    type: string
+                                    description: Stable failure code (e.g. `PARSE_FAILED`).
+                                  message:
+                                    type: string
+                                  retryable:
+                                    type: boolean
+                                required:
+                                - code
+                                - message
+                                - retryable
+                            required:
+                            - status
+                          description: 'Parsed MIME content (addresses, threading headers,
+
+                            attachment metadata), matching the `email.parsed` object
+
+                            on the webhook payload so one parser handles both the
+
+                            webhook and this endpoint. The top-level `body_text` /
+
+                            `body_html` fields above are the same values as
+
+                            `parsed.body_text` / `parsed.body_html`, retained for
+
+                            backward compatibility.
+
+                            '
+                        auth:
+                          allOf:
+                          - type: object
+                            description: 'SPF / DKIM / DMARC verdicts computed at ingest. Mirrors the
+
+                              `email.auth` object on the webhook payload. Field names are
+
+                              camelCase to match that payload exactly. For messages received
+
+                              before auth was recorded, the verdicts default to `none`.
+
+                              '
+                            properties:
+                              spf:
+                                type: string
+                                description: SPF result (e.g. `pass`, `fail`, `softfail`, `none`).
+                              dmarc:
+                                type: string
+                                description: DMARC result (e.g. `pass`, `fail`, `none`).
+                              dmarcPolicy:
+                                type:
+                                - string
+                                - 'null'
+                                description: Published DMARC policy (`none`, `quarantine`, `reject`).
+                              dmarcFromDomain:
+                                type:
+                                - string
+                                - 'null'
+                                description: The From-header domain DMARC was evaluated against.
+                              dmarcSpfAligned:
+                                type: boolean
+                              dmarcDkimAligned:
+                                type: boolean
+                              dmarcSpfStrict:
+                                type:
+                                - boolean
+                                - 'null'
+                              dmarcDkimStrict:
+                                type:
+                                - boolean
+                                - 'null'
+                              dkimSignatures:
+                                type: array
+                                items:
+                                  type: object
+                                  description: One DKIM signature found on the message, with its verdict.
+                                  properties:
+                                    domain:
+                                      type: string
+                                    selector:
+                                      type: string
+                                    result:
+                                      type: string
+                                      description: Verification result (e.g. `pass`, `fail`, `none`).
+                                    aligned:
+                                      type: boolean
+                                      description: Whether the signing domain aligns with the From domain (for DMARC).
+                                    keyBits:
+                                      type:
+                                      - integer
+                                      - 'null'
+                                    algo:
+                                      type:
+                                      - string
+                                      - 'null'
+                                  required:
+                                  - domain
+                                  - selector
+                                  - result
+                                  - aligned
+                            required:
+                            - spf
+                            - dmarc
+                            - dmarcSpfAligned
+                            - dmarcDkimAligned
+                            - dkimSignatures
+                          description: 'SPF / DKIM / DMARC verdicts computed at ingest, matching
+
+                            the `email.auth` object on the webhook payload. Use these
+
+                            to decide how much to trust a message before acting on
+
+                            instructions it contains.
+
+                            '
+                      required:
+                      - id
+                      - sender
+                      - recipient
+                      - status
+                      - domain
+                      - created_at
+                      - received_at
+                      - webhook_attempt_count
+                      - from_email
+                      - to_email
+                      - replies
+                      - parsed
+                      - auth
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+    delete:
+      operationId: deleteEmail
+      summary: Delete an email
+      tags:
+      - Emails
+      responses:
+        '200':
+          description: Resource deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        deleted:
+                          type: boolean
+                          const: true
+                      required:
+                      - deleted
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+      description: Permanently delete a received email and its stored content. This cannot be undone.
+  /emails/{id}/raw:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: downloadRawEmail
+      summary: Download raw email
+      description: 'Downloads the raw RFC 822 email file (.eml). Authenticates via
+
+        a signed download token (provided in webhook payloads) or a
+
+        valid session.
+
+        '
+      tags:
+      - Emails
+      security:
+      - BearerAuth: []
+      - DownloadToken: []
+      parameters:
+      - name: token
+        in: query
+        schema:
+          type: string
+        description: Signed download token from webhook payload
+      responses:
+        '200':
+          description: Raw email file
+          content:
+            message/rfc822:
+              schema:
+                type: string
+                format: binary
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename="email-id.eml"
+            X-Content-SHA256:
+              schema:
+                type: string
+              description: SHA-256 hex digest of the file
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+  /emails/{id}/attachments.tar.gz:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: downloadAttachments
+      summary: Download email attachments
+      description: 'Downloads all attachments as a gzip-compressed tar archive.
+
+        Authenticates via a signed download token (provided in webhook
+
+        payloads) or a valid session.
+
+        '
+      tags:
+      - Emails
+      security:
+      - BearerAuth: []
+      - DownloadToken: []
+      parameters:
+      - name: token
+        in: query
+        schema:
+          type: string
+        description: Signed download token from webhook payload
+      responses:
+        '200':
+          description: Attachments archive
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename="email-id_attachments.tar.gz"
+            X-Content-SHA256:
+              schema:
+                type: string
+              description: SHA-256 hex digest of the archive
+            X-Attachment-Count:
+              schema:
+                type: string
+              description: Number of attachments in the archive
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+  /emails/{id}/replay:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    post:
+      operationId: replayEmailWebhooks
+      summary: Replay email webhooks
+      description: 'Re-delivers the webhook payload for this email to all active
+
+        endpoints matching the email''s domain. Rate limited per-email
+
+        (short cooldown between successive replays of the same email)
+
+        and per-org (burst + sustained windows), sharing an org-wide
+
+        budget with delivery replays.
+
+        '
+      tags:
+      - Emails
+      responses:
+        '200':
+          description: Replay result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        delivered:
+                          type: integer
+                          description: Number of successful deliveries
+                        failed:
+                          type: integer
+                          description: Number of failed deliveries
+                      required:
+                      - delivered
+                      - failed
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /emails/{id}/discard-content:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    post:
+      operationId: discardEmailContent
+      summary: Discard email content
+      description: 'Permanently deletes the email''s raw bytes, parsed body (text + HTML),
+
+        and attachments while preserving metadata (sender, recipient,
+
+        subject, timestamps, hashes, attachment manifest) for audit logs.
+
+        Idempotent: a second call returns success with
+
+        `already_discarded: true` and does no work.
+
+
+        **Gated** on the customer''s discard-content opt-in (managed in the
+
+        dashboard at Settings > Webhooks). When the toggle is off, this
+
+        endpoint returns `403` with code `discard_not_enabled` and a
+
+        message pointing the human at the dashboard. There is intentionally
+
+        no API to flip this toggle. Opting in to a destructive,
+
+        non-reversible operation must be a deliberate human click in the
+
+        UI.
+
+        '
+      tags:
+      - Emails
+      responses:
+        '200':
+          description: Discard result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        discarded:
+                          type: boolean
+                          description: 'Always `true` on a 2xx response. The content is either now
+
+                            discarded as a result of this call, or was already discarded
+
+                            before this call ran.
+
+                            '
+                        already_discarded:
+                          type: boolean
+                          description: '`true` if the email''s content was already discarded before
+
+                            this call ran (no work was done). `false` if this call was
+
+                            the one that performed the discard.
+
+                            '
+                      required:
+                      - discarded
+                      - already_discarded
+                  required:
+                  - data
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          description: Authenticated caller lacks permission for the operation
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+        '429':
+          $ref: '#/components/responses/RateLimited'
+          description: Rate limit exceeded
+        '500':
+          $ref: '#/components/responses/InternalError'
+          description: Primitive encountered an internal error
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        description: Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+  /emails/{id}/conversation:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Resource UUID
+    get:
+      operationId: getConversation
+      summary: Get the conversation an email belongs to
+      description: 'Returns the full conversation the given inbound email belongs
+
+        to, as ordered, ready-to-prompt turns WITH bodies. It resolves
+
+        the thread from the email and returns every message oldest-first,
+
+        so an agent that received an email can pass `messages` straight
+
+        to a chat model in one call instead of walking `/threads/{id}`
+
+        plus `/emails/{id}` and `/sent-emails/{id}` per message.
+
+
+        Each message carries a `direction` (`inbound` | `outbound`) and a
+
+        derived `role`: `inbound` -> `user`, `outbound` -> `assistant`
+
+        (your own prior replies). The role mapping assumes the caller
+
+        owns the outbound side, which is the agent-reply case this exists
+
+        for. If the email has no thread yet (a brand-new message), the
+
+        conversation is just that one message as a single user turn.
+
+
+        The message list is capped; check `truncated` to detect when
+
+        older messages were omitted. Consecutive same-role turns are not
+
+        merged here; that normalization is model-specific and left to the
+
+        caller.
+
+        '
+      tags:
+      - Emails
+      responses:
+        '200':
+          description: Conversation
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    success:
+                      type: boolean
+                      const: true
+                  required:
+                  - success
+                  - data
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      description: 'The full conversation an inbound email belongs to, as ordered,
+
+                        ready-to-prompt turns with bodies. Resolves the thread from the
+
+                        email and returns every message oldest-first, so an agent that
+
+                        received an email can pass `messages` straight to a chat model in
+
+                        one call.
+
+                        '
+                      properties:
+                        thread_id:
+                          type:
+                          - string
+                          - 'null'
+                          format: uuid
+                          description: 'The thread this email belongs to, or null when the email
+
+                            isn''t threaded yet (the conversation is then just this one
+
+                            message).
+
+                            '
+                        subject:
+                          type:
+                          - string
+                          - 'null'
+                          description: 'Normalized thread subject (Re/Fwd prefixes stripped), or the
+
+                            email''s own subject when it isn''t threaded.
+
+                            '
+                        message_count:
+                          type: integer
+                          description: 'Total messages in the thread. `messages` is capped, so
+
+                            `truncated` is true (and this can exceed `messages.length`)
+
+                            when older messages were omitted.
+
+                            '
+                        truncated:
+                          type: boolean
+                          description: 'True when `messages` omits part of the conversation because
+
+                            the thread exceeds the per-call cap.
+
+                            '
+                        messages:
+                          type: array
+                          items:
+                            type: object
+                            description: One message in the conversation, with its body and a chat role.
+                            properties:
+                              role:
+                                type: string
+                                enum:
+                                - user
+                                - assistant
+                                description: 'Chat role derived from `direction`: `user` for inbound
+
+                                  (received) messages, `assistant` for outbound (your own prior
+
+                                  replies). Lets `messages` be passed directly to a chat model.
+
+                                  '
+                              direction:
+                                type: string
+                                enum:
+                                - inbound
+                                - outbound
+                                description: '`inbound` for a received email (`/emails/{id}`), `outbound`
+
+                                  for a send (`/sent-emails/{id}`).
+
+                                  '
+                              id:
+                                type: string
+                                format: uuid
+                              message_id:
+                                type:
+                                - string
+                                - 'null'
+                              from:
+                                type:
+                                - string
+                                - 'null'
+                              to:
+                                type:
+                                - string
+                                - 'null'
+                              subject:
+                                type:
+                                - string
+                                - 'null'
+                              text:
+                                type: string
+                                description: 'Plain-text body. Empty string when the message has no text
+
+                                  part or its content was discarded by retention.
+
+                                  '
+                              timestamp:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: received_at for inbound, created_at for outbound.
+                            required:
+                            - role
+                            - direction
+                            - id
+                            - text
+                      required:
+                      - thread_id
+                      - message_count
+                      - truncated
+                      - messages
+          headers:
+            ratelimit-limit:
+              description: Maximum number of requests allowed in the current window.
+              schema:
+                type: integer
+                minimum: 1
+                example: 120
+            ratelimit-remaining:
+              description: Remaining requests in the current window.
+              schema:
+                type: integer
+                minimum: 0
+                example: 118
+            ratelimit-reset:
+              description: Unix timestamp (seconds) when the current window resets.
+              schema:
+                type: integer
+                example: 1700000060
+            ratelimit-policy:
+              description: Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.
+              schema:
+                type: string
+                example: 120;w=60
+        '400':
+          $ref: '#/components/responses/ValidationError'
+          description: Invalid request parameters
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          description: Invalid or missing API key
+        '404':
+          $ref: '#/components/responses/NotFound'
+          description: Resource not found
+      security:
+      - BearerAuth: []
+components:
+  responses:
+    InternalError:
+      description: Primitive encountered an internal error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: internal_error
+              message: Internal server error
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    GatewayTimeout:
+      description: Primitive timed out while waiting for a downstream operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: internal_error
+              message: Downstream operation timed out
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+  schemas:
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
+      - subject
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+              - forbidden
+              - not_found
+              - validation_error
+              - rate_limit_exceeded
+              - internal_error
+              - conflict
+              - mx_conflict
+              - outbound_disabled
+              - cannot_send_from_domain
+              - recipient_not_allowed
+              - outbound_key_missing
+              - outbound_unreachable
+              - outbound_key_invalid
+              - outbound_capacity_exhausted
+              - outbound_response_malformed
+              - outbound_relay_failed
+              - discard_not_enabled
+              - inbound_not_repliable
+              - search_timeout
+              - authorization_pending
+              - slow_down
+              - access_denied
+              - expired_token
+              - invalid_device_code
+              - invalid_signup_code
+              - invalid_signup_token
+              - invalid_verification_code
+              - email_delivery_failed
+              - clerk_signup_failed
+              - no_orgs_for_user
+              - org_not_accessible
+              - feature_disabled
+              - memory_conflict
+              - developer_usage_credit_exhausted
+              - no_payout_address
+              - ownership_proof_failed
+              - payment_verification_failed
+              - payment_declined
+              - challenge_expired
+              - settlement_failed
+              - template_not_installable
+              - scaffold_only
+              - invalid_variables
+              - unknown_secrets
+              - missing_secrets
+              - no_inbound_domain
+              - domain_cannot_send
+              - address_taken
+              - route_cap_reached
+              - name_exhausted
+            message:
+              type: string
+            details:
+              type: object
+              description: 'Optional structured data that callers can inspect to recover
+
+                from the error. The fields present depend on `code`. Additional
+
+                keys may be added over time without a major-version bump.
+
+                '
+              additionalProperties: true
+              properties:
+                mx_conflict:
+                  type: object
+                  description: Present when `code == mx_conflict`.
+                  required:
+                  - provider_name
+                  - suggested_subdomain
+                  properties:
+                    provider_name:
+                      type: string
+                      description: Human-readable name of the detected mailbox provider (e.g. "Google Workspace").
+                    suggested_subdomain:
+                      type: string
+                      description: Subdomain to try instead (e.g. "mail" for `mail.example.com`).
+                required_entitlements:
+                  type: array
+                  items:
+                    type: string
+                  description: Entitlements that would allow a denied send when no recipient-scope gate was granted.
+                sent_email_id:
+                  type: string
+                  description: ID of the persisted sent-email attempt associated with the error.
+                content_hash:
+                  type: string
+                  description: Content hash of the original request on idempotency cache-hit errors.
+                client_idempotency_key:
+                  type: string
+                  description: Effective idempotency key associated with the original request.
+            gates:
+              type: array
+              items:
+                $ref: '#/components/schemas/GateDenial'
+              description: Structured per-gate denial detail for recipient-scope send-mail failures.
+            request_id:
+              type: string
+              description: Server-issued request identifier for support and tracing.
+          required:
+          - code
+          - message
+      required:
+      - success
+      - error
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'API key with `prim_` prefix or OAuth access token with `prim_oat_` prefix: `Authorization: Bearer <token>`. Access is governed by the caller''s organization role (`owner`, `admin`, or `member`): API keys always act at `member` level regardless of who created them, and OAuth access tokens act with the authorizing user''s current organization role, resolved per request. Every operation in this spec is available to organization members; billing and organization administration are owner/admin actions performed in the dashboard and are not part of this API.'
+    DownloadToken:
+      type: apiKey
+      in: query
+      name: token
+      description: Signed download token provided in webhook payloads
