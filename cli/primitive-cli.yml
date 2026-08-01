@@ -1,0 +1,21 @@
+generated: '2026-07-20'
+method: searched
+source: https://primitive.dev/llms.txt (CLI quick reference + Install) + https://github.com/primitivedotdev/sdks (cli-node)
+name: primitive
+aliases: [prim]
+description: Official Primitive CLI — wraps the v1 REST API for shell and agent use; also usable via npx.
+install:
+- {method: npm, command: 'npm i -g primitive', notes: also published scoped as @primitivedotdev/cli}
+- {method: npx, command: 'npx primitive --help'}
+- {method: homebrew, command: 'brew install primitivedotdev/tap/primitive'}
+source: https://github.com/primitivedotdev/sdks/tree/main/cli-node
+completions: [bash, zsh, fish]
+command_groups:
+- {group: chat, example: 'primitive chat <email> <message>', purpose: Send a message and wait for the threaded reply in one verb.}
+- {group: agent, example: 'primitive agent start-agent-signup', purpose: Provision a managed *.primitive.email address.}
+- {group: functions, example: 'primitive functions deploy', purpose: Deploy an inbound email JavaScript handler.}
+- {group: memories, example: 'primitive memories set|get|delete|search', purpose: Store durable JSON key-value state.}
+- {group: emails, example: 'primitive emails:latest', purpose: List recent inbound emails for the account.}
+- {group: send, example: 'primitive send --to <addr> --body <text>', purpose: Send outbound email.}
+- {group: payments, example: 'primitive payments pay-email --in-reply-to <inbound-email-id>', purpose: Pay an x402 USDC challenge received over email (add --wait-settle to block until settlement).}
+- {group: list-operations, example: 'primitive list-operations', purpose: List every API operation (generated from the OpenAPI spec).}

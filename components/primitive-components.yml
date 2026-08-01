@@ -1,0 +1,20 @@
+generated: '2026-07-20'
+method: searched
+source: https://primitive.dev/llms.txt (Machine-readable surfaces) + /.well-known/mcp.json
+summary: >-
+  Primitive ships an in-agent MCP App UI: a ui:// widget that renders the inbox inside agent hosts
+  (ChatGPT, Claude) via the OpenAI Apps SDK / MCP Apps. This is generative in-agent UI (A2UI), not a
+  server-side SDK.
+components:
+- family: MCP App UI
+  name: Primitive Email widget
+  resource_uri: ui://widget/primitive-email-v1.html
+  content_type: text/html;profile=mcp-app
+  declared_via: _meta.ui.resourceUri and OpenAI Apps SDK openai/outputTemplate
+  carried_by_tools: [listEmails, getEmail, getInboxStatus, getAccount]
+  hosts: [ChatGPT, Claude]
+  purpose: Renders the inbox inside the agent host as generative in-agent UI.
+distribution:
+- {kind: chatgpt-app, note: Primitive ships a ChatGPT app.}
+- {kind: codex-plugin, url: https://github.com/primitivedotdev/codex-plugin, note: Bundles the hosted MCP server with primitive-chat and primitive-inbox skills.}
+notes: Distinct from server-side SDKs (see packages/). No traditional web-component / JS element library is published.

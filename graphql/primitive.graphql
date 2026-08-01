@@ -1,0 +1,371 @@
+"""
+The estimated relative cost of resolving a field, so clients can budget a query
+and the server can rate-limit by total query cost.
+"""
+directive @cost(
+  """Estimated relative resolver cost for this field."""
+  complexity: Int!
+) on FIELD_DEFINITION
+
+"""
+A per-client rate limit for a field: at most `max` calls per `windowSeconds`.
+"""
+directive @rateLimit(
+  """Maximum calls allowed during the window."""
+  max: Int!
+  """Window size in seconds."""
+  windowSeconds: Int!
+) on FIELD_DEFINITION
+
+"""
+Primitive GraphQL API (v1) — a public, read-only surface returning synthetic
+sample data shaped like the REST API.
+
+Versioning & deprecation policy: this API is versioned via the `apiVersion`
+field (currently `v1`). Within a version every change is additive and
+backward-compatible. Any field scheduled for removal is annotated with the
+`@deprecated` directive and a concrete removal date, stays available until that
+date, and is only then dropped. Breaking changes ship under a new version,
+never silently within `v1`. The authenticated REST API at
+https://api.primitive.dev/v1 remains the system of record.
+"""
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"""
+Primitive GraphQL API — a read-only, public demo surface returning synthetic
+sample data shaped like the REST API. Errors are modelled as typed result
+unions rather than only the transport-level errors array. The authenticated
+REST API at https://api.primitive.dev/v1 remains the system of record.
+
+Versioning policy: this schema is versioned via the `apiVersion` field
+(currently `v1`). Changes within a version are additive and
+backward-compatible; any field slated for removal is annotated `@deprecated`
+with a concrete removal date and stays available until that date. Breaking
+changes ship only under a new version, never silently within `v1`.
+"""
+type Query {
+  """
+  The stable API version this schema implements (currently `v1`).
+
+  Versioning & deprecation policy (schema-evolution policy): this schema is
+  versioned through this apiVersion field. Within a version, schema evolution is
+  additive and backward-compatible; any field scheduled for removal is annotated
+  with the `@deprecated` directive and a concrete removal date, stays available
+  until that date, and is only then dropped. Breaking changes ship under a new
+  version, never silently within `v1`.
+  """
+  apiVersion: String! @cost(complexity: 0)
+
+  """
+  Look up a single email by id. Returns a typed result union so a not-found
+  or validation outcome is part of the schema, not just a transport error.
+  """
+  email(
+    """UUID of the email to look up (use an id from the `emails` connection)."""
+    id: ID!
+  ): EmailResult! @cost(complexity: 1)
+
+  """List emails using the Relay cursor-connection pagination pattern."""
+  emails(
+    """Maximum number of emails to return (1–100)."""
+    first: Int = 10
+    """Opaque cursor from a previous page's pageInfo.endCursor."""
+    after: String
+  ): EmailConnection! @cost(complexity: 5) @rateLimit(max: 60, windowSeconds: 60)
+
+  """Poll the status of an asynchronous job started by a mutation."""
+  job(
+    """Id of the job to poll, taken from a mutation's returned job handle."""
+    id: ID!
+  ): Job @cost(complexity: 1) @deprecated(reason: "Use jobResult, which returns a typed JobResult union so a not-found job id is modelled as data rather than a null. job is removed after 2026-12-01.")
+
+  """
+  Poll the status of an asynchronous job, returning a typed result union so a
+  not-found job id is part of the schema rather than a bare null — the
+  errors-as-data counterpart to the deprecated job field.
+  """
+  jobResult(
+    """Id of the job to poll, taken from a mutation's returned job handle."""
+    id: ID!
+  ): JobResult! @cost(complexity: 1)
+}
+
+"""
+Write operations. Mutations follow the async-job pattern (a mutation returns a
+job handle the client polls via `Query.job`) and model failures as data through
+typed result unions rather than top-level errors.
+"""
+type Mutation {
+  """
+  Send an email — the core Primitive operation, mirrored here as a synthetic demo
+  (no message is actually sent). Returns a payload union of a typed receipt or a
+  typed validation error, so a bad request is modelled as data rather than only a
+  transport-level error.
+  """
+  sendMail(
+    """The message to send."""
+    input: SendMailInput!
+  ): SendMailResult! @cost(complexity: 5) @rateLimit(max: 30, windowSeconds: 60)
+
+  """
+  Start an asynchronous bulk archive over many emails. Returns a payload union of
+  the job handle or a typed error — the async-job pattern with errors-as-data.
+  """
+  bulkArchiveEmails(
+    """The emails to archive."""
+    input: BulkArchiveInput!
+  ): BulkArchiveResult! @cost(complexity: 10) @rateLimit(max: 30, windowSeconds: 60)
+
+  """
+  Apply several label changes in one request — the batch-mutation pattern. Each
+  input maps to one result union in the returned list, in order.
+  """
+  batchLabelEmails(
+    """The label changes to apply; one result is returned per input, in order."""
+    inputs: [LabelEmailInput!]!
+  ): [LabelEmailResult!]! @cost(complexity: 10) @rateLimit(max: 30, windowSeconds: 60)
+
+  """
+  Archive a single email — a Relay-style mutation: it returns a payload object
+  carrying the result plus a `userErrors` list, so a failure (e.g. unknown id)
+  comes back as structured data in `userErrors` rather than only a
+  transport-level error.
+  """
+  archiveEmail(
+    """The archive request."""
+    input: ArchiveEmailInput!
+  ): ArchiveEmailPayload! @cost(complexity: 2) @rateLimit(max: 30, windowSeconds: 60)
+}
+
+"""An email message. Fields mirror the REST EmailSummary/EmailDetail model."""
+type Email {
+  """Unique email id (UUID)."""
+  id: ID!
+  """Envelope sender address."""
+  sender: String!
+  """Envelope recipient address."""
+  recipient: String!
+  """Subject line, if present."""
+  subject: String
+  """Delivery/processing status."""
+  status: EmailStatus!
+  """RFC 3339 timestamp the message was received."""
+  receivedAt: String!
+  """Plain-text body."""
+  bodyText: String
+  """Legacy plain-text snippet."""
+  snippet: String @deprecated(reason: "Use bodyText instead; snippet is removed after 2026-12-01.")
+}
+
+"""Processing status of an email."""
+enum EmailStatus {
+  """Accepted at the edge, not yet fully processed."""
+  ACCEPTED
+  """Fully processed and delivered to endpoints."""
+  COMPLETED
+  """Rejected by spam or policy filters."""
+  REJECTED
+}
+
+"""Result of looking up a single email: the email, or a typed error."""
+union EmailResult = Email | NotFoundError | ValidationError
+
+"""
+A typed error returned as data inside a result or mutation payload union, so
+failures are part of the schema rather than only the transport-level errors
+array. Every concrete error type implements this interface.
+"""
+interface Error {
+  """Stable machine-readable error code."""
+  code: String!
+  """Human-readable explanation."""
+  message: String!
+}
+
+"""A requested resource does not exist."""
+type NotFoundError implements Error {
+  """Stable machine-readable code: `not_found`."""
+  code: String!
+  """Human-readable explanation."""
+  message: String!
+}
+
+"""The request failed validation."""
+type ValidationError implements Error {
+  """Stable machine-readable code: `validation_error`."""
+  code: String!
+  """Human-readable explanation."""
+  message: String!
+  """The field that failed validation, if applicable."""
+  field: String
+}
+
+"""A page of emails following the Relay cursor-connection specification."""
+type EmailConnection {
+  """Total number of emails available across all pages."""
+  totalCount: Int!
+  """The emails in this page, each with its cursor."""
+  edges: [EmailEdge!]!
+  """Pagination metadata for traversing further pages."""
+  pageInfo: PageInfo!
+}
+
+"""One email together with its pagination cursor."""
+type EmailEdge {
+  """Opaque cursor; pass as `after` to fetch the page following this edge."""
+  cursor: String!
+  """The email at this edge."""
+  node: Email!
+}
+
+"""Relay pagination metadata."""
+type PageInfo {
+  """True if more pages follow this one."""
+  hasNextPage: Boolean!
+  """True if pages precede this one."""
+  hasPreviousPage: Boolean!
+  """Cursor of the last edge in this page."""
+  endCursor: String
+  """Cursor of the first edge in this page."""
+  startCursor: String
+}
+
+"""An asynchronous job started by a mutation."""
+type Job {
+  """Unique job id."""
+  id: ID!
+  """Job kind, e.g. `bulk_archive_emails`."""
+  type: String!
+  """Lifecycle status."""
+  status: JobStatus!
+  """Completion percentage, 0–100."""
+  progress: Int!
+  """RFC 3339 timestamp the job was created."""
+  createdAt: String!
+  """Estimated completion timestamp; null if not yet estimable."""
+  estimatedCompletionAt: String
+}
+
+"""Lifecycle status of an asynchronous job."""
+enum JobStatus {
+  """Queued, not started."""
+  PENDING
+  """Currently running."""
+  PROCESSING
+  """Finished successfully."""
+  COMPLETED
+  """Finished with an error."""
+  FAILED
+}
+
+"""
+Result of polling a job by id: the job, or a typed error. Mirrors the
+errors-as-data pattern used by the mutation payloads, so a not-found job is part
+of the schema rather than a null.
+"""
+union JobResult = Job | NotFoundError
+
+"""Handle returned when an asynchronous job is started."""
+type JobHandle {
+  """Poll this id with `query { job(id) }`."""
+  jobId: ID!
+  """Estimated seconds until completion."""
+  estimatedSeconds: Int
+}
+
+"""
+Payload union for `bulkArchiveEmails`: the started job's handle, or a typed
+error. Wiring the error types into the mutation payload keeps failures in the
+schema rather than only the transport-level errors array.
+"""
+union BulkArchiveResult = JobHandle | NotFoundError | ValidationError
+
+"""
+A user-facing error in a Relay-style mutation payload's `userErrors` list.
+Errors are returned as data here rather than as transport-level GraphQL errors,
+so a client reads them off the payload without inspecting the errors array.
+"""
+type UserError {
+  """Stable machine-readable error code, e.g. `not_found`."""
+  code: String!
+  """Human-readable explanation."""
+  message: String!
+  """Path to the offending input field, if the error is field-specific."""
+  field: [String!]
+}
+
+"""Input to archive a single email."""
+input ArchiveEmailInput {
+  """The id of the email to archive."""
+  emailId: ID!
+}
+
+"""
+Relay-style payload for `archiveEmail`: the archived email on success, plus a
+`userErrors` list that is empty on success and carries typed errors on failure.
+"""
+type ArchiveEmailPayload {
+  """The archived email, or null when archiving failed (see `userErrors`)."""
+  email: Email
+  """Typed, user-facing errors. Empty on success (Relay convention)."""
+  userErrors: [UserError!]!
+}
+
+"""Input to send an email."""
+input SendMailInput {
+  """Sender address; must be a verified address on one of your domains."""
+  from: String!
+  """Recipient address."""
+  to: String!
+  """Subject line."""
+  subject: String!
+  """Plain-text body."""
+  bodyText: String
+}
+
+"""A receipt for an accepted send (synthetic in this demo surface)."""
+type SendMailReceipt {
+  """Unique id assigned to the queued message."""
+  id: ID!
+  """Acceptance status, e.g. `queued`."""
+  status: String!
+  """RFC 3339 timestamp the send was accepted."""
+  acceptedAt: String!
+}
+
+"""
+Payload union for `sendMail`: the accepted receipt, or a typed validation
+error. Wiring the error type into the mutation payload keeps failures in the
+schema rather than only the transport-level errors array.
+"""
+union SendMailResult = SendMailReceipt | ValidationError
+
+"""Input to start a bulk archive job."""
+input BulkArchiveInput {
+  """The email ids to archive."""
+  emailIds: [ID!]!
+}
+
+"""One label change within a batch mutation."""
+input LabelEmailInput {
+  """The email to label."""
+  emailId: ID!
+  """The label to apply."""
+  label: String!
+}
+
+"""A successfully applied label within a batch mutation."""
+type LabelApplied {
+  """The email id this result corresponds to."""
+  emailId: ID!
+  """Whether the label was applied."""
+  ok: Boolean!
+}
+
+"""
+Payload union for one batch label change: the applied result, or a typed error.
+"""
+union LabelEmailResult = LabelApplied | NotFoundError | ValidationError

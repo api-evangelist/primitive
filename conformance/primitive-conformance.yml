@@ -1,0 +1,49 @@
+generated: '2026-07-20'
+method: searched
+source: OpenAPI + /.well-known/* + https://primitive.dev/llms.txt
+standards:
+- id: oauth2
+  conforms: true
+  evidence: OAuth 2.0 Authorization Server Metadata published; authorization_code + refresh_token grants, PKCE S256.
+- id: rfc8414-oauth-as-metadata
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server returns issuer/authorization/token/revocation/registration endpoints.
+- id: rfc9728-oauth-protected-resource
+  conforms: true
+  evidence: /.well-known/oauth-protected-resource declares resource + authorization_servers + bearer_methods.
+- id: rfc7636-pkce
+  conforms: true
+  evidence: code_challenge_methods_supported = [S256].
+- id: rfc9116-security-txt
+  conforms: true
+  evidence: /.well-known/security.txt present with Contact + Expires + Canonical.
+- id: rfc9727-api-catalog
+  conforms: true
+  evidence: /.well-known/api-catalog published.
+- id: rfc8594-deprecation-sunset-header
+  conforms: true
+  evidence: deprecation policy states deprecated operations receive a Sunset response header per RFC 8594.
+- id: mcp
+  conforms: true
+  evidence: Published hosted MCP server (dev.primitive/email) with server card; listed in official MCP registry + Smithery.
+- id: a2a-agent-card
+  conforms: true
+  evidence: /.well-known/agent-card.json (A2A format) + /.well-known/agent.json published.
+- id: x402
+  conforms: true
+  evidence: x402 USDC payments over email, settled non-custodially on Base (invite-only soft launch).
+- id: acp-agentic-commerce-protocol
+  conforms: true
+  evidence: Agentic Commerce Protocol checkout sessions + delegated payment (Shared Payment Token) endpoints.
+- id: openai-apps-sdk-mcp-app-ui
+  conforms: true
+  evidence: ui:// MCP App widget rendered in-agent via OpenAI Apps SDK (openai/outputTemplate).
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: Errors use a custom { success:false, error:{code,message,request_id} } envelope, not application/problem+json.
+- id: cursor-pagination
+  conforms: true
+  evidence: List endpoints use cursor-based pagination via meta.cursor.
+- id: idempotency-keys
+  conforms: true
+  evidence: Idempotency-Key header supported on send operations.

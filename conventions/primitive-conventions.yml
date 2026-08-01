@@ -1,0 +1,38 @@
+generated: '2026-07-20'
+method: searched
+source: https://api.primitive.dev/v1/openapi.json (info.description) + https://docs.primitive.dev/docs
+authentication:
+  style: bearer token
+  header: 'Authorization: Bearer <token>'
+  token_prefixes: {api_key: prim_, oauth_access_token: prim_oat_}
+  scope_model: organization-scoped; access governed by org role (owner/admin/member). API keys act at member level.
+  see: authentication/primitive-authentication.yml
+idempotency:
+  supported: true
+  header: Idempotency-Key
+  also_accepts_param: idempotency_key
+  applies_to: [sendEmail, sendMailBatch, replyToEmail, agentic_commerce delegate_payment/checkout_sessions]
+  behavior: Retried requests with the same key never produce duplicate sends; response carries idempotent_replay flag.
+pagination:
+  style: cursor
+  request_param: cursor
+  response_fields: [meta.total, meta.limit, meta.cursor]
+  terminal: meta.cursor is null when there are no more results.
+long_polling:
+  note: Inbound mail can be awaited via GET /v1/emails?since=<cursor>&wait=30 (long-poll up to 30s).
+response_envelope:
+  success: '{ "success": true, "data": { ... }, "meta": { "total": N, "limit": N, "cursor": "..." } }'
+  error: '{ "success": false, "error": { "code": "...", "message": "...", "request_id": "req_..." } }'
+  see: errors/primitive-error-codes.yml
+request_tracing:
+  request_id: error.request_id (req_...) returned on errors; SentEmail records carry request_id.
+rate_limiting:
+  limit: 120 requests / 60 seconds per organization
+  send_limits: 1,000 messages/hour and 10,000 messages/day per organization
+  response: 429 with Retry-After; headers ratelimit-limit / ratelimit-remaining / ratelimit-reset
+  see: errors/primitive-error-codes.yml
+versioning:
+  scheme: uri-path (v1)
+  see: lifecycle/primitive-lifecycle.yml
+webhook_signing:
+  note: Outbound webhook deliveries are signed; Node SDK verifyWebhookSignature is the reference implementation. Secret managed via /account/webhook-secret.

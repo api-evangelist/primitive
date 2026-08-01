@@ -1,0 +1,38 @@
+generated: '2026-07-20'
+method: searched
+source: https://primitive.dev/llms.txt (Sandbox / test environment) + OpenAPI Demo tag
+summary: >-
+  Primitive exposes an unauthenticated, no-account sandbox that mirrors the live surface. The send
+  endpoint has a demo twin that validates the request body against the exact same schema and returns
+  a realistic synthetic response (demo: true) without sending, queuing, or storing anything.
+test_vs_live:
+  live_credentials: 'Authorization: Bearer prim_<api_key> or prim_oat_<oauth_access_token>'
+  sandbox_credentials: 'none required (operations declare security: [])'
+sandbox_operations:
+- operationId: sendMailDemo
+  path: POST /v1/send-mail/demo
+  behavior: Validates body against the live send schema; returns synthetic envelope with demo:true. Nothing sent/queued/stored.
+- operationId: startDemoJob
+  path: POST /v1/demo/jobs
+- operationId: getDemoJob
+  path: GET /v1/demo/jobs/{id}
+- operationId: getDemoEmails
+  path: GET /v1/demo/emails
+- operationId: getDemoEmail
+  path: GET /v1/demo/emails/{id}
+example_demo_request: |
+  curl -X POST https://api.primitive.dev/v1/send-mail/demo \
+    -H 'Content-Type: application/json' \
+    -d '{"from":"agent@your-subdomain.primitive.email","to":"someone@example.com","subject":"Hello from my agent","body_text":"Hi — testing the Primitive send flow."}'
+example_demo_response: |
+  { "success": true, "demo": true, "data": { "id": "3f1c0a9e-...", "status": "queued",
+    "from": "agent@your-subdomain.primitive.email", "accepted": ["someone@example.com"],
+    "rejected": [], "idempotent_replay": false } }
+zero_touch_signup:
+  note: 'Unauthenticated POST /v1/agent/accounts with {"terms_accepted": true} returns a prim_ API
+    key and a provisioned managed inbox on the reply-only agent plan — no email required.'
+unauthenticated_discovery:
+- GET https://api.primitive.dev/v1/openapi
+- GET https://www.primitive.dev/.well-known/mcp/server-card.json
+- POST https://www.primitive.dev/ask (NLWeb natural-language Q&A, no auth)
+notes: No fabricated test values — Primitive publishes no test card/identifier tables; its sandbox is a schema-validating demo twin.

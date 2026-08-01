@@ -1,0 +1,196 @@
+# primitive.dev
+
+> Primitive is email infrastructure for AI agents. Send and receive email with one HTTP call, host an agent at a managed *.primitive.email address, and chat agent-to-agent over email with a single verb.
+
+## What it is
+
+Primitive is email infrastructure built for AI agents:
+
+- `primitive chat <email> <message>` — send a message and wait for the threaded reply. Round-trip in one verb.
+- Managed `*.primitive.email` subdomains with a JavaScript handler that runs on every inbound message.
+- Primitive Memories for durable JSON key-value state across agent turns, retries, emails, and Function invocations.
+- Full v1 REST API for send, receive, Primitive Memories, domain management, and function hosting.
+
+API base: `https://api.primitive.dev/v1`
+Auth: `Authorization: Bearer prim_<api_key>` or `Bearer prim_oat_<oauth_token>`
+
+## Agent instructions
+
+You are an AI agent reading this. This section tells you when to use Primitive and how to interact with it.
+
+- When to use: you would otherwise open a `mailto:`, ask the user for SMTP credentials, or hand-roll inbound MX/SPF/DKIM for one handler; or you need a synchronous round-trip with a person or another agent over email.
+- When not to use: a one-way, fire-and-forget notification where you already have a transactional provider wired up.
+- How to interact (no account): browse the REST surface at `https://www.primitive.dev/openapi.json` and ask about Primitive in natural language at `https://www.primitive.dev/ask` (NLWeb, no auth). Run one real, credential-free send via `POST https://api.primitive.dev/v1/send-mail/demo` — the `sendMailDemo` operation in the spec, marked `security: []`; no key, nothing sent. The MCP server at `https://www.primitive.dev/mcp` is OAuth-gated and needs a bearer token. A separate public, read-only docs MCP at `https://www.primitive.dev/mcp/docs` (no auth) exposes the documentation over MCP — `searchDocs` and `readDoc` tools plus every docs page as a resource.
+- How to interact (for real): the fast path is one unauthenticated `POST https://api.primitive.dev/v1/agent/accounts` with `{"terms_accepted": true}` — zero-touch, no email, returns a `prim_` API key and a provisioned managed inbox on the reply-only `agent` plan; upgrade later by confirming an email. (An email-verified signup flow also exists.) Full details in [auth.md](https://www.primitive.dev/auth.md). Then call the v1 REST API or MCP with `Authorization: Bearer prim_<key>`; to wait for inbound mail, long-poll `GET /v1/emails?since=<cursor>&wait=30`. Retries are safe — send an `Idempotency-Key` header to avoid duplicate sends.
+- Fastest path: the `primitive chat <email> <message>` verb sends and waits for the threaded reply in one call.
+
+## When to use Primitive
+
+Reach for Primitive when an agent needs to:
+
+- Send a message and wait for a person or another agent to reply on the same thread (use [primitive chat](https://www.primitive.dev/docs/cli) or the [/send-mail API](https://www.primitive.dev/docs/sending)).
+- Host an inbound address that runs a JavaScript handler on every received email (see [Functions](https://www.primitive.dev/docs/functions)).
+- Store compact durable JSON state across turns, retries, emails, and Function invocations (see [Primitive Memories](https://www.primitive.dev/docs/memories)).
+- Get a working email identity without buying a domain, configuring DNS, or copying SMTP credentials into an agent context (the managed [\*.primitive.email subdomain](https://www.primitive.dev/docs/managed-inbox)).
+- Send transactional email from a custom domain with managed SPF, DKIM, DMARC, and TLS-RPT (see [Domains](https://www.primitive.dev/docs/domains)).
+- Expose an agent over the universal addressing scheme every business already uses (one signup at [https://www.primitive.dev/signup](https://www.primitive.dev/signup)).
+- Charge or pay another agent in USDC over a real email thread with [x402](https://www.x402.org/) (see the x402 payments section below).
+
+## x402 payments
+
+Primitive supports [x402](https://www.x402.org/) USDC payments between agents, settled non-custodially on Base. There are two flows, both documented:
+
+- **Collecting payments (payee):** register a payout address, issue a challenge, settle it. See [https://www.primitive.dev/docs/collecting-payments](https://www.primitive.dev/docs/collecting-payments).
+- **Paying a request over email (payer):** you received an x402 request by email and want to pay it. Fund a USDC-on-Base wallet (no ETH/gas needed; the facilitator pays gas via gasless EIP-3009), supply the key via `PRIMITIVE_X402_PRIVATE_KEY`, then pay with one command: `primitive payments pay-email --in-reply-to <inbound-email-id>`. Add `--wait-settle` to block until settlement and print the receipt (with the on-chain `settle_tx`) inline instead of polling for the receipt email. This one-command flow is rolling out with a current CLI release; confirm it with `primitive payments pay-email --help` and update with `npm i -g primitive@latest`, or use the SDK `payEmailChallenge` sign-and-send path (available today) if your CLI predates it. Without `--wait-settle`, settlement is async; a follow-up receipt email carries the on-chain `settle_tx`. See [https://www.primitive.dev/docs/paying-x402-over-email](https://www.primitive.dev/docs/paying-x402-over-email).
+- **Protocol and trust model (agent-to-agent over email):** [https://www.primitive.dev/docs/x402-over-email](https://www.primitive.dev/docs/x402-over-email).
+
+x402 is in an invite-only soft launch, gated by the `x402_payments` and `interactions_enabled` organization entitlements.
+
+## How it compares
+
+- vs. SMTP: no credentials, no app passwords, no port-25 firewall battles. One HTTPS call.
+- vs. Resend / SendGrid / Mailgun: built for two-way agent conversations, not just outbound transactional sends. Inbound MX and a JavaScript handler ship in the same product.
+- vs. building your own MX: Primitive is the MX. SPF, DKIM, DMARC, IP reputation, and bounce processing are managed.
+- vs. other agent email infrastructure: see the category guide [Best email API for AI agents](https://www.primitive.dev/best-email-api-for-ai-agents) and the head-to-head pages [Primitive vs. AgentMail](https://www.primitive.dev/compare/agentmail) and [Primitive vs. Nylas](https://www.primitive.dev/compare/nylas).
+
+## Developer resources
+
+Every primitive.dev developer resource, by name, at a stable URL:
+
+- Primitive API documentation: [https://www.primitive.dev/docs](https://www.primitive.dev/docs) (REST reference at [https://www.primitive.dev/docs/api](https://www.primitive.dev/docs/api))
+- Primitive OpenAPI spec: [https://www.primitive.dev/openapi.json](https://www.primitive.dev/openapi.json) (also at /.well-known/openapi.json)
+- Primitive authentication docs: [https://www.primitive.dev/docs/auth](https://www.primitive.dev/docs/auth) (agent-readable summary at [https://www.primitive.dev/auth.md](https://www.primitive.dev/auth.md))
+- Primitive webhooks docs: [https://www.primitive.dev/docs/endpoints](https://www.primitive.dev/docs/endpoints) (payloads at [https://www.primitive.dev/docs/webhook-payload](https://www.primitive.dev/docs/webhook-payload))
+- Primitive MCP server: `https://www.primitive.dev/mcp` (OAuth; setup guide at [https://www.primitive.dev/docs/connectors](https://www.primitive.dev/docs/connectors)); public docs MCP at `https://www.primitive.dev/mcp/docs` (no auth)
+- Primitive SDKs (Node, Python, Go, MIT): [https://github.com/primitivedotdev/sdks](https://github.com/primitivedotdev/sdks) — npm `@primitivedotdev/sdk`
+- Primitive CLI: npm `primitive` (`npx primitive --help`)
+
+A human-browsable index of the same list lives at [https://www.primitive.dev/developers](https://www.primitive.dev/developers). AI platform integrations are listed at [https://www.primitive.dev/integrations](https://www.primitive.dev/integrations): the hosted MCP server connects to Claude (claude.ai, Claude Desktop, Claude Code), Cursor, Visual Studio Code (VS Code) in GitHub Copilot agent mode, and Goose (the open-source agent from Block), plus any other MCP-compatible client; ChatGPT-compatible runtimes use the published plugin manifest; and OpenAI Codex installs the [Codex plugin](https://github.com/primitivedotdev/codex-plugin), which bundles the MCP server with the primitive-chat and primitive-inbox skills (full install command below).
+
+## Pricing
+
+Usage-based, with three tiers. Each includes a monthly grant of usage credits; metered usage draws from it, and usage beyond it is billed:
+
+- Developer (free): `$0/mo`, includes `$5/mo` of usage credits
+- Power: `$13/mo`, includes `$13/mo` of usage credits
+- Platinum: `$299/mo`, includes `$299/mo` of usage credits
+- Metered usage: inbound and outbound accepted email, storage (GB-day), Primitive Memories storage/read/write usage, Function invocations, and Function runtime
+- Start free on Developer with no credit card required
+- Rate limits (abuse control): 1,000 messages/hour and 10,000 messages/day per organization (POST /v1/send-mail returns `429` when exceeded)
+- Inbound email content is retained until you delete it; Primitive does not auto-delete stored mail on a schedule
+
+## Constraints
+
+- Rate-limited API responses return `429` with `Retry-After`. Full [error code reference](https://www.primitive.dev/docs/errors) and [versioning policy](https://www.primitive.dev/docs/versioning) in the docs.
+- Inbound email content is retained until you delete it; Primitive does not auto-delete stored mail on a schedule. Content deletion is customer-initiated via content discard.
+- API keys and OAuth access tokens are organization-scoped.
+
+## Sandbox / test environment
+
+Exercise the full request and response shape with no credentials and no side effects:
+
+- `POST https://api.primitive.dev/v1/send-mail/demo` is an unauthenticated sandbox for the live send endpoint. It validates your body against the exact same schema and returns a realistic synthetic response (`demo: true`); no email is sent, queued, or stored.
+- The entire surface is discoverable without auth (`GET https://api.primitive.dev/v1/openapi`, `GET https://www.primitive.dev/.well-known/mcp`), so an agent can explore and dry-run the API in this test environment before signing up.
+
+## Agent Quickstart
+
+Zero to a sent email in three steps. Steps 1 and 2 need no credentials, so an agent can verify the request and response shapes before signing up.
+
+1. Discover the surface (no auth). List every operation and every MCP tool with its input schema:
+
+```
+curl https://api.primitive.dev/v1/openapi
+curl https://www.primitive.dev/.well-known/mcp/server-card.json
+```
+
+2. Run one real call (no auth). `POST /v1/send-mail/demo` validates the body against the exact same schema as the live send endpoint and returns a realistic synthetic envelope (`demo: true`) — nothing is sent, queued, or stored:
+
+```
+curl -X POST https://api.primitive.dev/v1/send-mail/demo -H 'Content-Type: application/json' -d '{"from":"agent@your-subdomain.primitive.email","to":"someone@example.com","subject":"Hello from my agent","body_text":"Hi — testing the Primitive send flow."}'
+```
+
+Response (shape-identical to a fresh async send, plus `demo: true`):
+
+```json
+{ "success": true, "demo": true, "data": { "id": "3f1c0a9e-...", "status": "queued", "from": "agent@your-subdomain.primitive.email", "accepted": ["someone@example.com"], "rejected": [], "idempotent_replay": false } }
+```
+
+3. Get a real credential, then send for real. Register via the agent signup flow (full walkthrough at [auth.md](https://www.primitive.dev/auth.md)). The CLI (`npm i -g primitive`, also scoped as `@primitivedotdev/cli`; or `brew install primitivedotdev/tap/primitive`) wraps steps 3a–3b: `primitive agent start-agent-signup`.
+
+```
+# a) start signup — returns a signup_token and emails a 6-digit verification code
+curl -X POST https://api.primitive.dev/v1/agent/signup/start -H 'Content-Type: application/json' -d '{"email":"you@example.com","terms_accepted":true,"device_name":"my agent"}'
+
+# b) verify the code — returns an OAuth access token prefixed prim_oat_
+curl -X POST https://api.primitive.dev/v1/agent/signup/verify -H 'Content-Type: application/json' -d '{"signup_token":"<from step a>","verification_code":"123456"}'
+
+# c) send a real email with the token (same body as the demo in step 2)
+curl -X POST https://api.primitive.dev/v1/send-mail -H 'Authorization: Bearer prim_oat_<access_token>' -H 'Content-Type: application/json' -d '{"from":"agent@your-subdomain.primitive.email","to":"someone@example.com","subject":"Hello from my agent","body_text":"Hi — testing the Primitive send flow."}'
+```
+
+## Quickstart
+
+- [Quickstart walkthrough](https://www.primitive.dev/docs/quickstart)
+- [Agent auth guide](https://www.primitive.dev/auth.md)
+- [Sign up](https://www.primitive.dev/signup)
+- [Pricing reference](https://www.primitive.dev/pricing.md)
+
+## Install
+
+- CLI (npm): `npm i -g primitive` (also published as the scoped package `@primitivedotdev/cli`) — provides the `primitive` / `prim` commands
+- CLI (Homebrew): `brew install primitivedotdev/tap/primitive`
+- Skills (Claude Code, Codex, Cursor, and 50+ compatible agents): `npx skills add primitivedotdev/skills` — bundles `primitive-chat` (send and wait for the threaded reply) and `primitive-inbox` (a managed *.primitive.email address that receives mail)
+- Codex plugin: `codex plugin marketplace add primitivedotdev/codex-plugin && codex plugin add primitive@primitive && codex mcp login primitive` — bundles the hosted MCP server with the `primitive-chat` and `primitive-inbox` skills as a one-step Codex plugin (the `mcp login` step authenticates the bundled server)
+- Node SDK: `npm i @primitivedotdev/sdk`
+- Python SDK: `pip install primitivedotdev`
+- Go SDK: `go get github.com/primitivedotdev/sdks/sdk-go@latest`
+
+## CLI quick reference
+
+```
+primitive chat <email> <message>           Send and wait for the threaded reply
+primitive agent start-agent-signup         Provision a managed *.primitive.email address
+primitive functions deploy                 Deploy an inbound email handler
+primitive memories set|get|delete|search   Store durable JSON key-value state
+primitive emails:latest                    List recent inbound emails for the account
+primitive send --to <addr> --body <text>   Send outbound email
+```
+
+Node SDK Memories: `createPrimitiveClient({ apiKey }).memories.set/get/delete/search`. Memory search is key-prefix search with `prefix`, not free-text search.
+
+## Public code
+
+Primitive's SDKs and CLI are public source:
+
+- [github.com/primitivedotdev/sdks](https://github.com/primitivedotdev/sdks): Node, Python, and Go SDKs plus the `primitive` CLI, all generated from the same OpenAPI spec. Includes [`AGENTS.md`](https://github.com/primitivedotdev/sdks/blob/main/AGENTS.md) at the repo root with codebase conventions for AI coding agents.
+- [npmjs.com/org/primitivedotdev](https://www.npmjs.com/org/primitivedotdev): published npm packages.
+- [skills.sh/primitivedotdev/skills](https://skills.sh/primitivedotdev/skills): the `primitive-chat` and `primitive-inbox` skills for Claude Code, Codex, Cursor, and 50+ compatible coding agents.
+
+## Machine-readable surfaces
+
+- [OpenAPI 3.1 spec (JSON)](https://www.primitive.dev/openapi.json) (also [YAML](https://www.primitive.dev/openapi.yaml))
+- GraphQL: a public, read-only typed surface at `https://api.primitive.dev/graphql` (introspection enabled). The full SDL is fetchable as text at `https://api.primitive.dev/graphql.graphql` — typed-error result unions plus Relay-style `userErrors` mutation payloads (errors-as-data), a `@deprecated` field, Relay cursor pagination, and an inline versioning & deprecation (schema-evolution) policy: the schema is versioned via `apiVersion` (v1), changes within a version are additive/backward-compatible, and fields slated for removal are marked `@deprecated` with a removal date before being dropped under a new version.
+- Try send-mail with no auth: `POST https://api.primitive.dev/v1/send-mail/demo` validates your body against the real schema and returns a realistic synthetic response (nothing is sent) — see Agent Quickstart above
+- [MCP server](https://www.primitive.dev/mcp) (Streamable HTTP transport) — the "do" surface
+- [Docs MCP](https://www.primitive.dev/mcp/docs) (Streamable HTTP, public, read-only) — the "learn" surface: `searchDocs` / `readDoc` tools plus every docs page as a resource; both servers are listed in [mcp.json](https://www.primitive.dev/.well-known/mcp.json)
+- In-agent MCP App UI: email-reading tools (listEmails, getEmail, getInboxStatus, getAccount) carry a `ui://` MCP App widget (`ui://widget/primitive-email-v1.html`, served as `text/html;profile=mcp-app`) declared via `_meta.ui.resourceUri` and the OpenAI Apps SDK `openai/outputTemplate`. It renders the inbox inside agent hosts like ChatGPT and Claude — Primitive ships a ChatGPT app and a Codex plugin. This is generative, in-agent UI (A2UI / OpenAI Apps SDK), not just a data API.
+- [MCP discovery](https://www.primitive.dev/.well-known/mcp) and [server card](https://www.primitive.dev/.well-known/mcp/server-card.json)
+- MCP registry listings — published as `dev.primitive/email`: [Official MCP Registry](https://registry.modelcontextprotocol.io/v0/servers?search=dev.primitive%2Femail), [Smithery](https://smithery.ai/servers/primitivedotdev/primitive)
+- [NLWeb /ask](https://www.primitive.dev/ask) — POST `{ q: "..." }` or GET `/ask?q=...` for structured results about Primitive (SSE streaming supported)
+- [Agent card (A2A)](https://www.primitive.dev/.well-known/agent-card.json)
+- [Agent discovery](https://www.primitive.dev/.well-known/agent.json)
+- [API catalog (RFC 9727)](https://www.primitive.dev/.well-known/api-catalog)
+- [OAuth AS metadata (RFC 8414)](https://www.primitive.dev/.well-known/oauth-authorization-server)
+- [OAuth protected resource (RFC 9728)](https://www.primitive.dev/.well-known/oauth-protected-resource)
+- Agentic Commerce Protocol (ACP) — agents can buy a Primitive plan without a human checkout. Checkout sessions: `POST https://www.primitive.dev/checkout_sessions` (also at `https://api.primitive.dev/checkout_sessions`), then `/complete`. Delegated payment via a Shared Payment Token (`spt_`): `POST https://www.primitive.dev/agentic_commerce/delegate_payment`. Both accept an `Idempotency-Key` header and respond to a CORS preflight.
+- [Full docs bundle](https://www.primitive.dev/llms-full.txt) (text/markdown)
+
+## Help
+
+Stuck? Ask the dev_help agent directly:
+
+```
+primitive chat dev_help@agent.primitive.dev "<question>"
+```
+
+That round-trips through the same hosted MCP / API surface this file documents, with answers grounded in [the docs corpus](https://www.primitive.dev/docs).

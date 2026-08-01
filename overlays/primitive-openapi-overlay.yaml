@@ -1,0 +1,38 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Primitive
+  version: 1.0.0
+extends: openapi/primitive-openapi-original.json
+actions:
+- target: $.info
+  update:
+    x-apievangelist-provider: primitive
+    x-apievangelist-category: email-infrastructure-for-ai-agents
+    x-apievangelist-agent-ready: true
+    x-apievangelist-artifacts:
+    - authentication/primitive-authentication.yml
+    - conventions/primitive-conventions.yml
+    - errors/primitive-error-codes.yml
+    - lifecycle/primitive-lifecycle.yml
+    - sandbox/primitive-sandbox.yml
+    - data-model/primitive-data-model.yml
+    - agentic-access/primitive-agentic-access.yml
+    - mcp/primitive-mcp.yml
+    - skills/_index.yml
+- target: $.info
+  update:
+    x-apievangelist-conventions:
+      idempotency:
+        header: Idempotency-Key
+        applies_to: [sendEmail, sendMailBatch, replyToEmail]
+      pagination: cursor-based (meta.cursor / meta.limit / meta.total)
+      rate_limit: 120 requests / 60s per organization; 429 with Retry-After
+      response_envelope: '{ success, data, meta }'
+      error_envelope: '{ success:false, error:{ code, message, request_id } }'
+- target: $.info
+  update:
+    x-apievangelist-related-surfaces:
+      graphql: https://api.primitive.dev/graphql (SDL at /graphql.graphql)
+      mcp: https://www.primitive.dev/mcp
+      docs_mcp: https://www.primitive.dev/mcp/docs
+      webhooks_event: email.received

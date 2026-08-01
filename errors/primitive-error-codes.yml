@@ -1,0 +1,42 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.primitive.dev/docs/errors
+format: custom-envelope
+envelope:
+  shape: '{ "success": false, "error": { "code": "...", "message": "...", "request_id": "req_..." } }'
+  code_field: error.code
+  request_id_field: error.request_id
+  notes: code is stable/machine-readable for branching; message may change and should not be parsed.
+error_codes:
+- {code: unauthorized, status: 401, meaning: Missing or invalid bearer token, action: Acquire token via /auth.md discovery flow; retry once.}
+- {code: forbidden, status: 403, meaning: Valid bearer lacks required scope/role, action: Reissue token with missing scope; do not retry.}
+- {code: not_found, status: 404, meaning: Resource does not exist or is not visible, action: Verify ID; do not retry.}
+- {code: validation_error, status: 400, meaning: Request failed schema validation, action: Fix named fields; retry once.}
+- {code: mx_conflict, status: 409, meaning: Domain claim conflicts with existing provider, action: Surface to user; pass confirmed=true to override.}
+- {code: conflict, status: 409, meaning: Request conflicts with current state, action: Re-read resource, reconcile, retry.}
+- {code: rate_limited, status: 429, meaning: Org-wide rate limit exceeded, action: Honor Retry-After header before retrying.}
+- {code: rate_limit_exceeded, status: 429, meaning: Per-resource rate limit exceeded, action: Honor Retry-After header.}
+- {code: service_unavailable, status: 503, meaning: Backing dependency unreachable, action: Retry with exponential back-off (max 5 attempts).}
+- {code: internal_error, status: 500, meaning: Unhandled server fault, action: Retry once with back-off; escalate with request_id.}
+- {code: recipient_not_allowed, status: 403, meaning: First-send gate refused recipient, action: 'Inspect gates[] array; follow fix.action guidance.'}
+- {code: cannot_send_from_domain, status: 403, meaning: from address not verified for org, action: Send from a verified domain or verify it; check /v1/outbound/status.}
+- {code: inbound_not_repliable, status: 422, meaning: Inbound email cannot be replied to, action: Do not retry; start a fresh send.}
+- {code: not_scheduled, status: 409, meaning: Reschedule/cancel targeted a non-scheduled send, action: Read current state; do not retry.}
+- {code: discard_not_enabled, status: 403, meaning: Content discard requested but not enabled, action: Enable in webhook settings first.}
+- {code: search_timeout, status: 504, meaning: Search query exceeded time budget, action: Narrow date range or add filters; retry.}
+- {code: outbound_capacity_exhausted, status: 503, meaning: Relay at capacity, action: Retry with back-off, honor Retry-After.}
+- {code: outbound_unreachable, status: 502, meaning: Relay unreachable, action: Retry with back-off.}
+- {code: outbound_relay_failed, status: 502, meaning: Unclassified relay failure, action: Retry with back-off; escalate with request_id.}
+- {code: outbound_response_malformed, status: 502, meaning: Relay returned unexpected response, action: Retry once; escalate with request_id.}
+- {code: outbound_key_invalid, status: 500, meaning: Server-side credential invalid, action: Escalate with request_id.}
+- {code: feature_disabled, status: 403, meaning: x402 not enabled for org, action: Read error.details.docs_url; request access.}
+- {code: no_payout_address, status: 422, meaning: Payee missing payout wallet, action: Register a payout address via CLI.}
+- {code: payment_declined, status: 422, meaning: Spend policy refused payment, action: Inspect policy; adjust caps/allowlist; retry.}
+- {code: payment_verification_failed, status: 422, meaning: Signed payment did not match challenge, action: Re-sign against exact challenge; do not retry.}
+- {code: settlement_failed, status: 502, meaning: On-chain settlement incomplete, action: Fund wallet; payee issues fresh challenge.}
+- {code: challenge_expired, status: 422, meaning: Challenge past expiry, action: Payee issues new challenge; use larger expires_in.}
+rate_limit_headers:
+- Retry-After
+- ratelimit-limit
+- ratelimit-remaining
+- ratelimit-reset

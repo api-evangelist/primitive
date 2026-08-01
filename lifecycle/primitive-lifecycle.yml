@@ -1,0 +1,23 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.primitive.dev/docs/versioning
+versioning:
+  scheme: uri-path
+  current: v1
+  docs: https://docs.primitive.dev/docs/versioning
+  notes: The current and only supported major version is v1. Non-breaking additions (new operations,
+    optional fields) are permitted; clients must tolerate unknown fields.
+  stability_guarantees: [operation paths, HTTP methods, request/response shapes, error envelopes, authentication model, webhook delivery]
+deprecation:
+  policy_url: https://docs.primitive.dev/docs/versioning
+  sunset_header: true          # RFC 8594 Sunset response header on deprecated operations
+  spec_flag: 'deprecated: true in OpenAPI with replacement guidance'
+  notice_period: Breaking changes announced at least 6 months before removal.
+  current_state: No scheduled deprecations in v1 today; no scheduled v2 release.
+sla:
+  url: null
+  uptime_target: null
+  notes: No published SLA / uptime commitment found.
+status_page: null
+health_endpoint: https://api.primitive.dev/v1/health
+deprecated_operations: []

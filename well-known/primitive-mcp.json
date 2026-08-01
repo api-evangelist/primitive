@@ -1,0 +1,27 @@
+{
+  "name": "primitive.dev",
+  "displayName": "primitive.dev",
+  "description": "Primitive is email infrastructure for AI agents that ships an in-agent MCP App UI — a ui:// widget on the OpenAI Apps SDK / MCP Apps that renders the inbox inside agent hosts like ChatGPT and Claude — alongside MCP and REST APIs to send, receive, and manage email.",
+  "icon": "https://www.primitive.dev/web-app-manifest-192x192.png",
+  "logo": "https://www.primitive.dev/web-app-manifest-192x192.png",
+  "url": "https://www.primitive.dev/mcp",
+  "serverUrl": "https://www.primitive.dev/mcp",
+  "serverCard": "https://www.primitive.dev/.well-known/mcp/server-card.json",
+  "transport": "streamable-http",
+  "registryName": "dev.primitive/email",
+  "registries": [
+    {
+      "registry": "Official MCP Registry",
+      "url": "https://registry.modelcontextprotocol.io/v0/servers?search=dev.primitive%2Femail"
+    },
+    {
+      "registry": "Smithery",
+      "url": "https://smithery.ai/servers/primitivedotdev/primitive"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "authorization_server": "https://www.primitive.dev/.well-known/oauth-authorization-server",
+    "protected_resource": "https://www.primitive.dev/.well-known/oauth-protected-resource/mcp"
+  }
+}

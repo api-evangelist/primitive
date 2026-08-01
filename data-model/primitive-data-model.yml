@@ -1,0 +1,45 @@
+generated: '2026-07-20'
+method: derived
+source: openapi/primitive-openapi-original.json (component schemas + id-reference fields)
+notes: Entities and relationships derived from OpenAPI component schemas and *_id reference fields. All ids are org-scoped.
+entities:
+- {name: Account, id: org_id, tags: [Account]}
+- {name: Domain, id: id, variants: [VerifiedDomain, UnverifiedDomain], tags: [Domains]}
+- {name: Email (inbound), id: id, tags: [Emails], schemas: [EmailSummary, EmailDetail]}
+- {name: SentEmail, id: id, tags: [Sending], schemas: [SentEmailSummary, SendMailResult]}
+- {name: Thread, id: id, tags: [Threads]}
+- {name: Endpoint (webhook), id: id, tags: [Endpoints]}
+- {name: Filter, id: id, tags: [Filters]}
+- {name: RecipientRoute, id: id, tags: [Routes]}
+- {name: Function, id: id, tags: [Functions]}
+- {name: WebhookDelivery, id: id, tags: [Webhook Deliveries], schema: DeliverySummary}
+- {name: Memory, id: key, tags: [Memories], schema: MemoryRecord}
+- {name: Registry, id: slug, tags: [Registries]}
+- {name: Agent, id: address, tags: [Registries]}
+- {name: WakeSchedule, id: id, tags: [Wake]}
+- {name: WakeAuthorization, id: id, tags: [Wake]}
+- {name: WakeDispatch, id: id, tags: [Wake]}
+- {name: Template, id: id, tags: [Templates]}
+- {name: X402PayoutAddress, id: id, tags: [Payments]}
+- {name: X402Challenge, id: id, tags: [Payments]}
+- {name: X402DeclinedPayment, id: id, tags: [Payments]}
+relationships:
+- {from: Domain, to: Account, kind: belongs_to, via: org_id}
+- {from: Email, to: Domain, kind: belongs_to, via: domain_id}
+- {from: Email, to: Thread, kind: belongs_to, via: thread_id}
+- {from: Email, to: SentEmail, kind: has_one, via: reply_to_sent_email_id}
+- {from: SentEmail, to: Email, kind: belongs_to, via: in_reply_to_email_id}
+- {from: SentEmail, to: Thread, kind: belongs_to, via: thread_id}
+- {from: Thread, to: Email, kind: has_one, via: root_message_id}
+- {from: Endpoint, to: Domain, kind: belongs_to, via: domain_id}
+- {from: Endpoint, to: Function, kind: has_one, via: function_id}
+- {from: Filter, to: Domain, kind: belongs_to, via: domain_id}
+- {from: RecipientRoute, to: Domain, kind: belongs_to, via: domain_id}
+- {from: RecipientRoute, to: Endpoint, kind: has_one, via: endpoint_id}
+- {from: RecipientRoute, to: Function, kind: has_one, via: function_id}
+- {from: WebhookDelivery, to: Email, kind: belongs_to, via: email_id}
+- {from: WebhookDelivery, to: Endpoint, kind: belongs_to, via: endpoint_id}
+- {from: WakeAuthorization, to: Endpoint, kind: belongs_to, via: recipient_endpoint_id}
+- {from: Agent, to: Endpoint, kind: has_one, via: endpoint_id}
+- {from: X402EmailChallenge, to: X402Challenge, kind: belongs_to, via: challenge_id}
+- {from: X402DeclinedPayment, to: X402Challenge, kind: belongs_to, via: challenge_id}

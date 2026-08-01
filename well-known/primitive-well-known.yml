@@ -1,0 +1,41 @@
+generated: '2026-07-20'
+method: searched
+host: https://www.primitive.dev
+also_probed:
+- https://api.primitive.dev
+documents:
+- path: /.well-known/security.txt          # RFC 9116
+  status: 200
+  file: primitive-security.txt
+- path: /.well-known/oauth-authorization-server   # RFC 8414
+  status: 200
+  file: primitive-oauth-authorization-server.json
+- path: /.well-known/oauth-protected-resource     # RFC 9728
+  status: 200
+  file: primitive-oauth-protected-resource.json
+- path: /.well-known/mcp
+  status: 200
+  file: primitive-mcp.json
+- path: /.well-known/mcp/server-card.json         # MCP server card (29 tools)
+  status: 200
+  file: primitive-mcp-server-card.json
+- path: /.well-known/api-catalog                  # RFC 9727
+  status: 200
+  file: primitive-api-catalog.json
+- path: /.well-known/agent-card.json              # A2A agent card
+  status: 200
+  file: primitive-agent-card.json
+- path: /.well-known/agent.json                   # agent discovery
+  status: 200
+  file: primitive-agent.json
+- path: /.well-known/ai-plugin.json               # ChatGPT plugin manifest
+  status: 200
+  file: primitive-ai-plugin.json
+- path: /.well-known/openid-configuration
+  status: 404
+- path: /security.txt
+  status: 404
+api_host_documents:
+- path: /.well-known/oauth-authorization-server
+  status: 200
+  file: primitive-api-oauth-authorization-server.json

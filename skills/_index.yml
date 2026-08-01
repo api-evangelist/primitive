@@ -1,0 +1,19 @@
+generated: '2026-07-20'
+method: searched
+source: https://github.com/primitivedotdev/skills (provider-published, saved verbatim)
+install: npx skills add primitivedotdev/skills
+skills:
+- file: primitive-chat.md
+  name: primitive-chat
+  description: Send an outbound email to someone and wait for the threaded reply in one step (agent-to-agent or agent-to-human).
+  api: openapi/primitive-openapi-original.json
+  operations: [sendEmail, replyToEmail, listEmails, getConversation, startAgentSignup]
+  author: Primitive
+  version: '1.0.0'
+- file: primitive-inbox.md
+  name: primitive-inbox
+  description: Get a managed *.primitive.email address to receive mail (verification codes, magic links) and read/wait for it.
+  api: openapi/primitive-openapi-original.json
+  operations: [createAgentAccount, listEmails, getEmail, getInboxStatus, createFunction]
+  author: Primitive
+  version: '1.0.0'

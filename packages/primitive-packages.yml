@@ -1,0 +1,42 @@
+generated: '2026-07-20'
+method: searched
+source: https://primitive.dev/llms.txt (Install section) + registries
+packages:
+- language: javascript
+  registry: npm
+  name: "@primitivedotdev/sdk"
+  url: https://www.npmjs.com/package/@primitivedotdev/sdk
+  install: npm i @primitivedotdev/sdk
+  official: true
+  notes: Official Node.js SDK — webhook, api, openapi, contract, and parser runtime modules; generated from the OpenAPI spec.
+- language: python
+  registry: pypi
+  name: primitivedotdev
+  url: https://pypi.org/project/primitivedotdev/
+  install: pip install primitivedotdev
+  official: true
+  notes: Official Python SDK, generated from the OpenAPI spec.
+- language: go
+  registry: pkg.go.dev
+  name: github.com/primitivedotdev/sdks/sdk-go
+  url: https://github.com/primitivedotdev/sdks/tree/main/sdk-go
+  install: go get github.com/primitivedotdev/sdks/sdk-go@latest
+  official: true
+  notes: Official Go SDK, generated from the OpenAPI spec.
+- language: javascript
+  registry: npm
+  name: primitive
+  url: https://www.npmjs.com/package/primitive
+  install: npm i -g primitive
+  official: true
+  kind: cli
+  notes: The Primitive CLI (also published scoped as @primitivedotdev/cli). Provides the `primitive` / `prim` commands.
+- language: shell
+  registry: homebrew
+  name: primitivedotdev/tap/primitive
+  url: https://github.com/primitivedotdev/homebrew-tap
+  install: brew install primitivedotdev/tap/primitive
+  official: true
+  kind: cli
+  notes: Homebrew tap for the Primitive CLI.
+source_repo: https://github.com/primitivedotdev/sdks

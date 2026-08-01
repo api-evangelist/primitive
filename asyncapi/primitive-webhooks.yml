@@ -1,0 +1,21 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.primitive.dev/docs/endpoints + https://docs.primitive.dev/docs/webhook-payload + OpenAPI Endpoints/Webhook Deliveries tags
+spec_type: Webhooks
+note: Primitive documents webhooks but publishes no AsyncAPI document; captured as a webhook catalog. Not penalized for absent AsyncAPI.
+delivery:
+  style: HTTP POST to a customer-registered endpoint URL
+  signing: Signed so receivers can verify origin and integrity; Node SDK verifyWebhookSignature is the reference impl.
+  secret_management: /account/webhook-secret (get + rotate)
+  replay: Stored deliveries can be replayed (POST /v1/webhooks/deliveries/{id}/replay); per-email replay via POST /v1/emails/{id}/replay.
+  test: POST /v1/endpoints/{id}/test sends a sample event to verify the endpoint.
+events:
+- name: email.received
+  description: Fired when an inbound email is received at a verified domain / managed inbox and processed.
+  managed_by: Endpoints API (createEndpoint / listEndpoints / updateEndpoint / deleteEndpoint)
+management_operations:
+  endpoints: [createEndpoint, listEndpoints, updateEndpoint, deleteEndpoint, testEndpoint]
+  deliveries: [listDeliveries, replayDelivery]
+  account: [getWebhookSecret, rotateWebhookSecret]
+download_token:
+  note: Webhook payloads include a signed DownloadToken (query param `token`) for fetching raw email/attachments.

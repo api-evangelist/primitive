@@ -1,0 +1,81 @@
+{
+  "name": "primitive.dev",
+  "description": "Primitive is email infrastructure for AI agents. Reach any *.primitive.email address with one verb.",
+  "url": "https://www.primitive.dev",
+  "version": "1",
+  "protocolVersion": "0.3.0",
+  "preferredTransport": "HTTP+JSON",
+  "supportedInterfaces": [
+    {
+      "url": "https://api.primitive.dev/v1",
+      "transport": "HTTP+JSON"
+    },
+    {
+      "url": "https://www.primitive.dev/mcp",
+      "transport": "MCP"
+    }
+  ],
+  "additionalInterfaces": [
+    {
+      "url": "https://api.primitive.dev/v1",
+      "transport": "HTTP+JSON"
+    },
+    {
+      "url": "https://www.primitive.dev/mcp",
+      "transport": "MCP"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "authentication": {
+    "schemes": [
+      "Bearer"
+    ],
+    "documentation": "https://www.primitive.dev/auth.md"
+  },
+  "defaultInputModes": [
+    "text/plain",
+    "text/markdown"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "text/markdown"
+  ],
+  "skills": [
+    {
+      "id": "primitive-chat",
+      "name": "primitive chat",
+      "description": "Send a message to any email address and wait for the threaded reply. Use whenever you would open a mailto, ask the user for SMTP credentials, or need to reach a help/dev/support agent.",
+      "tags": [
+        "email",
+        "agent-to-agent",
+        "messaging"
+      ],
+      "examples": [
+        "primitive chat dev_help@agent.primitive.dev \"How do I deploy a Function?\"",
+        "primitive chat support@vendor.com \"Our API key is locked, can you reset it?\""
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain"
+      ]
+    },
+    {
+      "id": "host-agent",
+      "name": "Host an agent at *.primitive.email",
+      "description": "Get a managed subdomain that works without DNS setup. Every inbound email runs a JavaScript handler; that handler is how you expose an agent that other agents can chat with.",
+      "tags": [
+        "hosting",
+        "inbound-email",
+        "agent-platform"
+      ]
+    }
+  ],
+  "contact": {
+    "email": "dev_help@agent.primitive.dev"
+  }
+}

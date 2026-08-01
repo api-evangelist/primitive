@@ -1,0 +1,61 @@
+{
+  "name": "primitive.dev",
+  "description": "Primitive is email infrastructure for AI agents. Universal *.primitive.email addresses, hosted functions that run on every inbound email, durable JSON state with Primitive Memories, and a one-line `primitive chat <email> <message>` verb for agent-to-agent contact.",
+  "homepage": "https://www.primitive.dev",
+  "documentation": "https://docs.primitive.dev/docs",
+  "contact": {
+    "email": "dev_help@agent.primitive.dev",
+    "note": "The dev_help agent answers grounded in the public docs corpus. Reach it directly with `primitive chat dev_help@agent.primitive.dev \"<question>\"`."
+  },
+  "capabilities": [
+    "send_email",
+    "receive_email",
+    "host_email_handler",
+    "agent_to_agent_chat",
+    "durable_agent_memory",
+    "managed_subdomain",
+    "custom_domain"
+  ],
+  "endpoints": {
+    "api_base": "https://api.primitive.dev/v1",
+    "openapi": "https://www.primitive.dev/openapi.json",
+    "mcp_server": "https://www.primitive.dev/mcp",
+    "mcp_discovery": "https://www.primitive.dev/.well-known/mcp",
+    "mcp_server_card": "https://www.primitive.dev/.well-known/mcp/server-card.json",
+    "oauth_authorization_server": "https://www.primitive.dev/.well-known/oauth-authorization-server",
+    "oauth_protected_resource": "https://www.primitive.dev/.well-known/oauth-protected-resource",
+    "api_catalog": "https://www.primitive.dev/.well-known/api-catalog",
+    "llms_txt": "https://www.primitive.dev/llms.txt",
+    "llms_full": "https://www.primitive.dev/llms-full.txt",
+    "agents_md": "https://www.primitive.dev/agents.md",
+    "agent_skills": "https://www.primitive.dev/.well-known/agent-skills",
+    "auth_walkthrough": "https://www.primitive.dev/auth.md",
+    "pricing": "https://www.primitive.dev/pricing.md",
+    "memories": "https://docs.primitive.dev/docs/memories"
+  },
+  "install": {
+    "cli": "npm i -g @primitivedotdev/cli",
+    "skill": "npx skills add primitivedotdev/skills",
+    "sdks": {
+      "node": "@primitivedotdev/sdk",
+      "python": "primitive",
+      "go": "github.com/primitivedotdev/sdks/sdk-go"
+    }
+  },
+  "nlweb": {
+    "ask": "https://www.primitive.dev/ask",
+    "description": "Natural-language query endpoint (NLWeb protocol). POST { q: \"your question\" } or GET /ask?q=... Returns structured results about Primitive capabilities."
+  },
+  "when_to_use": [
+    "You need to send an email from an agent and receive the reply in the same session (use `primitive chat` or the /send-mail + /emails API).",
+    "You need a managed inbound address (*.primitive.email) that runs a JavaScript handler on every received email (hosted Functions).",
+    "You need compact durable JSON state across turns, retries, emails, or Function invocations (use Primitive Memories).",
+    "You want a working email identity without buying a domain or configuring SMTP, SPF, DKIM, or DMARC yourself.",
+    "You need to send transactional email from a custom domain with managed deliverability.",
+    "You need agent-to-agent communication over the universal email addressing scheme."
+  ],
+  "when_not_to_use": [
+    "The destination is an internal service you already call directly over HTTP — use the relevant API or SDK instead.",
+    "You only need fire-and-forget notifications with no reply expected — a plain transactional send via /send-mail suffices and the managed *.primitive.email address adds no value."
+  ]
+}

@@ -14,7 +14,255 @@ created: '2026-07-17'
 modified: '2026-07-17'
 tags:
 - Company
-apis: []
+apis:
+- aid: primitive:primitive-account-api
+  name: Primitive Account API
+  description: Manage your account settings, storage, and webhook secret
+  tags:
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-account-api-openapi.yml
+- aid: primitive:primitive-agent-api
+  name: Primitive Agent API
+  description: Agent signup and authentication
+  tags:
+  - Agent
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-agent-api-openapi.yml
+- aid: primitive:primitive-cli-api
+  name: Primitive CLI API
+  description: Browser-assisted CLI authentication
+  tags:
+  - CLI
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-cli-api-openapi.yml
+- aid: primitive:primitive-demo-api
+  name: Primitive Demo API
+  description: >-
+    Public, no-account sandbox operations that mirror authenticated endpoints with synthetic data so an
+    agent can learn the request and response shapes before signing up.
+  tags:
+  - Demo
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-demo-api-openapi.yml
+- aid: primitive:primitive-discovery-api
+  name: Primitive Discovery API
+  description: >-
+    Unauthenticated entry point that lists the API base URL, how to obtain credentials, and the operations
+    callable without a token.
+  tags:
+  - Discovery
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-discovery-api-openapi.yml
+- aid: primitive:primitive-domains-api
+  name: Primitive Domains API
+  description: Claim, verify, and manage email domains
+  tags:
+  - Domains
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-domains-api-openapi.yml
+- aid: primitive:primitive-emails-api
+  name: Primitive Emails API
+  description: List, inspect, and manage received emails
+  tags:
+  - Emails
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-emails-api-openapi.yml
+- aid: primitive:primitive-endpoints-api
+  name: Primitive Endpoints API
+  description: Manage webhook endpoints that receive email events
+  tags:
+  - Endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-endpoints-api-openapi.yml
+- aid: primitive:primitive-filters-api
+  name: Primitive Filters API
+  description: Manage whitelist and blocklist filter rules
+  tags:
+  - Filters
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-filters-api-openapi.yml
+- aid: primitive:primitive-functions-api
+  name: Primitive Functions API
+  description: >-
+    Deploy JavaScript handlers that run on inbound mail. Each function
+
+    is a single ESM module whose default export is an object with an
+
+    async `fetch(request, env)` method, in the shape of a Workers-style
+
+    handler. Primitive signs each delivery and forwards the
+
+    `Primitive-Signature` header to the handler; verify the raw request
+
+    body with `PRIMITIVE_WEBHOOK_SECRET` before trusting the parsed event.
+
+    The `event` field is `email.received` for normal inbound mail, or a
+
+    machine-mail type (`email.bounced`, `email.tls_report`,
+
+    `email.dmarc_report`, `email.dmarc_failure`) for bounces and reports;
+
+    the payload shape is otherwise identical. Code runs on
+
+    Primitive's edge runtime; there is no infrastructure to manage.
+
+    Secrets land in `env` as encrypted bindings and are refreshed on
+
+    every redeploy.
+  tags:
+  - Functions
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-functions-api-openapi.yml
+- aid: primitive:primitive-inbox-api
+  name: Primitive Inbox API
+  description: Check inbound email setup and processing readiness
+  tags:
+  - Inbox
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-inbox-api-openapi.yml
+- aid: primitive:primitive-memories-api
+  name: Primitive Memories API
+  description: >-
+    Durable org-scoped or function-scoped JSON key-value storage for
+
+    agents and functions. Keys are caller-defined. Function scope is
+
+    always addressed by the function id UUID, not by function name.
+  tags:
+  - Memories
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-memories-api-openapi.yml
+- aid: primitive:primitive-payments-api
+  name: Primitive Payments API
+  description: >-
+    Collect and pay stablecoin (USDC) payments with x402. Settlement is
+
+    non-custodial: funds move directly from payer to payee on-chain via an
+
+    EIP-3009 authorization the payer signs with their own key, and Primitive
+
+    never holds funds. The payee registers a payout address and creates a
+
+    challenge; the payer signs and settles it under a configurable spend
+
+    policy (kill-switch, per-payment and per-day caps, payee allowlist).
+  tags:
+  - Payments
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-payments-api-openapi.yml
+- aid: primitive:primitive-registries-api
+  name: Primitive Registries API
+  description: >-
+    The Agent Registry: ownable directories of agents, addressable by a
+
+    registry-scoped handle. A registry's publish policy (owner_only, request,
+
+    or open) decides whether a publish lists immediately or pends owner
+
+    approval. An agent is defined once with a globally unique,
+
+    reachability-verified address, then published into any registry under a
+
+    handle. Discovery reads (list, resolve, get) are public for public
+
+    registries; managing a registry and moderating requests use the owner's
+
+    API key.
+  tags:
+  - Registries
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-registries-api-openapi.yml
+- aid: primitive:primitive-routes-api
+  name: Primitive Routes API
+  description: >-
+    Recipient routing: route inbound mail to a single destination per recipient
+
+    address. Rules bind an address pattern (exact or wildcard) to an endpoint;
+
+    `function_id` routes an address to a function, minting its route-target
+
+    endpoint.
+  tags:
+  - Routes
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-routes-api-openapi.yml
+- aid: primitive:primitive-search-api
+  name: Primitive Search API
+  description: Semantic and hybrid search across received and sent mail
+  tags:
+  - Search
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-search-api-openapi.yml
+- aid: primitive:primitive-sending-api
+  name: Primitive Sending API
+  description: Send outbound emails through the Primitive API
+  tags:
+  - Sending
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-sending-api-openapi.yml
+- aid: primitive:primitive-service-api
+  name: Primitive Service API
+  description: Operational endpoints such as the unauthenticated health/liveness probe.
+  tags:
+  - Service
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-service-api-openapi.yml
+- aid: primitive:primitive-templates-api
+  name: Primitive Templates API
+  description: Public Function template registry reads used to browse installable agent templates.
+  tags:
+  - Templates
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-templates-api-openapi.yml
+- aid: primitive:primitive-threads-api
+  name: Primitive Threads API
+  description: Conversation threads spanning received and sent emails
+  tags:
+  - Threads
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-threads-api-openapi.yml
+- aid: primitive:primitive-wake-api
+  name: Primitive Wake API
+  description: >-
+    Wake scheduling: schedule and send typed wake commands to your own
+
+    functions over real DKIM-signed email on a cron cadence, and manage the
+
+    per-target allowlist that authorizes which senders may wake a function.
+  tags:
+  - Wake
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-wake-api-openapi.yml
+- aid: primitive:primitive-webhook-deliveries-api
+  name: Primitive Webhook Deliveries API
+  description: View and replay webhook delivery attempts
+  tags:
+  - Webhook Deliveries
+  properties:
+  - type: OpenAPI
+    url: openapi/primitive-webhook-deliveries-api-openapi.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com

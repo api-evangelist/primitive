@@ -1,0 +1,105 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://www.primitive.dev/",
+      "item": [
+        {
+          "href": "https://www.primitive.dev/openapi.json",
+          "type": "application/json",
+          "title": "Primitive API: OpenAPI 3.1 (JSON)"
+        },
+        {
+          "href": "https://www.primitive.dev/openapi.yaml",
+          "type": "application/yaml",
+          "title": "Primitive API: OpenAPI 3.1 (YAML)"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/agent.json",
+          "type": "application/json",
+          "title": "Primitive agent discovery document"
+        },
+        {
+          "href": "https://www.primitive.dev/mcp",
+          "type": "application/json",
+          "title": "Primitive MCP server (Streamable HTTP)"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/mcp",
+          "type": "application/json",
+          "title": "Primitive MCP discovery document"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/mcp/server-card.json",
+          "type": "application/json",
+          "title": "Primitive MCP server card"
+        },
+        {
+          "href": "https://www.primitive.dev/auth.md",
+          "type": "text/markdown",
+          "title": "Primitive agent auth walkthrough"
+        }
+      ],
+      "service-desc": [
+        {
+          "href": "https://www.primitive.dev/openapi.json",
+          "type": "application/json",
+          "title": "Primitive API: OpenAPI 3.1 (JSON)"
+        },
+        {
+          "href": "https://www.primitive.dev/openapi.yaml",
+          "type": "application/yaml",
+          "title": "Primitive API: OpenAPI 3.1 (YAML)"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://docs.primitive.dev/docs",
+          "type": "text/html",
+          "title": "Primitive docs (human-readable)"
+        },
+        {
+          "href": "https://www.primitive.dev/llms-full.txt",
+          "type": "text/markdown",
+          "title": "Primitive docs (LLM-readable, single bundle)"
+        },
+        {
+          "href": "https://www.primitive.dev/auth.md",
+          "type": "text/markdown",
+          "title": "Agent auth walkthrough"
+        }
+      ],
+      "service-meta": [
+        {
+          "href": "https://www.primitive.dev/.well-known/oauth-authorization-server",
+          "type": "application/json",
+          "title": "OAuth 2.0 Authorization Server metadata (RFC 8414)"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/oauth-protected-resource",
+          "type": "application/json",
+          "title": "OAuth 2.0 Protected Resource metadata (RFC 9728)"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/oauth-protected-resource/mcp",
+          "type": "application/json",
+          "title": "OAuth 2.0 Protected Resource metadata for the MCP server"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/mcp",
+          "type": "application/json",
+          "title": "MCP discovery document"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/mcp/server-card.json",
+          "type": "application/json",
+          "title": "MCP server card"
+        },
+        {
+          "href": "https://www.primitive.dev/.well-known/agent.json",
+          "type": "application/json",
+          "title": "Agent discovery document"
+        }
+      ]
+    }
+  ]
+}

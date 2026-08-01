@@ -1,0 +1,2586 @@
+{
+  "name": "primitive",
+  "registryName": "dev.primitive/email",
+  "registries": [
+    {
+      "registry": "Official MCP Registry",
+      "url": "https://registry.modelcontextprotocol.io/v0/servers?search=dev.primitive%2Femail"
+    },
+    {
+      "registry": "Smithery",
+      "url": "https://smithery.ai/servers/primitivedotdev/primitive"
+    }
+  ],
+  "description": "Primitive is email infrastructure for AI agents that ships an in-agent MCP App UI — a ui:// widget on the OpenAI Apps SDK / MCP Apps that renders the inbox inside agent hosts like ChatGPT and Claude — alongside MCP and REST APIs to send, receive, and manage email. Auth: bearer token (Primitive API key or OAuth access token).",
+  "icon": "https://www.primitive.dev/web-app-manifest-192x192.png",
+  "logo": "https://www.primitive.dev/web-app-manifest-512x512.png",
+  "version": "0.1.0",
+  "serverUrl": "https://www.primitive.dev/mcp",
+  "transport": "streamable-http",
+  "authentication": {
+    "type": "bearer",
+    "documentation": "https://www.primitive.dev/auth.md",
+    "oauth": {
+      "authorization_server": "https://www.primitive.dev/.well-known/oauth-authorization-server",
+      "protected_resource": "https://www.primitive.dev/.well-known/oauth-protected-resource/mcp"
+    }
+  },
+  "when_to_use": [
+    "Send email and await a reply from a person or another agent in the same session.",
+    "List or search inbound emails received at a managed *.primitive.email address or a custom verified domain.",
+    "Get a full conversation thread to pass as context to a chat model.",
+    "Manage domains, webhook endpoints, and email filters programmatically.",
+    "Render the inbox as an in-agent MCP App widget inside ChatGPT or Claude (the ui:// resource on email-reading tools)."
+  ],
+  "when_not_to_use": [
+    "Calling an internal service you already reach directly — use that service's API instead.",
+    "Fire-and-forget transactional email with no reply expected — POST /send-mail directly via the REST API."
+  ],
+  "tools": [
+    {
+      "name": "listDomains",
+      "title": "List domains",
+      "description": "List all inbound domains for the organization, both verified and unverified. Each domain includes its verification status and DNS records. Use before addDomain to check whether a domain is already claimed.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "List domains"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "addDomain",
+      "title": "Add domain",
+      "description": "Claim a new domain and receive the DNS records to publish. Returns dns_records with the exact records to add. If the domain has an mx_conflict (existing mail provider), re-call with confirmed: true to proceed. After publishing DNS records, call verifyDomain to complete setup.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "requestBody": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "domain": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 253,
+                "description": "The domain name to claim (e.g. \"example.com\")."
+              },
+              "confirmed": {
+                "type": "boolean",
+                "description": "Set to true to confirm replacing an existing mailbox provider after an mx_conflict response."
+              }
+            },
+            "required": [
+              "domain"
+            ]
+          }
+        },
+        "required": [
+          "requestBody"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Add domain"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "verifyDomain",
+      "title": "Verify domain",
+      "description": "Check DNS records for a domain claim (MX, TXT, SPF, DKIM, DMARC). On success the domain becomes verified and starts receiving mail. On failure, returns which checks passed and which still need attention. If DNS propagation is incomplete, wait a few minutes and retry.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Domain ID returned by addDomain or listDomains."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Verify domain"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "downloadDomainZoneFile",
+      "title": "Download DNS zone file",
+      "description": "Download a BIND-format DNS zone file for a domain. Useful when users want to import all required DNS records at once rather than copying them individually. Returns plain text in BIND zone file format.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Domain ID from listDomains or addDomain."
+          },
+          "outbound_only": {
+            "type": "boolean",
+            "description": "When true, include only outbound DNS records (SPF, DKIM, DMARC). Defaults to all records for unverified domains, outbound-only for verified."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Download DNS zone file"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "getAccount",
+      "title": "Get account",
+      "description": "Use this when you need the authenticated Primitive account summary, including email, plan, onboarding state, and webhook secret rotation time.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "Get account",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Loading account",
+        "openai/toolInvocation/invoked": "Account loaded"
+      }
+    },
+    {
+      "name": "getInboxStatus",
+      "title": "Get inbox status",
+      "description": "Use this when the user asks whether inbound email is ready or needs setup. Returns domains, routes, deployed Functions, and recent inbound activity.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "Get inbox status",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Checking inbox",
+        "openai/toolInvocation/invoked": "Inbox status ready"
+      }
+    },
+    {
+      "name": "getOutboundStatus",
+      "title": "Get outbound status",
+      "description": "What can I send FROM? Lists this account's verified outbound (sendable) domains plus any domains still pending DNS verification, with next actions. Call this BEFORE sendEmail to pick a valid `from` domain — the account email is not necessarily sendable. The same sendable list is echoed in a cannot_send_from_domain error.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Get outbound status"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "listEmails",
+      "title": "List inbound emails",
+      "description": "Use this when you need to browse inbound emails received at verified domains with cursor pagination, status filters, date filters, or sender/recipient search.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "description": "Backward (history) pagination cursor from a previous response's `meta.cursor` field: returns emails OLDER than this position, newest-first. Mutually exclusive with `since`."
+          },
+          "since": {
+            "type": "string",
+            "description": "Forward-tail cursor (a `meta.cursor` value, format `{ISO datetime}|{UUID}`): returns emails strictly NEWER than this position, oldest-first, for lossless polling of just-arrived mail. Mutually exclusive with `cursor`."
+          },
+          "wait": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 30,
+            "default": 0,
+            "description": "Long-poll up to this many seconds (0–30, default 0) holding the request for new mail instead of returning an empty page immediately. Requires `since`. Returns as soon as matching mail arrives, or an empty page when the wait elapses."
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50,
+            "description": "Maximum number of emails to return (1–100, default 50)."
+          },
+          "domain_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Filter to emails received on a specific verified domain."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "completed",
+              "rejected"
+            ],
+            "description": "Filter to emails in this processing status."
+          },
+          "search": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Free-text search across sender, recipient, and subject."
+          },
+          "date_from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive lower bound on created_at (ISO 8601)."
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive upper bound on created_at (ISO 8601)."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "List inbound emails",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Loading emails",
+        "openai/toolInvocation/invoked": "Emails loaded"
+      }
+    },
+    {
+      "name": "searchEmails",
+      "title": "Search inbound emails",
+      "description": "Use this when you need to find inbound emails with structured filters or full-text matching. Use sort=received_at_asc plus date_from for new-mail polling.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "q": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Full-text query matched across subject, body, sender, and recipient."
+          },
+          "from": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Filter to emails from this sender address or domain."
+          },
+          "to": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Filter to emails addressed to this recipient."
+          },
+          "subject": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Filter to emails whose subject contains this string."
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Filter to emails whose body contains this string."
+          },
+          "domain_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Filter to emails received on a specific verified domain."
+          },
+          "reply_to_sent_email_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Filter to inbound emails that are replies to a specific sent email ID."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "completed",
+              "rejected"
+            ],
+            "description": "Filter to emails in this processing status."
+          },
+          "date_from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive lower bound on received_at (ISO 8601)."
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive upper bound on received_at (ISO 8601)."
+          },
+          "has_attachment": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "description": "Filter to emails that have (\"true\") or lack (\"false\") attachments."
+          },
+          "spam_score_lt": {
+            "type": "number",
+            "description": "Filter to emails with a spam score strictly below this value."
+          },
+          "spam_score_gte": {
+            "type": "number",
+            "description": "Filter to emails with a spam score at or above this value."
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "relevance",
+              "received_at_desc",
+              "received_at_asc"
+            ],
+            "description": "Sort order. Use received_at_asc with date_from for polling new mail."
+          },
+          "cursor": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Pagination cursor from a previous response's `meta.cursor` field."
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50,
+            "description": "Maximum number of emails to return (1–100, default 50)."
+          },
+          "snippet": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "default": "true",
+            "description": "Include a short body snippet in each result (default true)."
+          },
+          "include_facets": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "default": "true",
+            "description": "Include aggregated facet counts (sender, domain, status) in the response (default true)."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "Search inbound emails",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Searching emails",
+        "openai/toolInvocation/invoked": "Search complete"
+      }
+    },
+    {
+      "name": "getEmail",
+      "title": "Get email",
+      "description": "Use this when you need full details for one inbound email ID, including parsed bodies, threading metadata, SMTP envelope, webhook state, and replies.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Inbound email ID from listEmails or searchEmails."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "Get email",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Loading email",
+        "openai/toolInvocation/invoked": "Email loaded"
+      }
+    },
+    {
+      "name": "replyToEmail",
+      "title": "Reply to email",
+      "description": "Use this when the user has selected a specific inbound email and confirmed a reply. Sends real outbound email with threading handled server-side.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Inbound email ID to reply to. Threading headers are set server-side."
+          },
+          "requestBody": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "body_text": {
+                "type": "string",
+                "description": "Plain-text reply body. Provide at least one of body_text or body_html."
+              },
+              "body_html": {
+                "type": "string",
+                "description": "HTML reply body. Provide at least one of body_text or body_html."
+              },
+              "from": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 998,
+                "description": "RFC 5322 From header. Defaults to the original recipient address if omitted."
+              },
+              "wait": {
+                "type": "boolean",
+                "description": "When true, wait for the first SMTP delivery outcome before returning."
+              },
+              "attachments": {
+                "type": "array",
+                "maxItems": 100,
+                "description": "Optional file attachments to include in the reply.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "filename": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "description": "Attachment filename including extension."
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "description": "MIME type of the attachment (e.g. \"application/pdf\"). Inferred from the filename when omitted."
+                    },
+                    "content_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[\\x21-\\x3B\\x3D\\x3F-\\x7E]+$",
+                      "description": "Content-ID for an inline (cid) attachment: 1-128 printable ASCII characters, no whitespace or angle brackets. When set, the part renders inline and body_html can reference it (e.g. src=\"cid:logo-1\"). Omit for a regular downloadable attachment."
+                    },
+                    "content_base64": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 44040192,
+                      "description": "Base64-encoded attachment content."
+                    }
+                  },
+                  "required": [
+                    "filename",
+                    "content_base64"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "requestBody"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "Reply to email",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Sending reply",
+        "openai/toolInvocation/invoked": "Reply sent"
+      }
+    },
+    {
+      "name": "sendEmail",
+      "title": "Send email",
+      "description": "Use this when the user has confirmed a new outbound email. Sends real email through Primitive's relay and can wait for the first SMTP delivery outcome, or schedule the send for a future time with scheduled_at.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Idempotency-Key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Client-supplied idempotency key. Retrying with the same key returns the original result without re-sending."
+          },
+          "requestBody": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 998,
+                "description": "RFC 5322 From header. The sender domain must be a verified outbound domain for your organization."
+              },
+              "to": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Recipient email address (RFC 5321 mailbox, display-name form allowed), or an array of single-address strings to address multiple recipients with one message. Each array entry must be exactly one address. Combined to+cc+bcc count max 100."
+              },
+              "cc": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Optional CC recipients: a single address or an array of single-address strings (each entry exactly one address). Counts toward the combined to+cc+bcc max of 100."
+              },
+              "bcc": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Optional BCC recipients: a single address or an array of single-address strings (each entry exactly one address). Counts toward the combined to+cc+bcc max of 100."
+              },
+              "reply_to": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Optional Reply-To header: a single address or an array of up to 10 single-address entries. A pure header: adds no recipients and does not count toward the recipient cap."
+              },
+              "subject": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 998,
+                "description": "Email subject line."
+              },
+              "body_text": {
+                "type": "string",
+                "description": "Plain-text message body. Provide at least one of body_text or body_html."
+              },
+              "body_html": {
+                "type": "string",
+                "description": "HTML message body. Provide at least one of body_text or body_html. Reference inline attachments via cid: URLs matching their content_id."
+              },
+              "in_reply_to": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 998,
+                "description": "Message-ID of the email being replied to, for threading (e.g. \"<abc@example.com>\")."
+              },
+              "references": {
+                "type": "array",
+                "maxItems": 100,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 998
+                },
+                "description": "List of Message-IDs for the References header, oldest-first."
+              },
+              "attachments": {
+                "type": "array",
+                "maxItems": 100,
+                "description": "Optional file attachments. Not allowed on scheduled sends (scheduled_at).",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "filename": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "description": "Attachment filename including extension."
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "description": "MIME type of the attachment (e.g. \"application/pdf\"). Inferred from the filename when omitted."
+                    },
+                    "content_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[\\x21-\\x3B\\x3D\\x3F-\\x7E]+$",
+                      "description": "Content-ID for an inline (cid) attachment: 1-128 printable ASCII characters, no whitespace or angle brackets. When set, the part renders inline and body_html can reference it (e.g. src=\"cid:logo-1\"). Omit for a regular downloadable attachment."
+                    },
+                    "content_base64": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 44040192,
+                      "description": "Base64-encoded attachment content."
+                    }
+                  },
+                  "required": [
+                    "filename",
+                    "content_base64"
+                  ]
+                }
+              },
+              "tags": {
+                "type": "array",
+                "maxItems": 10,
+                "description": "Optional metadata tags (max 10, unique names) stored on the send record for correlation and filtering via listSentEmails. Never rendered into headers and never delivered.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "description": "Tag name: ASCII letters, digits, underscores, dashes only."
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256,
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "description": "Tag value: same charset as the name. Use \"true\" for a bare marker tag."
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ]
+                }
+              },
+              "scheduled_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Schedule the send for a future time (ISO 8601 UTC, e.g. \"2026-08-01T09:00:00Z\"). Must be strictly in the future and at most 30 days out. Cannot be combined with wait or with attachments. Cancel before dispatch with cancelScheduledSend."
+              },
+              "wait": {
+                "type": "boolean",
+                "description": "When true, wait for the first SMTP delivery outcome before returning. Respects wait_timeout_ms. Cannot be combined with scheduled_at."
+              },
+              "wait_timeout_ms": {
+                "type": "number",
+                "minimum": 1000,
+                "maximum": 30000,
+                "description": "How long to wait for delivery confirmation when wait is true (1000-30000 ms, default 10000)."
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "subject"
+            ]
+          }
+        },
+        "required": [
+          "requestBody"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "Send email",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Sending email",
+        "openai/toolInvocation/invoked": "Email sent"
+      }
+    },
+    {
+      "name": "sendEmailDemo",
+      "title": "Try a send (no signup)",
+      "description": "Send a SIMULATED email with no account required. Validates the body against the exact same schema as sendEmail (including cc/bcc, reply_to, tags, attachments, and scheduled_at), then returns a realistic synthetic success envelope (demo: true); it never actually sends, queues, or stores anything. Demo requests are capped at 16KB total body, so large attachments are rejected even though the schema allows them. Use this to let someone try Primitive and see the response shape before they sign up. To send for real, sign up for an API key and use sendEmail.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "requestBody": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 998,
+                "description": "RFC 5322 From header. The sender domain must be a verified outbound domain for your organization."
+              },
+              "to": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Recipient email address (RFC 5321 mailbox, display-name form allowed), or an array of single-address strings to address multiple recipients with one message. Each array entry must be exactly one address. Combined to+cc+bcc count max 100."
+              },
+              "cc": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Optional CC recipients: a single address or an array of single-address strings (each entry exactly one address). Counts toward the combined to+cc+bcc max of 100."
+              },
+              "bcc": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Optional BCC recipients: a single address or an array of single-address strings (each entry exactly one address). Counts toward the combined to+cc+bcc max of 100."
+              },
+              "reply_to": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 998
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 10,
+                    "items": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 998
+                    }
+                  }
+                ],
+                "description": "Optional Reply-To header: a single address or an array of up to 10 single-address entries. A pure header: adds no recipients and does not count toward the recipient cap."
+              },
+              "subject": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 998,
+                "description": "Email subject line."
+              },
+              "body_text": {
+                "type": "string",
+                "description": "Plain-text message body. Provide at least one of body_text or body_html."
+              },
+              "body_html": {
+                "type": "string",
+                "description": "HTML message body. Provide at least one of body_text or body_html. Reference inline attachments via cid: URLs matching their content_id."
+              },
+              "in_reply_to": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 998,
+                "description": "Message-ID of the email being replied to, for threading (e.g. \"<abc@example.com>\")."
+              },
+              "references": {
+                "type": "array",
+                "maxItems": 100,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 998
+                },
+                "description": "List of Message-IDs for the References header, oldest-first."
+              },
+              "attachments": {
+                "type": "array",
+                "maxItems": 100,
+                "description": "Optional file attachments. Not allowed on scheduled sends (scheduled_at).",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "filename": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "description": "Attachment filename including extension."
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "description": "MIME type of the attachment (e.g. \"application/pdf\"). Inferred from the filename when omitted."
+                    },
+                    "content_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[\\x21-\\x3B\\x3D\\x3F-\\x7E]+$",
+                      "description": "Content-ID for an inline (cid) attachment: 1-128 printable ASCII characters, no whitespace or angle brackets. When set, the part renders inline and body_html can reference it (e.g. src=\"cid:logo-1\"). Omit for a regular downloadable attachment."
+                    },
+                    "content_base64": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 44040192,
+                      "description": "Base64-encoded attachment content."
+                    }
+                  },
+                  "required": [
+                    "filename",
+                    "content_base64"
+                  ]
+                }
+              },
+              "tags": {
+                "type": "array",
+                "maxItems": 10,
+                "description": "Optional metadata tags (max 10, unique names) stored on the send record for correlation and filtering via listSentEmails. Never rendered into headers and never delivered.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "description": "Tag name: ASCII letters, digits, underscores, dashes only."
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256,
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "description": "Tag value: same charset as the name. Use \"true\" for a bare marker tag."
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ]
+                }
+              },
+              "scheduled_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Schedule the send for a future time (ISO 8601 UTC, e.g. \"2026-08-01T09:00:00Z\"). Must be strictly in the future and at most 30 days out. Cannot be combined with wait or with attachments. Cancel before dispatch with cancelScheduledSend."
+              },
+              "wait": {
+                "type": "boolean",
+                "description": "When true, wait for the first SMTP delivery outcome before returning. Respects wait_timeout_ms. Cannot be combined with scheduled_at."
+              },
+              "wait_timeout_ms": {
+                "type": "number",
+                "minimum": 1000,
+                "maximum": 30000,
+                "description": "How long to wait for delivery confirmation when wait is true (1000-30000 ms, default 10000)."
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "subject"
+            ]
+          }
+        },
+        "required": [
+          "requestBody"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "title": "Try a send (no signup)",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "securitySchemes": [
+        {
+          "type": "noauth"
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "noauth"
+          }
+        ],
+        "ui": {
+          "resourceUri": "ui://widget/primitive-email-v1.html"
+        },
+        "openai/outputTemplate": "ui://widget/primitive-email-v1.html",
+        "openai/toolInvocation/invoking": "Running a demo send",
+        "openai/toolInvocation/invoked": "Demo send simulated"
+      }
+    },
+    {
+      "name": "listSentEmails",
+      "title": "List sent emails",
+      "description": "List outbound emails sent by this org, with cursor pagination and filters. Bodies are omitted from list rows to keep responses small — use getSentEmail to fetch a specific row with full body. Useful for auditing delivery status, finding bounced sends, or checking gate-denied attempts.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor from a previous response's `meta.cursor` field."
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50,
+            "description": "Maximum number of sent emails to return (1–100, default 50)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "submitted_to_agent",
+              "agent_failed",
+              "gate_denied",
+              "unknown",
+              "delivered",
+              "bounced",
+              "deferred",
+              "wait_timeout",
+              "scheduled",
+              "canceled"
+            ],
+            "description": "Filter to rows in this status. Use \"scheduled\" to find pending scheduled sends (cancelable via cancelScheduledSend) and \"canceled\" for ones already canceled."
+          },
+          "request_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Filter to the row matching a specific server-issued request_id from a /send-mail response."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Filter to rows with the given client idempotency key."
+          },
+          "date_from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive lower bound on created_at (ISO 8601)."
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive upper bound on created_at (ISO 8601)."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "List sent emails"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "getSentEmail",
+      "title": "Get sent email",
+      "description": "Get the full record for a single sent email by id, including body_text and body_html. Use to inspect delivery details for a specific send — e.g. the SMTP response on a bounced row, or the gate denial reason on a gate_denied row.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Sent email ID from listSentEmails or a /send-mail response."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Get sent email"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancelScheduledSend",
+      "title": "Cancel scheduled send",
+      "description": "Cancel a still-scheduled send before it dispatches (terminal status \"canceled\"; the same idempotency key becomes reusable). Pass the sent email id from a sendEmail response that used scheduled_at, or from listSentEmails. Returns a conflict error once the send has already started dispatching.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Sent email ID of the scheduled send, from a sendEmail response or listSentEmails."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Cancel scheduled send"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "awaitReply",
+      "title": "Await reply",
+      "description": "Get the threaded reply to a sent email — the canonical 'did they reply yet?' call. Pass the sent email's id (from a sendEmail response). With wait=true it long-polls up to wait_timeout_ms for the reply to arrive (synchronous agent-to-agent chat); with wait=false (default) it returns immediately with the reply if one has arrived, else reply=null. Matches on the reply's threading, not a from/subject guess.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The sent email id to fetch the reply for (from a sendEmail/replyToEmail response)."
+          },
+          "wait": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "description": "When \"true\", long-poll until a reply arrives or wait_timeout_ms elapses. Default no-wait."
+          },
+          "wait_timeout_ms": {
+            "type": "number",
+            "minimum": 1000,
+            "maximum": 30000,
+            "description": "How long to wait when wait=true (1000–30000 ms, default 10000)."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Await reply"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "getConversation",
+      "title": "Get conversation",
+      "description": "Get the full conversation an inbound email belongs to as ordered, chat-model-ready turns with bodies. Each message is oldest-first with a direction (inbound/outbound) and a derived role (inbound→user, outbound→assistant). For a brand-new message, returns just that one turn. The response includes a truncated boolean (true when the message cap was reached) and a message_count field.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of any inbound email in the conversation."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Get conversation"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "getThread",
+      "title": "Get thread",
+      "description": "Get a conversation thread by id: metadata plus all inbound and outbound messages interleaved oldest-first. Each message has a direction (inbound/outbound) and id; fetch inbound message bodies via getEmail, or outbound bodies via getSentEmail. Discover thread_id from any email or sent-email record. Compare message_count against messages.length to detect truncation.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Thread ID from the thread_id field on any email or sent-email."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Get thread"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "downloadEmailAttachments",
+      "title": "Download email attachments",
+      "description": "Download all attachments for an inbound email as a gzip-compressed tar archive. Returns the archive as a base64-encoded string along with the attachment count and SHA-256 digest. Prefer getEmail first to check the attachment manifest before downloading.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Inbound email ID."
+          },
+          "token": {
+            "type": "string",
+            "description": "Signed download token from a webhook payload. Optional — the bearer token is used when this is omitted."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "Download email attachments"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "listEndpoints",
+      "title": "List webhook endpoints",
+      "description": "List all active webhook endpoints for the organization. Each endpoint shows its URL, enabled state, and optional domain restriction.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "List webhook endpoints"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "createEndpoint",
+      "title": "Create webhook endpoint",
+      "description": "Create a webhook endpoint to receive email.received events. If an endpoint with the same URL already exists but is deactivated, it is reactivated. After creating, call testEndpoint to confirm your signature verifier accepts the payload.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "requestBody": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "url": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The webhook URL to deliver events to."
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether the endpoint should receive deliveries immediately after creation (default true)."
+              },
+              "domain_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Restrict deliveries to emails from a specific domain. Omit to receive events for all domains."
+              },
+              "rules": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Endpoint-specific filtering rules."
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "requestBody"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Create webhook endpoint"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "deleteEndpoint",
+      "title": "Delete webhook endpoint",
+      "description": "Soft-delete a webhook endpoint. The endpoint will no longer receive deliveries.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Endpoint ID from listEndpoints or createEndpoint."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Delete webhook endpoint"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "testEndpoint",
+      "title": "Test webhook endpoint",
+      "description": "Send a sample email.received event to a webhook endpoint to verify your signature verifier. Rate limited to 4/min and 30/hr. Successful deliveries and verified-domain endpoints are exempt.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Endpoint ID from listEndpoints or createEndpoint."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Test webhook endpoint"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "listFilters",
+      "title": "List filters",
+      "description": "List all whitelist and blocklist filter rules for the organization.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "List filters"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "createFilter",
+      "title": "Create filter",
+      "description": "Create a whitelist or blocklist filter rule. Patterns are stored lowercase. Per-domain filters require a Pro plan.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "requestBody": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "whitelist",
+                  "blocklist"
+                ],
+                "description": "Whether to allow (whitelist) or block (blocklist) matching senders."
+              },
+              "pattern": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "description": "Email address or pattern to filter."
+              },
+              "domain_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Restrict to a specific domain (Pro plan required). Omit for org-wide filter."
+              }
+            },
+            "required": [
+              "type",
+              "pattern"
+            ]
+          }
+        },
+        "required": [
+          "requestBody"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Create filter"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "deleteFilter",
+      "title": "Delete filter",
+      "description": "Delete a filter rule.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Filter rule ID from listFilters or createFilter."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Delete filter"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "listWebhookDeliveries",
+      "title": "List webhook deliveries",
+      "description": "List webhook delivery attempts with pagination and filters. Each delivery includes the target endpoint and a nested email object with sender/recipient/subject. Useful for diagnosing delivery failures or confirming a specific email was delivered.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "description": "Pagination cursor from a previous response's `meta.cursor` field."
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50,
+            "description": "Maximum number of delivery records to return (1–100, default 50)."
+          },
+          "email_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Filter by inbound email ID."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "delivered",
+              "header_confirmed",
+              "failed"
+            ],
+            "description": "Filter to deliveries in this status."
+          },
+          "date_from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive lower bound on attempted_at (ISO 8601)."
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inclusive upper bound on attempted_at (ISO 8601)."
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "title": "List webhook deliveries"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "replayWebhookDelivery",
+      "title": "Replay webhook delivery",
+      "description": "Re-send a stored webhook payload from a previous delivery attempt to its original endpoint. Rate limited per org (burst + sustained windows, shared budget with email webhook replays).",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Delivery ID (numeric string from listWebhookDeliveries)."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "tool",
+          "status",
+          "data"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "title": "Replay webhook delivery"
+      },
+      "securitySchemes": [
+        {
+          "type": "oauth2",
+          "scopes": []
+        }
+      ],
+      "_meta": {
+        "securitySchemes": [
+          {
+            "type": "oauth2",
+            "scopes": []
+          }
+        ]
+      }
+    }
+  ]
+}

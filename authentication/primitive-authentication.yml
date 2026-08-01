@@ -1,0 +1,27 @@
+generated: '2026-07-20'
+method: derived
+source: openapi/primitive-openapi-original.json
+summary:
+  types:
+  - apiKey
+  - http
+  api_key_in:
+  - query
+schemes:
+- name: BearerAuth
+  type: http
+  scheme: bearer
+  description: 'API key with `prim_` prefix or OAuth access token with `prim_oat_` prefix: `Authorization:
+    Bearer <token>`. Access is governed by the caller''s organization role (`owner`, `admin`,
+    or `member`): API keys always act at `member` level regardless of who created them, and
+    OAuth access tokens act with the authorizing user''s current organization role, resolved
+    per request. Every operation in this spec is'
+  sources:
+  - openapi/primitive-openapi-original.json
+- name: DownloadToken
+  type: apiKey
+  in: query
+  parameter: token
+  description: Signed download token provided in webhook payloads
+  sources:
+  - openapi/primitive-openapi-original.json
