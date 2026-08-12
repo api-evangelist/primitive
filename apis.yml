@@ -269,6 +269,12 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgentSkill
+  url: skills/primitive-chat.md
+- type: MCPServer
+  url: mcp/primitive-mcp.yml
+- type: Overlay
+  url: overlays/primitive-openapi-overlay.yaml
 - type: AgentCard
   url: a2a/primitive-a2a.yml
   name: A2A Agent Card
