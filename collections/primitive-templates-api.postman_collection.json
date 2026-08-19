@@ -1,0 +1,1495 @@
+{
+  "item": [
+    {
+      "id": "92beefa0-4ed5-4531-9606-b4835f2ee595",
+      "name": "Templates",
+      "description": {
+        "content": "Public Function template registry reads used to browse installable agent templates.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c9bb37c7-69c8-40e7-933b-caa61b0b4f71",
+          "name": "List function templates",
+          "request": {
+            "name": "List function templates",
+            "description": {
+              "content": "List approved Function templates available for browsing and installation. Results are cacheable and paginated with `data.next_cursor`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "q",
+                  "value": "<string>",
+                  "description": "Search templates by title, summary, or slug."
+                },
+                {
+                  "disabled": false,
+                  "key": "tag",
+                  "value": "<string>",
+                  "description": "Filter templates by an exact tag."
+                },
+                {
+                  "disabled": false,
+                  "key": "cursor",
+                  "value": "<string>",
+                  "description": "Cursor from a previous response `data.next_cursor` value."
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Maximum number of templates to return. The server caps this at 100."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "0605fe05-b7f8-45e8-a413-8fb589a2bf36",
+              "name": "Paginated template registry summaries.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "tag",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": \"6db4a8ac-2a3d-7e6a-95b5-d6f02f3c619a\",\n        \"slug\": \"1w42ei-wbie5dom3acpc7g4-yw7nxv_98yq\",\n        \"title\": \"string\",\n        \"summary\": \"string\",\n        \"author\": {\n          \"id\": \"string\",\n          \"name\": \"string\",\n          \"url\": \"https://sfJ.vggHbPw+mktJ6\"\n        },\n        \"tags\": [\n          \"string\",\n          \"string\"\n        ],\n        \"verified\": true,\n        \"install_count\": 6206,\n        \"github_repo\": \"tgZDRfIh/.K9C\",\n        \"created_at\": \"2020-01-29T08:35:25.381Z\",\n        \"updated_at\": \"1981-08-24T03:56:38.794Z\"\n      },\n      {\n        \"id\": \"917a021c-951b-bd98-cd91-7cb1d58fed6b\",\n        \"slug\": \"lhbfvc7_g-52o83f8bw09o-_d2kve8zy\",\n        \"title\": \"string\",\n        \"summary\": \"string\",\n        \"author\": {\n          \"id\": \"string\",\n          \"name\": \"string\",\n          \"url\": \"http://CVamvTarPjCwz.fiuGiSEaqFXFbCD17,g0jgn+6iqo8F6VyidIPb-Ce\"\n        },\n        \"tags\": [\n          \"string\",\n          \"string\"\n        ],\n        \"verified\": true,\n        \"install_count\": 4658,\n        \"github_repo\": \"Xw/0pXpUurY35\",\n        \"created_at\": \"1995-10-07T03:01:11.504Z\",\n        \"updated_at\": \"1982-12-12T21:43:33.881Z\"\n      }\n    ],\n    \"next_cursor\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c178fbd9-8fc5-43c1-a034-1198f4ac20e5",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "tag",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ef78f182-cf27-42a1-ad6d-16c7e54a47db",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "tag",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "5241"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ff4bc14c-6ace-432a-916c-0aef651e40c3",
+          "name": "Get a function template",
+          "request": {
+            "name": "Get a function template",
+            "description": {
+              "content": "Fetch one approved Function template by slug, including its manifest snapshot and README. The stored source files used for install are not returned.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) Template slug from the template manifest."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "1fb29002-4819-4920-b909-af575ce2d0fa",
+              "name": "Template registry detail.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"5f5a9411-f3d0-5e78-9308-1a4a5fb0fa37\",\n    \"slug\": \"fz7u_xn0lgn-y_cxwo5nyvy-\",\n    \"title\": \"string\",\n    \"summary\": \"string\",\n    \"author\": {\n      \"id\": \"string\",\n      \"name\": \"string\",\n      \"url\": \"http://eokPbCW.ohlnafoHvCmmPwrXABL8.bfy6T,f-ZtvHxi2yPUqC-Wz.z\"\n    },\n    \"tags\": [\n      \"string\",\n      \"string\"\n    ],\n    \"verified\": true,\n    \"install_count\": 3813,\n    \"github_repo\": \"8zLBHMf/4GX\",\n    \"created_at\": \"1974-06-01T00:03:03.809Z\",\n    \"updated_at\": \"1963-03-26T15:55:20.395Z\",\n    \"description\": \"string\",\n    \"github_sha\": \"string\",\n    \"github_path\": \"string\",\n    \"manifest\": {\n      \"schemaVersion\": 6884,\n      \"id\": \"fk\",\n      \"title\": \"string\",\n      \"summary\": \"string\",\n      \"author\": {\n        \"id\": \"string\",\n        \"name\": \"string\",\n        \"url\": \"https://OMIErUJwtIjWDPeYU.qzX8PtwHtxM9vGkNHGGWECWtYK,t\"\n      },\n      \"source\": {\n        \"mode\": \"string\",\n        \"dir\": \".\"\n      },\n      \"install\": {\n        \"mode\": \"scaffold\",\n        \"reason\": \"\"\n      },\n      \"description\": \"string\",\n      \"setup\": {\n        \"agent\": \"string\",\n        \"prompt\": \"string\",\n        \"produces\": []\n      },\n      \"postInstall\": \"string\"\n    },\n    \"readme\": \"string\",\n    \"status\": \"approved\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5aa55211-9ad6-46b6-b6eb-fd9945c767b2",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b03a7a49-87ea-4602-a43d-847e81c4020e",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7a5bd969-9650-4957-ba27-79d313f2c2ad",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "5241"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "73c96e69-55a8-4ee1-a714-55c1aed03878",
+          "name": "Install a function template",
+          "request": {
+            "name": "Install a function template",
+            "description": {
+              "content": "Start a one-shot deploy of an approved deploy-mode Function template. The response returns an install record immediately; poll `GET /templates/installs/{id}` for progress.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                ":id",
+                "install"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) Template slug from the template manifest."
+                }
+              ]
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\",\n    \"key_2\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "8a9fa599-488e-47e8-aa7e-f3cc0d3f510a",
+              "name": "Template install started.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"dbc0c15c-70b0-730a-c90c-9eee49039420\",\n    \"template_slug\": \"fcg_s7b2pe9whg-2_vd8j7e5x\",\n    \"state\": \"test_failed\",\n    \"address\": \"string\",\n    \"function_id\": \"7b3eb6f0-4e82-94a7-92f4-3817ea8437af\",\n    \"error\": \"string\",\n    \"created_at\": \"1997-09-07T16:12:44.866Z\",\n    \"updated_at\": \"1960-07-01T08:20:05.543Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b74c8917-c3b4-4bd4-8e3e-da37295b2a09",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8ac80e81-4972-42f5-a311-d21e2cb51d6e",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8b701de7-3fc7-4176-82f9-6ef16962baab",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "14bd03ec-2273-40f7-a57d-2ccd941428d0",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0333dc63-33e8-4561-a9cb-3a6440a97f42",
+              "name": "The request conflicts with the current state of the resource",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"conflict\",\n    \"message\": \"settlement already in progress\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "78d2ae53-1fbc-48a5-bce2-e84495eeb266",
+              "name": "The request was well-formed but could not be processed. For Payments\nthis covers a missing payout address, a failed payment verification, a\nspend-policy decline, or an expired challenge; `error.code` distinguishes\nthem.\n",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"payment_declined\",\n    \"message\": \"payment exceeds the per-payment cap\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fa25740a-3853-4dd9-9375-297632856e81",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    ":id",
+                    "install"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Template slug from the template manifest."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"<string>\",\n  \"domain\": \"<string>\",\n  \"variables\": {\n    \"key_0\": \"<string>\",\n    \"key_1\": \"<string>\"\n  },\n  \"secrets\": {\n    \"key_0\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "5241"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "801577c5-1d07-48ac-af6f-da39c779a1dd",
+          "name": "Get template install status",
+          "request": {
+            "name": "Get template install status",
+            "description": {
+              "content": "Fetch the current state of a template install. Reads may advance the self-test phase when a reply effect has been observed.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                "installs",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) Template install UUID."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "ed5a5c0b-f014-4db1-a20b-2b5fc71b4ad9",
+              "name": "Current template install status.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "installs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Template install UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"dbc0c15c-70b0-730a-c90c-9eee49039420\",\n    \"template_slug\": \"fcg_s7b2pe9whg-2_vd8j7e5x\",\n    \"state\": \"test_failed\",\n    \"address\": \"string\",\n    \"function_id\": \"7b3eb6f0-4e82-94a7-92f4-3817ea8437af\",\n    \"error\": \"string\",\n    \"created_at\": \"1997-09-07T16:12:44.866Z\",\n    \"updated_at\": \"1960-07-01T08:20:05.543Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d7bc7da8-32ed-42f2-a085-b67d28566159",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "installs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Template install UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "87ae74b8-26d6-4454-8ef8-624b6304a784",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "installs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Template install UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "70b83d2c-ee12-484e-a753-651fb9d73ef6",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "installs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Template install UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "81bef936-438f-454b-afab-22ce3113f7e4",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "installs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Template install UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "bc74b5ec-9929-4ba1-bc4a-410411b9dc13",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "installs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Template install UUID."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "5241"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.primitive.dev/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "0d61b287-1785-458a-9068-24e0b57ba21b",
+    "name": "Primitive Account Templates API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump.\n\nContact Support:\n Name: Primitive",
+      "type": "text/plain"
+    }
+  }
+}

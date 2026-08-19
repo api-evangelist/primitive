@@ -1,0 +1,100 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Webhook Deliveries API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Webhook Deliveries",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List webhook deliveries",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/webhooks/deliveries",
+            "params": [
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Pagination cursor from a previous response's `meta.cursor` field.\nFormat: `{ISO-datetime}|{id}`\n"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of results per page"
+              },
+              {
+                "name": "email_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by email ID"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter by delivery status"
+              },
+              {
+                "name": "date_from",
+                "value": "",
+                "type": "query",
+                "description": "Filter deliveries created on or after this timestamp"
+              },
+              {
+                "name": "date_to",
+                "value": "",
+                "type": "query",
+                "description": "Filter deliveries created on or before this timestamp"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns a paginated list of webhook delivery attempts. Each delivery\nincludes a nested `email` object with sender, recipient, and subject.\n"
+        },
+        {
+          "info": {
+            "name": "Replay a webhook delivery",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/webhooks/deliveries/:id/replay",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Delivery ID (numeric)"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Re-sends the stored webhook payload from a previous delivery attempt.\nIf the original endpoint is still active, it is targeted. If the\noriginal endpoint was deleted, the oldest active endpoint is used.\nDeactivated endpoints cannot be replayed to. Rate limited per-org,\nsharing an org-wide budget with email replays.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,148 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account CLI API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "CLI",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Start CLI browser login",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/cli/login/start",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Starts a browser-assisted CLI login session. The response includes a\ndevice code for polling and a user code that the user approves in the\nbrowser. This endpoint does not require an API key.\n"
+        },
+        {
+          "info": {
+            "name": "Poll CLI browser login",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/cli/login/poll",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Polls a CLI login session until the browser approval either succeeds,\nis denied, expires, or is polled too quickly. The OAuth token set is\ncreated only after approval and is returned exactly once.\n"
+        },
+        {
+          "info": {
+            "name": "Start CLI account signup",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/cli/signup/start",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Starts a terminal-native CLI signup. `signup_code` is optional;\nomit it to sign up without one. The API creates a pending signup\nsession, sends an email verification code, and returns an opaque\nsignup token used by the resend and verify steps. This endpoint\ndoes not require an API key.\n"
+        },
+        {
+          "info": {
+            "name": "Resend CLI signup verification code",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/cli/signup/resend",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Sends a new email verification code for a pending CLI signup session.\nThis endpoint does not require an API key.\n"
+        },
+        {
+          "info": {
+            "name": "Verify CLI signup and create OAuth session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/cli/signup/verify",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Verifies the email code for a CLI signup session and creates the\naccount. When the session was started with a `signup_code`, the\nreserved code is redeemed; sessions started without a code skip\nthe redemption step. Either way an org-scoped OAuth CLI session\nis created and the token set is returned exactly once. This\nendpoint does not require an API key.\n"
+        },
+        {
+          "info": {
+            "name": "Revoke the current CLI OAuth session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/cli/logout",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Revokes the OAuth grant used to authenticate the request. API-key\nauthenticated legacy logout requests succeed without deleting server API\nkeys so old local CLI state can be cleared safely.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

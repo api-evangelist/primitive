@@ -19,40 +19,83 @@ server:
   - name: Smithery
     url: https://smithery.ai/servers/primitivedotdev/primitive
   app_ui:
-    note: Email-reading tools carry a ui:// MCP App widget (ui://widget/primitive-email-v1.html)
-      served as text/html;profile=mcp-app via the OpenAI Apps SDK; renders the inbox inside ChatGPT/Claude.
+    note: Email-reading tools carry a ui:// MCP App widget (ui://widget/primitive-email-v1.html) served
+      as text/html;profile=mcp-app via the OpenAI Apps SDK; renders the inbox inside ChatGPT/Claude.
 docs_server:
   name: primitive docs MCP (public, read-only, no auth)
   transport: streamable-http
   url: https://www.primitive.dev/mcp/docs
-  tools: [searchDocs, readDoc]
+  tools:
+  - searchDocs
+  - readDoc
 tools:
-- {name: listDomains, description: List all inbound domains for the organization.}
-- {name: addDomain, description: Claim a new domain and receive DNS records to publish.}
-- {name: verifyDomain, description: Check DNS records for a domain claim (MX, TXT, SPF, DKIM, DMARC).}
-- {name: downloadDomainZoneFile, description: Download a BIND-format DNS zone file for a domain.}
-- {name: getAccount, description: Authenticated Primitive account summary.}
-- {name: getInboxStatus, description: Whether inbound email is ready or needs setup.}
-- {name: getOutboundStatus, description: Lists this account's verified outbound (sendable) identities.}
-- {name: listEmails, description: Browse inbound emails received at verified domains.}
-- {name: searchEmails, description: Find inbound emails with structured filters.}
-- {name: getEmail, description: Full details for one inbound email ID.}
-- {name: replyToEmail, description: Reply to a specific inbound email.}
-- {name: sendEmail, description: Send a real outbound email.}
-- {name: sendEmailDemo, description: Send a SIMULATED email with no account required.}
-- {name: listSentEmails, description: List outbound emails sent by this org.}
-- {name: getSentEmail, description: Full record for a single sent email by id.}
-- {name: cancelScheduledSend, description: Cancel a still-scheduled send before it dispatches.}
-- {name: awaitReply, description: Get the threaded reply to a sent email.}
-- {name: getConversation, description: Full conversation an inbound email belongs to.}
-- {name: getThread, description: Conversation thread by id with all messages.}
-- {name: downloadEmailAttachments, description: Download all attachments for an inbound email.}
-- {name: listEndpoints, description: List active webhook endpoints for the organization.}
-- {name: createEndpoint, description: Create a webhook endpoint to receive email.received events.}
-- {name: deleteEndpoint, description: Soft-delete a webhook endpoint.}
-- {name: testEndpoint, description: Send a sample email.received event to a webhook endpoint.}
-- {name: listFilters, description: List whitelist and blocklist filter rules.}
-- {name: createFilter, description: Create a whitelist or blocklist filter rule.}
-- {name: deleteFilter, description: Delete a filter rule.}
-- {name: listWebhookDeliveries, description: List webhook delivery attempts with pagination.}
-- {name: replayWebhookDelivery, description: Re-send a stored webhook payload from a previous delivery.}
+- name: listDomains
+  description: List all inbound domains for the organization.
+- name: addDomain
+  description: Claim a new domain and receive DNS records to publish.
+- name: verifyDomain
+  description: Check DNS records for a domain claim (MX
+  TXT: null
+  SPF: null
+  DKIM: null
+  DMARC).: null
+- name: downloadDomainZoneFile
+  description: Download a BIND-format DNS zone file for a domain.
+- name: getAccount
+  description: Authenticated Primitive account summary.
+- name: getInboxStatus
+  description: Whether inbound email is ready or needs setup.
+- name: getOutboundStatus
+  description: Lists this account's verified outbound (sendable) identities.
+- name: listEmails
+  description: Browse inbound emails received at verified domains.
+- name: searchEmails
+  description: Find inbound emails with structured filters.
+- name: getEmail
+  description: Full details for one inbound email ID.
+- name: replyToEmail
+  description: Reply to a specific inbound email.
+- name: sendEmail
+  description: Send a real outbound email.
+- name: sendEmailDemo
+  description: Send a SIMULATED email with no account required.
+- name: listSentEmails
+  description: List outbound emails sent by this org.
+- name: getSentEmail
+  description: Full record for a single sent email by id.
+- name: cancelScheduledSend
+  description: Cancel a still-scheduled send before it dispatches.
+- name: awaitReply
+  description: Get the threaded reply to a sent email.
+- name: getConversation
+  description: Full conversation an inbound email belongs to.
+- name: getThread
+  description: Conversation thread by id with all messages.
+- name: downloadEmailAttachments
+  description: Download all attachments for an inbound email.
+- name: listEndpoints
+  description: List active webhook endpoints for the organization.
+- name: createEndpoint
+  description: Create a webhook endpoint to receive email.received events.
+- name: deleteEndpoint
+  description: Soft-delete a webhook endpoint.
+- name: testEndpoint
+  description: Send a sample email.received event to a webhook endpoint.
+- name: listFilters
+  description: List whitelist and blocklist filter rules.
+- name: createFilter
+  description: Create a whitelist or blocklist filter rule.
+- name: deleteFilter
+  description: Delete a filter rule.
+- name: listWebhookDeliveries
+  description: List webhook delivery attempts with pagination.
+- name: replayWebhookDelivery
+  description: Re-send a stored webhook payload from a previous delivery.
+deployment:
+  mode: remote
+  endpoint: https://www.primitive.dev/mcp
+  verified: probed
+  probe: live
+  tools: 29
+  checked: '2026-08-12'
+  source: catalog MCP census

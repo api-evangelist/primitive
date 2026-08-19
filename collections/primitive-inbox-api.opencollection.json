@@ -1,0 +1,33 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Inbox API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Inbox",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get inbound inbox readiness",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/inbox/status",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns one consolidated view of domain verification, webhook/function processing routes, deployed functions, and recent inbound mail. Agents should use this before guiding users through inbound email setup."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

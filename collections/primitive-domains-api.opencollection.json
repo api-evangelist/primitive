@@ -1,0 +1,166 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Domains API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Domains",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List all domains",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/domains",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns all verified and unverified domains for your organization,\nsorted by creation date (newest first). Each domain includes a\n`verified` boolean to distinguish between the two states.\n"
+        },
+        {
+          "info": {
+            "name": "Claim a new domain",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/domains",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Creates an unverified domain claim and returns the exact\nDNS records to publish in `dns_records`. Publish those\nrecords before calling the verify endpoint. To give users\nan importable DNS file, call `downloadDomainZoneFile` or run\n`primitive domains zone-file --id <domain-id>`.\n"
+        },
+        {
+          "info": {
+            "name": "Update domain settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.primitive.dev/v1/domains/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Update a verified domain's settings. Only verified domains can be\nupdated. Per-domain spam thresholds require a Pro plan.\n"
+        },
+        {
+          "info": {
+            "name": "Delete a domain",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.primitive.dev/v1/domains/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Remove a domain from the organization. Inbound mail for its addresses stops being accepted."
+        },
+        {
+          "info": {
+            "name": "Verify domain ownership",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/domains/:id/verify",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Checks DNS records required for inbound routing, ownership,\nand outbound authentication: MX, ownership TXT, SPF, DKIM,\nDMARC, and TLS-RPT.\nOn success, the domain is promoted from unverified to verified.\nOn failure, returns which checks passed and which failed,\nplus the exact DNS records still expected. To give users\nan importable DNS file for missing records, call\n`downloadDomainZoneFile` or run\n`primitive domains zone-file --id <domain-id>`.\n"
+        },
+        {
+          "info": {
+            "name": "Download domain DNS zone file",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/domains/:id/zone-file",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              },
+              {
+                "name": "outbound_only",
+                "value": "",
+                "type": "query",
+                "description": "When true, include only outbound DNS records. Verified domains default to outbound-only; pending claims default to all required records."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Downloads a BIND-format DNS zone file containing the DNS records required for a domain claim. Agents should offer this after `addDomain` when users want to import DNS records instead of copying each record manually."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

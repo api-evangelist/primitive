@@ -1,0 +1,69 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Discovery API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Discovery",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List the unauthenticated API endpoints",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/discovery"
+          },
+          "docs": "Public, no-auth entry point for arriving agents. Returns the API base URL, the authentication lifecycle (register/claim/revoke), and the list of operations callable without credentials — the agent/CLI signup + login flows and the no-account `POST /send-mail/demo`. Fetch this first to discover how to obtain credentials, then call the authenticated operations with `Authorization: Bearer prim_<key>`."
+        },
+        {
+          "info": {
+            "name": "Ask about Primitive — NLWeb query (no authentication)",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/ask",
+            "params": [
+              {
+                "name": "q",
+                "value": "",
+                "type": "query",
+                "description": "Natural-language question about Primitive."
+              }
+            ]
+          },
+          "docs": "Microsoft NLWeb natural-language query endpoint. Returns structured JSON describing Primitive. **No credentials required.** Pass the question as `?q=...`; send `Accept: text/event-stream` for an SSE stream."
+        },
+        {
+          "info": {
+            "name": "Ask about Primitive — NLWeb query (no authentication)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/ask",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Microsoft NLWeb natural-language query endpoint. POST `{ \"q\": \"...\" }`. **No credentials required.** Set `prefer.streaming: true` or `Accept: text/event-stream` for an SSE stream."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

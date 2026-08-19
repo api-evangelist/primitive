@@ -1,0 +1,1735 @@
+{
+  "item": [
+    {
+      "id": "c73db5ec-43dc-4df0-b000-a7c7966feeb1",
+      "name": "Routes",
+      "description": {
+        "content": "Recipient routing: route inbound mail to a single destination per recipient\naddress. Rules bind an address pattern (exact or wildcard) to an endpoint;\n`function_id` routes an address to a function, minting its route-target\nendpoint.\n",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "d24b96d2-c090-415e-a1c9-7d08f0c0e978",
+          "name": "List recipient routes",
+          "request": {
+            "name": "List recipient routes",
+            "description": {
+              "content": "Returns the org's recipient routing rules in evaluation order. Each rule\nbinds a recipient address pattern to one endpoint; inbound mail resolves\nto a single destination at delivery time.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "routes"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "9790e221-b5b7-4d0a-8f5d-5fba339d894c",
+              "name": "List of routes",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"735974ba-81a2-cf06-d826-f5965fa4ff20\",\n      \"org_id\": \"d1b28d9c-51db-ae63-4ad2-69ac743a063c\",\n      \"domain_id\": \"e3651aab-c221-1fe8-ffb0-b0ffff11bd8f\",\n      \"match_type\": \"exact\",\n      \"pattern\": \"string\",\n      \"pattern_norm\": \"string\",\n      \"endpoint_id\": \"4c337a9b-5177-19ce-7ff9-ae54196f429e\",\n      \"priority\": 5163,\n      \"enabled\": false,\n      \"match_count\": \"string\",\n      \"last_matched_at\": \"1955-09-27T02:28:43.540Z\",\n      \"created_at\": \"2024-04-26T12:58:23.278Z\"\n    },\n    {\n      \"id\": \"525375cf-db8a-b7ee-a623-6cc5440966ee\",\n      \"org_id\": \"ccaec21c-1f40-283b-f3dc-ce8437dbdde9\",\n      \"domain_id\": \"d78c9650-71f8-d7c8-c1a0-40add8b8edd3\",\n      \"match_type\": \"exact\",\n      \"pattern\": \"string\",\n      \"pattern_norm\": \"string\",\n      \"endpoint_id\": \"b5021c6d-e428-13e8-db4c-25800c3f0d8b\",\n      \"priority\": 3361,\n      \"enabled\": true,\n      \"match_count\": \"string\",\n      \"last_matched_at\": \"1996-08-11T22:51:17.552Z\",\n      \"created_at\": \"2019-07-25T16:23:48.094Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "dd6dbde0-9b8a-4da2-812f-ebc93879e3a1",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "633f0dcf-ee41-479e-afc4-9caddb0d10d5",
+          "name": "Create a recipient route",
+          "request": {
+            "name": "Create a recipient route",
+            "description": {
+              "content": "Binds a recipient pattern to a destination. Provide exactly one of\n`endpoint_id` (an existing endpoint) or `function_id`. With `function_id`,\na dedicated route-target endpoint is minted for that function in the same\ntransaction, enabling per-address function routing (e.g.\n`alice@acme.com -> functionA`).\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "routes"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"function_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "9394f516-945e-44ae-8b52-739dfcdddee6",
+              "name": "Route created",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"function_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"e5abc5ac-07d9-6602-9d4a-3b8a0e0ca75c\",\n    \"org_id\": \"0a594b71-ad3d-d5b9-02b3-8812074da487\",\n    \"domain_id\": \"e380c16f-4023-fdba-5a07-a58cb8b637f6\",\n    \"match_type\": \"regex\",\n    \"pattern\": \"string\",\n    \"pattern_norm\": \"string\",\n    \"endpoint_id\": \"31d78de4-bd20-f3b9-8789-bee2dffee6ef\",\n    \"priority\": 1094,\n    \"enabled\": true,\n    \"match_count\": \"string\",\n    \"last_matched_at\": \"1976-01-30T19:07:30.225Z\",\n    \"created_at\": \"2006-04-27T20:50:49.235Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "abd1787f-2c4d-4c83-89e5-e2f6d0844f24",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"function_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a0708525-38a3-430b-82b2-9266a1cae876",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"function_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b7148880-26d6-465d-8728-f9132bdc64bb",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"function_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "52ea29e6-c9fa-4bad-93a6-8474a1c43d02",
+              "name": "The request conflicts with the current state of the resource",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"function_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"conflict\",\n    \"message\": \"settlement already in progress\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "94de1f37-3858-493a-a39f-a6cc7f25bba3",
+          "name": "Reorder recipient routes",
+          "request": {
+            "name": "Reorder recipient routes",
+            "description": {
+              "content": "Update the priority of one or more routes in a single call.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "routes",
+                "reorder"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"updates\": [\n    {\n      \"id\": \"<uuid>\",\n      \"priority\": \"<integer>\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "cd5f8852-8dc7-4be8-bdc8-49144cea4fea",
+              "name": "Updated route list",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    "reorder"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"updates\": [\n    {\n      \"id\": \"<uuid>\",\n      \"priority\": \"<integer>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"735974ba-81a2-cf06-d826-f5965fa4ff20\",\n      \"org_id\": \"d1b28d9c-51db-ae63-4ad2-69ac743a063c\",\n      \"domain_id\": \"e3651aab-c221-1fe8-ffb0-b0ffff11bd8f\",\n      \"match_type\": \"exact\",\n      \"pattern\": \"string\",\n      \"pattern_norm\": \"string\",\n      \"endpoint_id\": \"4c337a9b-5177-19ce-7ff9-ae54196f429e\",\n      \"priority\": 5163,\n      \"enabled\": false,\n      \"match_count\": \"string\",\n      \"last_matched_at\": \"1955-09-27T02:28:43.540Z\",\n      \"created_at\": \"2024-04-26T12:58:23.278Z\"\n    },\n    {\n      \"id\": \"525375cf-db8a-b7ee-a623-6cc5440966ee\",\n      \"org_id\": \"ccaec21c-1f40-283b-f3dc-ce8437dbdde9\",\n      \"domain_id\": \"d78c9650-71f8-d7c8-c1a0-40add8b8edd3\",\n      \"match_type\": \"exact\",\n      \"pattern\": \"string\",\n      \"pattern_norm\": \"string\",\n      \"endpoint_id\": \"b5021c6d-e428-13e8-db4c-25800c3f0d8b\",\n      \"priority\": 3361,\n      \"enabled\": true,\n      \"match_count\": \"string\",\n      \"last_matched_at\": \"1996-08-11T22:51:17.552Z\",\n      \"created_at\": \"2019-07-25T16:23:48.094Z\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fe7e3ff7-319b-4ff5-8f68-3bb0d36ee5f4",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    "reorder"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"updates\": [\n    {\n      \"id\": \"<uuid>\",\n      \"priority\": \"<integer>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7df4cb5a-045d-439e-9785-ec801acbf5f9",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    "reorder"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"updates\": [\n    {\n      \"id\": \"<uuid>\",\n      \"priority\": \"<integer>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "be6d0bd3-8eb6-4416-8ddd-f99cf887dbb5",
+          "name": "Simulate routing for a recipient",
+          "request": {
+            "name": "Simulate routing for a recipient",
+            "description": {
+              "content": "Resolves where an inbound email to `recipient` would be delivered, with a\ntrace of every rule evaluated and why. Read-only; creates nothing.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "routes",
+                "simulate"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient\": \"<string>\",\n  \"event_type\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "75cb8214-af87-44d4-ad5f-874b5656119f",
+              "name": "Routing decision",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    "simulate"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"recipient\": \"<string>\",\n  \"event_type\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"outcome\": \"matched\",\n    \"recipient\": \"string\",\n    \"endpoint_id\": \"string\",\n    \"matched_route_id\": \"string\",\n    \"matched_tier\": \"regex\",\n    \"matched_pattern\": \"string\",\n    \"default_scope\": \"null\",\n    \"evaluated\": [\n      {\n        \"route_id\": \"string\",\n        \"tier\": \"wildcard\",\n        \"pattern\": \"string\",\n        \"result\": \"miss\",\n        \"reason\": \"string\"\n      },\n      {\n        \"route_id\": \"string\",\n        \"tier\": \"exact\",\n        \"pattern\": \"string\",\n        \"result\": \"skipped\",\n        \"reason\": \"string\"\n      }\n    ],\n    \"truncated\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0c2c9fca-98be-4bcb-8311-b7929a332ffe",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    "simulate"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"recipient\": \"<string>\",\n  \"event_type\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ebbf060d-e394-4175-820f-bface349b62e",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    "simulate"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"recipient\": \"<string>\",\n  \"event_type\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "49d9f4a8-a1e6-43ff-9ec1-ef7cca752b9c",
+          "name": "Update a recipient route",
+          "request": {
+            "name": "Update a recipient route",
+            "description": {
+              "content": "Update a recipient route",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "routes",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) Resource UUID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "d96360a7-5386-4724-9a45-19adec4773d2",
+              "name": "Updated route",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"e5abc5ac-07d9-6602-9d4a-3b8a0e0ca75c\",\n    \"org_id\": \"0a594b71-ad3d-d5b9-02b3-8812074da487\",\n    \"domain_id\": \"e380c16f-4023-fdba-5a07-a58cb8b637f6\",\n    \"match_type\": \"regex\",\n    \"pattern\": \"string\",\n    \"pattern_norm\": \"string\",\n    \"endpoint_id\": \"31d78de4-bd20-f3b9-8789-bee2dffee6ef\",\n    \"priority\": 1094,\n    \"enabled\": true,\n    \"match_count\": \"string\",\n    \"last_matched_at\": \"1976-01-30T19:07:30.225Z\",\n    \"created_at\": \"2006-04-27T20:50:49.235Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e4a1b6fb-e64c-4856-a463-4a17e94742c3",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "114431a5-75ae-445b-9ec9-8875c1745ef2",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "785ba6eb-f18c-4612-b096-f2c93dbefe16",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "544d3a40-5d87-49b2-a507-343b006ebdca",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d6a14844-8079-4b9a-b266-c3d51359c140",
+              "name": "The request conflicts with the current state of the resource",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"match_type\": \"<string>\",\n  \"pattern\": \"<string>\",\n  \"endpoint_id\": \"<uuid>\",\n  \"domain_id\": \"<string,null-uuid>\",\n  \"priority\": \"<integer>\",\n  \"enabled\": \"<boolean>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"conflict\",\n    \"message\": \"settlement already in progress\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "dd0a1818-e3b8-4888-8ee8-e25af0c4340d",
+          "name": "Delete a recipient route",
+          "request": {
+            "name": "Delete a recipient route",
+            "description": {
+              "content": "Delete a recipient route",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "routes",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) Resource UUID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "4a22fddc-e786-46e8-8adf-e161df6a40e5",
+              "name": "Resource deleted",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"deleted\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0f06b958-d278-41e7-8cd6-0580ae3ec3a5",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c11e46d8-5f60-4ecd-a492-ee8c7dedccee",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "routes",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.primitive.dev/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "aa6d9da6-2a2d-4f97-8e53-88864e01db4d",
+    "name": "Primitive Account Routes API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump.\n\nContact Support:\n Name: Primitive",
+      "type": "text/plain"
+    }
+  }
+}

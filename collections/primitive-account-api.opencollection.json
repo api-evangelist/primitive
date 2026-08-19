@@ -1,0 +1,103 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Account",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get account info",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/account",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Retrieve the authenticated organization's account: organization identity, current plan, usage, and onboarding state."
+        },
+        {
+          "info": {
+            "name": "Update account settings",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.primitive.dev/v1/account",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Update the mutable account settings (such as display name and notification preferences) for the authenticated organization."
+        },
+        {
+          "info": {
+            "name": "Get storage usage",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/account/storage",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Return stored-email storage usage and the remaining quota for the authenticated organization."
+        },
+        {
+          "info": {
+            "name": "Get webhook signing secret",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/account/webhook-secret",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns the webhook signing secret for your account. If no\nsecret exists yet, one is generated automatically on first\naccess.\n\nSigning is account-scoped, not per-endpoint. Every webhook\ndelivery from any of your registered endpoints is signed\nwith this single secret. Rotate via\n`POST /account/webhook-secret/rotate`.\n\n**Secret format**: the returned string looks base64-shaped\n(e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`) but is NOT base64.\nUse it AS-IS as a UTF-8 string when computing HMAC over a\ndelive"
+        },
+        {
+          "info": {
+            "name": "Rotate webhook signing secret",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/account/webhook-secret/rotate",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Generates a new webhook signing secret, replacing the current one.\nRate limited to once per 60 minutes.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

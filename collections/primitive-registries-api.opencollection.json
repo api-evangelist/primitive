@@ -1,0 +1,357 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Registries API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Registries",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List the registries you own",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/registries",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "List the registries you own"
+        },
+        {
+          "info": {
+            "name": "Create a registry",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/registries",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Create a registry"
+        },
+        {
+          "info": {
+            "name": "Get a public registry's metadata",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/registries/:slug",
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug"
+              }
+            ]
+          },
+          "docs": "Get a public registry's metadata"
+        },
+        {
+          "info": {
+            "name": "Update a registry you own",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.primitive.dev/v1/registries/:slug",
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Update a registry you own"
+        },
+        {
+          "info": {
+            "name": "Delete a registry you own",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.primitive.dev/v1/registries/:slug",
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Removes the registry from discovery and frees its slug for re-creation."
+        },
+        {
+          "info": {
+            "name": "List agents in a registry",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/registries/:slug/agents",
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of items to return (1-200)."
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "The address of the last agent from the previous page."
+              }
+            ]
+          },
+          "docs": "List agents in a registry"
+        },
+        {
+          "info": {
+            "name": "Publish an agent into a registry",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/registries/:slug/agents",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Publish an agent into a registry"
+        },
+        {
+          "info": {
+            "name": "Resolve a registry handle to its agent",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/registries/:slug/agents/:handle",
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug."
+              },
+              {
+                "name": "handle",
+                "value": "",
+                "type": "path",
+                "description": "The registry-scoped handle the agent is published under."
+              }
+            ]
+          },
+          "docs": "Resolve a registry handle to its agent"
+        },
+        {
+          "info": {
+            "name": "Unpublish an agent from a registry",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.primitive.dev/v1/registries/:slug/agents/:handle",
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug."
+              },
+              {
+                "name": "handle",
+                "value": "",
+                "type": "path",
+                "description": "The registry-scoped handle the agent is published under."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Unpublish an agent from a registry"
+        },
+        {
+          "info": {
+            "name": "List pending publication requests",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/registries/:slug/requests",
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of items to return (1-200)."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "List pending publication requests"
+        },
+        {
+          "info": {
+            "name": "Approve or reject a publication request",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/registries/:slug/requests/:id",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "slug",
+                "value": "",
+                "type": "path",
+                "description": "The registry slug."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Approve or reject a publication request"
+        },
+        {
+          "info": {
+            "name": "Define an agent identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agents",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Define an agent identity"
+        },
+        {
+          "info": {
+            "name": "Get an agent's public profile by address",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/agents/:address",
+            "params": [
+              {
+                "name": "address",
+                "value": "",
+                "type": "path",
+                "description": "The agent's email address (URL-encoded)."
+              }
+            ]
+          },
+          "docs": "Get an agent's public profile by address"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

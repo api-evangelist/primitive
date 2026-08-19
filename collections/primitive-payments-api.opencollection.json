@@ -1,0 +1,213 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Payments API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Payments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List payout addresses",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/x402/payout-addresses",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "List your org's registered payout addresses, newest first."
+        },
+        {
+          "info": {
+            "name": "Register a payout address",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/x402/payout-addresses",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Register (or update) the default payout address your org receives x402\npayments at, for a given network. You prove control of the address with\nan org-bound `personal_sign` signature over the message produced by the\nSDK helper `buildPayoutRegistrationMessage`. The org id is taken from your\nauthenticated key, never the body, so a captured signature can't register\nan address under another org. Exactly one default address exists per\n(org, network); registering again replaces it. A payee MUST registe"
+        },
+        {
+          "info": {
+            "name": "Create an email-native payment challenge",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/x402/email-challenges",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Issue an x402 payment challenge over a real email thread (the payee\nside). Unlike `createChallenge` (which mints a synthetic challenge id),\nthis sends the challenge as an email from `from` to `to` and binds the\npayment to that DKIM-authenticated thread. The `pay_to` address and the\ntoken asset are resolved server-side from your registered default payout\naddress for the network, never from the request. The response carries\nthe thread's `interaction_id` plus the `challenge` (the\n`payment_requireme"
+        },
+        {
+          "info": {
+            "name": "Create a payment challenge",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/x402/challenges",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Create an x402 payment challenge (the payee side of a payment). The\n`pay_to` address is resolved server-side from your registered default\npayout address for the network, never from the request. The response\ncarries the `nonce_binding` and `payment_requirements` the payer needs to\nsign; hand the whole challenge object to the payer (for example in an\nemail reply). Amounts are in token base units (USDC has 6 decimals, so\n`\"10000\"` is 0.01 USDC).\n"
+        },
+        {
+          "info": {
+            "name": "Get a payment challenge",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/x402/challenges/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Fetch a challenge you created, to poll its `status` and settlement\nreceipt (`settle_tx`). Scoped to the challenger org that created it.\n"
+        },
+        {
+          "info": {
+            "name": "Pay a payment challenge",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/x402/challenges/:id/pay",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Settle a challenge addressed to your org as payer. The request body\ncarries a signed x402 `PaymentPayload`: an EIP-3009\n`transferWithAuthorization` signed locally with your own key, whose nonce\nis bound to the challenge via the SDK's `deriveEip3009Nonce`. The platform\nverifies every signed field against its own record of the challenge,\napplies your spend policy, and settles on-chain through a facilitator.\nSettlement is non-custodial; Primitive never holds funds. Idempotent:\npaying an already-set"
+        },
+        {
+          "info": {
+            "name": "Get your spend policy",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/x402/spend-policy",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Read your org's outbound spend policy: the kill-switch, per-payment and\nper-day caps, and the payee allowlist. Returns the defaults (no limits,\nnot paused) when no policy has been set.\n"
+        },
+        {
+          "info": {
+            "name": "Update your spend policy",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://api.primitive.dev/v1/x402/spend-policy",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Update your org's spend policy. Applied as a merge: only the fields you\ninclude change, and omitted fields keep their current value, so a partial\nupdate can't silently reset the kill-switch. Send an explicit `null` to\nclear a cap. Caps are in token base units.\n"
+        },
+        {
+          "info": {
+            "name": "List declined payments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/x402/declined-payments",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "The 50 most recent payments your org's spend policy declined, newest\nfirst. Use this to see why an outbound payment was refused (a cap, the\npayee allowlist, or the kill-switch) instead of only reading the\ndashboard.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

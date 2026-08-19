@@ -1,0 +1,202 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Memories API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Memories",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get a memory",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/memories",
+            "headers": [
+              {
+                "name": "x-primitive-function-id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "key",
+                "value": "",
+                "type": "query",
+                "description": "Memory key. Must be at most 512 UTF-8 bytes."
+              },
+              {
+                "name": "scope_type",
+                "value": "",
+                "type": "query",
+                "description": "Explicit scope type. Omit to use automatic scope resolution. Pass `function` with `scope_id=<function-id>`, or `org` with no `scope_id`. Function-authenticated requests cannot override their automatic Function scope."
+              },
+              {
+                "name": "scope_id",
+                "value": "",
+                "type": "query",
+                "description": "Function id UUID when `scope_type=function`. Not valid with `scope_type=org`. Function-authenticated requests may only use their own Function id."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Fetch one active memory by key and scope. Omit scope parameters to use automatic scope resolution. Function-authenticated requests use their own Function id and cannot override it. Function scope uses a function id UUID in `scope_id`."
+        },
+        {
+          "info": {
+            "name": "Set a memory",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://api.primitive.dev/v1/memories",
+            "headers": [
+              {
+                "name": "x-primitive-function-id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Create or update a durable JSON memory under an org or function scope. Function-authenticated requests use their own Function id and cannot override it. If no explicit scope is provided for other credentials, `x-primitive-function-id` is used next, and other requests default to org scope. Function scope uses the function id UUID, not the function name."
+        },
+        {
+          "info": {
+            "name": "Delete a memory",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.primitive.dev/v1/memories",
+            "headers": [
+              {
+                "name": "x-primitive-function-id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "key",
+                "value": "",
+                "type": "query",
+                "description": "Memory key. Must be at most 512 UTF-8 bytes."
+              },
+              {
+                "name": "scope_type",
+                "value": "",
+                "type": "query",
+                "description": "Explicit scope type. Omit to use automatic scope resolution. Pass `function` with `scope_id=<function-id>`, or `org` with no `scope_id`. Function-authenticated requests cannot override their automatic Function scope."
+              },
+              {
+                "name": "scope_id",
+                "value": "",
+                "type": "query",
+                "description": "Function id UUID when `scope_type=function`. Not valid with `scope_type=org`. Function-authenticated requests may only use their own Function id."
+              },
+              {
+                "name": "if_version",
+                "value": "",
+                "type": "query",
+                "description": "Optional compare-and-delete version."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Delete one active memory by key and scope. Function-authenticated requests use their own Function id and cannot override it. Deletes are idempotent without `if_version`; a stale `if_version` returns `memory_conflict`."
+        },
+        {
+          "info": {
+            "name": "Search memories",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/memories/search",
+            "headers": [
+              {
+                "name": "x-primitive-function-id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "prefix",
+                "value": "",
+                "type": "query",
+                "description": "Key prefix to match. Empty string lists all active memories in the selected scope."
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Key cursor from a previous response meta.cursor."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of results per page"
+              },
+              {
+                "name": "include_value",
+                "value": "",
+                "type": "query",
+                "description": "Pass `false` to omit the `value` field and return metadata only."
+              },
+              {
+                "name": "updated_after",
+                "value": "",
+                "type": "query",
+                "description": "Only include memories updated at or after this timestamp."
+              },
+              {
+                "name": "updated_before",
+                "value": "",
+                "type": "query",
+                "description": "Only include memories updated at or before this timestamp."
+              },
+              {
+                "name": "scope_type",
+                "value": "",
+                "type": "query",
+                "description": "Explicit scope type. Omit to use automatic scope resolution. Pass `function` with `scope_id=<function-id>`, or `org` with no `scope_id`. Function-authenticated requests cannot override their automatic Function scope."
+              },
+              {
+                "name": "scope_id",
+                "value": "",
+                "type": "query",
+                "description": "Function id UUID when `scope_type=function`. Not valid with `scope_type=org`. Function-authenticated requests may only use their own Function id."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "List active memories in a scope by lexicographic key prefix. Results are ordered by key ascending. This is prefix search, not free-text search. Function-authenticated requests use their own Function id and cannot override it. Pass `include_value=false` to return metadata only."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

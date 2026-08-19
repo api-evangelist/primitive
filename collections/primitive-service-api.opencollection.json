@@ -1,0 +1,29 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Service API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Service",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Service health check",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/health"
+          },
+          "docs": "Liveness probe for the API. Returns 200 with a small status payload whenever the service is up. Public — no authentication required — so agents, uptime monitors, and load balancers can reach it without a credential."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

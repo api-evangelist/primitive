@@ -1,0 +1,399 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Emails API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Emails",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List inbound emails",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/emails",
+            "params": [
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Pagination cursor from a previous response's `meta.cursor` field.\nFormat: `{ISO-datetime}|{id}`\n"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of results per page"
+              },
+              {
+                "name": "domain_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by domain ID"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter inbound rows by lifecycle status. See `EmailStatus`\nfor what each value means. Note that the webhook delivery\nstate is a SEPARATE lifecycle on the same row; filter by\n`webhook_status` semantics is not currently supported on\nthis endpoint.\n"
+              },
+              {
+                "name": "search",
+                "value": "",
+                "type": "query",
+                "description": "Search subject, sender, and recipient (case-insensitive)"
+              },
+              {
+                "name": "date_from",
+                "value": "",
+                "type": "query",
+                "description": "Filter emails created on or after this timestamp"
+              },
+              {
+                "name": "date_to",
+                "value": "",
+                "type": "query",
+                "description": "Filter emails created on or before this timestamp"
+              },
+              {
+                "name": "since",
+                "value": "",
+                "type": "query",
+                "description": "Forward-tail cursor. Returns rows that became visible AFTER this\ncursor, oldest-first, so a caller can stream new inbound mail by\nre-passing the cursor from each response. Mutually exclusive with\n`cursor` (which pages history newest-first). Pass the `meta.cursor`\nfrom the previous `since` response; an empty page means caught up.\n"
+              },
+              {
+                "name": "wait",
+                "value": "",
+                "type": "query",
+                "description": "Long-poll: hold the request up to this many seconds waiting for new\nmail past `since`, returning as soon as any arrives (or an empty\npage when the wait elapses). Requires `since`. Omitted means no wait\n(returns immediately); the server treats an absent value as 0. NOT\ngiven an OpenAPI `default` on purpose: a default makes some\ngenerators (e.g. openapi-python-client) send `wait=0` on every call,\nwhich then fails the `wait` requires `since` check for plain history\nlistings.\n"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns a paginated list of INBOUND emails received at your\nverified domains. Outbound messages sent via /send-mail are\nnot included; this endpoint is the inbox view, not a\nunified send/receive history.\n\nSupports filtering by domain, status, date range, and\nfree-text search across subject, sender, and recipient\nfields.\n\nFor a compact text-table summary of the most recent N\ninbounds (no filters, no cursor pagination), the CLI ships\n`primitive emails:latest` as a one-line-per-email shortcut.\nIt's "
+        },
+        {
+          "info": {
+            "name": "Search inbound emails",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/emails/search",
+            "params": [
+              {
+                "name": "q",
+                "value": "",
+                "type": "query",
+                "description": "Full-text search DSL query."
+              },
+              {
+                "name": "from",
+                "value": "",
+                "type": "query",
+                "description": "Filter by sender address or sender domain."
+              },
+              {
+                "name": "to",
+                "value": "",
+                "type": "query",
+                "description": "Filter by recipient address or recipient domain."
+              },
+              {
+                "name": "subject",
+                "value": "",
+                "type": "query",
+                "description": "Full-text search restricted to the subject field."
+              },
+              {
+                "name": "body",
+                "value": "",
+                "type": "query",
+                "description": "Full-text search restricted to the parsed text body."
+              },
+              {
+                "name": "domain_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter by domain ID."
+              },
+              {
+                "name": "reply_to_sent_email_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter to inbound emails that are replies to a specific\noutbound send. The value is a `sent_emails.id` (UUID). At\ninbound ingest, Primitive matches the parsed In-Reply-To\nheader (or References as a fallback) against\n`sent_emails.message_id` in the same org and records the\nresolved id on `emails.reply_to_sent_email_id`. This filter\nis the strict-threading lookup behind `primitive chat` and\nany UI that wants to show the inbound reply to a given\nsend. NULL on inbound that isn't a threaded reply to one\nof your sends, so existing emails received before this\ningestion landed will not match.\n"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter by inbound email lifecycle status."
+              },
+              {
+                "name": "date_from",
+                "value": "",
+                "type": "query",
+                "description": "Filter emails received on or after this timestamp."
+              },
+              {
+                "name": "date_to",
+                "value": "",
+                "type": "query",
+                "description": "Filter emails received on or before this timestamp."
+              },
+              {
+                "name": "has_attachment",
+                "value": "",
+                "type": "query",
+                "description": "Filter by whether the email has one or more attachments."
+              },
+              {
+                "name": "spam_score_lt",
+                "value": "",
+                "type": "query",
+                "description": "Filter to emails with spam score below this value."
+              },
+              {
+                "name": "spam_score_gte",
+                "value": "",
+                "type": "query",
+                "description": "Filter to emails with spam score greater than or equal to this value."
+              },
+              {
+                "name": "sort",
+                "value": "",
+                "type": "query",
+                "description": "Sort mode. Defaults to relevance when a text query is present,\notherwise `received_at_desc`.\n"
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Opaque pagination cursor from a previous search response."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of results per page"
+              },
+              {
+                "name": "snippet",
+                "value": "",
+                "type": "query",
+                "description": "Include subject/body highlight snippets when text search is active."
+              },
+              {
+                "name": "include_facets",
+                "value": "",
+                "type": "query",
+                "description": "Include facet counts for sender, domain, status, and attachment presence."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Searches inbound emails with structured filters and optional\nfull-text matching across parsed email fields. This endpoint is\noptimized for filtered inbox views and CLI polling workflows:\ncallers that only need new accepted mail can pass\n`sort=received_at_asc`, `snippet=false`, `include_facets=false`,\nand a `date_from` timestamp.\n\n`q`, `subject`, and `body` use the same English full-text index\nas the web inbox search. Structured filters such as `from`, `to`,\n`domain_id`, status, attachment presen"
+        },
+        {
+          "info": {
+            "name": "Get inbound email by id",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/emails/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns the full record for an inbound email received at one\nof your verified domains, including the parsed text and HTML\nbodies, threading metadata, SMTP envelope detail, webhook\ndelivery state, and a `replies` array for any outbound sends\nrecorded as replies to this inbound.\n\nFor listing inbound emails (with cursor pagination, status\nand date filters, and free-text search), use\n`/emails`. Outbound (sent) email records are NOT returned\nhere; use `/sent-emails/{id}` for those.\n\nThe response carr"
+        },
+        {
+          "info": {
+            "name": "Delete an email",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.primitive.dev/v1/emails/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Permanently delete a received email and its stored content. This cannot be undone."
+        },
+        {
+          "info": {
+            "name": "Download raw email",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/emails/:id/raw",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              },
+              {
+                "name": "token",
+                "value": "",
+                "type": "query",
+                "description": "Signed download token from webhook payload"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Downloads the raw RFC 822 email file (.eml). Authenticates via\na signed download token (provided in webhook payloads) or a\nvalid session.\n"
+        },
+        {
+          "info": {
+            "name": "Download email attachments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/emails/:id/attachments.tar.gz",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              },
+              {
+                "name": "token",
+                "value": "",
+                "type": "query",
+                "description": "Signed download token from webhook payload"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Downloads all attachments as a gzip-compressed tar archive.\nAuthenticates via a signed download token (provided in webhook\npayloads) or a valid session.\n"
+        },
+        {
+          "info": {
+            "name": "Replay email webhooks",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/emails/:id/replay",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Re-delivers the webhook payload for this email to all active\nendpoints matching the email's domain. Rate limited per-email\n(short cooldown between successive replays of the same email)\nand per-org (burst + sustained windows), sharing an org-wide\nbudget with delivery replays.\n"
+        },
+        {
+          "info": {
+            "name": "Discard email content",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/emails/:id/discard-content",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Permanently deletes the email's raw bytes, parsed body (text + HTML),\nand attachments while preserving metadata (sender, recipient,\nsubject, timestamps, hashes, attachment manifest) for audit logs.\nIdempotent: a second call returns success with\n`already_discarded: true` and does no work.\n\n**Gated** on the customer's discard-content opt-in (managed in the\ndashboard at Settings > Webhooks). When the toggle is off, this\nendpoint returns `403` with code `discard_not_enabled` and a\nmessage pointing t"
+        },
+        {
+          "info": {
+            "name": "Get the conversation an email belongs to",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/emails/:id/conversation",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns the full conversation the given inbound email belongs\nto, as ordered, ready-to-prompt turns WITH bodies. It resolves\nthe thread from the email and returns every message oldest-first,\nso an agent that received an email can pass `messages` straight\nto a chat model in one call instead of walking `/threads/{id}`\nplus `/emails/{id}` and `/sent-emails/{id}` per message.\n\nEach message carries a `direction` (`inbound` | `outbound`) and a\nderived `role`: `inbound` -> `user`, `outbound` -> `assist"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

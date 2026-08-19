@@ -1,0 +1,292 @@
+{
+  "item": [
+    {
+      "id": "566e9920-4094-4d17-8cbd-5b47cfb063d4",
+      "name": "Discovery",
+      "description": {
+        "content": "Unauthenticated entry point that lists the API base URL, how to obtain credentials, and the operations callable without a token.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "9400bb91-c282-423b-9fe9-7cada0c6c957",
+          "name": "List the unauthenticated API endpoints",
+          "request": {
+            "name": "List the unauthenticated API endpoints",
+            "description": {
+              "content": "Public, no-auth entry point for arriving agents. Returns the API base URL, the authentication lifecycle (register/claim/revoke), and the list of operations callable without credentials — the agent/CLI signup + login flows and the no-account `POST /send-mail/demo`. Fetch this first to discover how to obtain credentials, then call the authenticated operations with `Authorization: Bearer prim_<key>`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "discovery"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "62babdae-7386-4602-a208-da044b5e36e5",
+              "name": "Discovery document listing the unauthenticated endpoints and how to obtain credentials.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "discovery"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"service\": \"Primitive — email infrastructure for AI agents\",\n  \"description\": \"These endpoints are callable without authentication. Use the signup flows to register an agent identity and obtain credentials, or the demo to exercise the API before you have one. Every other endpoint requires `Authorization: Bearer <token>`.\",\n  \"base_url\": \"https://api.primitive.dev/v1\",\n  \"documentation\": \"https://docs.primitive.dev/docs\",\n  \"openapi\": \"https://www.primitive.dev/openapi.json\",\n  \"authentication\": {\n    \"guide\": \"https://www.primitive.dev/auth.md\",\n    \"register_uri\": \"https://api.primitive.dev/v1/agent/signup/start\",\n    \"claim_uri\": \"https://api.primitive.dev/v1/agent/signup/verify\",\n    \"revocation_uri\": \"https://www.primitive.dev/oauth/revoke\"\n  },\n  \"public_endpoints\": [\n    {\n      \"method\": \"POST\",\n      \"path\": \"/agent/signup/start\",\n      \"url\": \"https://api.primitive.dev/v1/agent/signup/start\",\n      \"summary\": \"Start agent account signup\",\n      \"authentication\": \"none\"\n    },\n    {\n      \"method\": \"POST\",\n      \"path\": \"/send-mail/demo\",\n      \"url\": \"https://api.primitive.dev/v1/send-mail/demo\",\n      \"summary\": \"Try send-mail without authentication (simulation — no mail is sent)\",\n      \"authentication\": \"none\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "11728e8a-3a4e-4653-af4d-0b5aa4e2f506",
+          "name": "Ask about Primitive — NLWeb query (no authentication)",
+          "request": {
+            "name": "Ask about Primitive — NLWeb query (no authentication)",
+            "description": {
+              "content": "Microsoft NLWeb natural-language query endpoint. Returns structured JSON describing Primitive. **No credentials required.** Pass the question as `?q=...`; send `Accept: text/event-stream` for an SSE stream.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "ask"
+              ],
+              "host": [
+                "{{ask-Url}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "q",
+                  "value": "<string>",
+                  "description": "Natural-language question about Primitive."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "f47e8aab-4a94-4bab-85bc-9a0edbd20132",
+              "name": "NLWeb result list describing Primitive capabilities.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "ask"
+                  ],
+                  "host": [
+                    "{{ask-Url}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"_meta\": {\n    \"response_type\": \"string\",\n    \"version\": \"string\",\n    \"query\": \"string\"\n  },\n  \"results\": [\n    {\n      \"@context\": \"string\",\n      \"@type\": \"string\",\n      \"name\": \"string\",\n      \"url\": \"string\",\n      \"description\": \"string\"\n    },\n    {\n      \"@context\": \"string\",\n      \"@type\": \"string\",\n      \"name\": \"string\",\n      \"url\": \"string\",\n      \"description\": \"string\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "302b0ea6-1d09-4139-8aee-49a332918718",
+          "name": "Ask about Primitive — NLWeb query (no authentication)",
+          "request": {
+            "name": "Ask about Primitive — NLWeb query (no authentication)",
+            "description": {
+              "content": "Microsoft NLWeb natural-language query endpoint. POST `{ \"q\": \"...\" }`. **No credentials required.** Set `prefer.streaming: true` or `Accept: text/event-stream` for an SSE stream.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "ask"
+              ],
+              "host": [
+                "{{ask-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"q\": \"<string>\",\n  \"prefer\": {\n    \"streaming\": \"<boolean>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "955d0d93-5886-4fd7-9f15-f1d3609d1969",
+              "name": "NLWeb result list describing Primitive capabilities.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "ask"
+                  ],
+                  "host": [
+                    "{{ask-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"q\": \"What does Primitive cost?\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"_meta\": {\n    \"response_type\": \"string\",\n    \"version\": \"string\",\n    \"query\": \"string\"\n  },\n  \"results\": [\n    {\n      \"@context\": \"string\",\n      \"@type\": \"string\",\n      \"name\": \"string\",\n      \"url\": \"string\",\n      \"description\": \"string\"\n    },\n    {\n      \"@context\": \"string\",\n      \"@type\": \"string\",\n      \"name\": \"string\",\n      \"url\": \"string\",\n      \"description\": \"string\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.primitive.dev/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://www.primitive.dev",
+      "key": "ask-Url"
+    }
+  ],
+  "info": {
+    "_postman_id": "d2f3ac7e-42b3-49dd-bc73-6f85c72d23aa",
+    "name": "Primitive Account Discovery API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump.\n\nContact Support:\n Name: Primitive",
+      "type": "text/plain"
+    }
+  }
+}

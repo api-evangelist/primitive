@@ -1,0 +1,2511 @@
+{
+  "item": [
+    {
+      "id": "2306d8e5-e869-4dbe-a0c7-13c8626cb039",
+      "name": "Memories",
+      "description": {
+        "content": "Durable org-scoped or function-scoped JSON key-value storage for\nagents and functions. Keys are caller-defined. Function scope is\nalways addressed by the function id UUID, not by function name.\n",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c25844e1-e358-4d93-a108-8a9b5fd8e17a",
+          "name": "Set a memory",
+          "request": {
+            "name": "Set a memory",
+            "description": {
+              "content": "Create or update a durable JSON memory under an org or function scope. Function-authenticated requests use their own Function id and cannot override it. If no explicit scope is provided for other credentials, `x-primitive-function-id` is used next, and other requests default to org scope. Function scope uses the function id UUID, not the function name.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "memories"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                "key": "x-primitive-function-id",
+                "value": "<uuid>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "ffe4aac2-347e-42b7-a76c-5b714540f89f",
+              "name": "Existing memory updated.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"f9cc4779-82ec-59be-c914-3734192a6421\",\n    \"key\": \"string\",\n    \"scope\": {\n      \"type\": \"function\",\n      \"id\": \"d3017b24-232f-0f28-5b7a-832ae3141120\"\n    },\n    \"value\": null,\n    \"version\": \"2723\",\n    \"created_at\": \"1977-10-24T20:27:10.257Z\",\n    \"updated_at\": \"1982-07-09T00:17:05.133Z\",\n    \"last_read_at\": \"2022-06-28T15:50:40.325Z\",\n    \"read_count\": \"8803\",\n    \"write_count\": \"5803\",\n    \"expires_at\": \"1973-09-10T21:47:45.303Z\",\n    \"created_by\": \"string\",\n    \"updated_by\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "60732576-28a9-4e54-9598-d7c4a38ea233",
+              "name": "Memory created.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"f9cc4779-82ec-59be-c914-3734192a6421\",\n    \"key\": \"string\",\n    \"scope\": {\n      \"type\": \"function\",\n      \"id\": \"d3017b24-232f-0f28-5b7a-832ae3141120\"\n    },\n    \"value\": null,\n    \"version\": \"2723\",\n    \"created_at\": \"1977-10-24T20:27:10.257Z\",\n    \"updated_at\": \"1982-07-09T00:17:05.133Z\",\n    \"last_read_at\": \"2022-06-28T15:50:40.325Z\",\n    \"read_count\": \"8803\",\n    \"write_count\": \"5803\",\n    \"expires_at\": \"1973-09-10T21:47:45.303Z\",\n    \"created_by\": \"string\",\n    \"updated_by\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8b0cdc1e-48c1-4907-875d-72bb74a6d1c9",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7d1a6ccf-7928-4c36-8202-76d02ebc0046",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9d02ab13-9866-40fa-9d82-e5cf2a6f5249",
+              "name": "Usage credits are exhausted or payment is required.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Payment Required",
+              "code": 402,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"error\": {\n    \"code\": \"access_denied\",\n    \"message\": \"string\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"string\",\n        \"suggested_subdomain\": \"string\"\n      },\n      \"required_entitlements\": [\n        \"string\",\n        \"string\"\n      ],\n      \"sent_email_id\": \"string\",\n      \"content_hash\": \"string\",\n      \"client_idempotency_key\": \"string\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"domain_not_confirmed\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"confirm_domain\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_unauthenticated\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      }\n    ],\n    \"request_id\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0505aafc-4c70-4704-a258-ef2242dcaba2",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a70ead1c-6d69-4fc0-8999-02498b9da589",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ab3d2097-1ed6-45d3-bd28-d5ff8048fcd7",
+              "name": "The request conflicts with the current state of the resource",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"conflict\",\n    \"message\": \"settlement already in progress\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7fb11d90-4254-4c9e-b76b-1ee762d1b2d3",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when the body does not include `scope`. Ignored when `scope` is provided.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"<string>\",\n  \"value\": \"<null>\",\n  \"scope\": {\n    \"type\": \"<string>\"\n  },\n  \"ttl_seconds\": \"<integer>\",\n  \"expires_at\": \"<dateTime>\",\n  \"clear_ttl\": \"<boolean>\",\n  \"if_absent\": \"<boolean>\",\n  \"if_version\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "9249"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e65a6af4-2689-47c7-a4f9-dbfc2a022cd2",
+          "name": "Get a memory",
+          "request": {
+            "name": "Get a memory",
+            "description": {
+              "content": "Fetch one active memory by key and scope. Omit scope parameters to use automatic scope resolution. Function-authenticated requests use their own Function id and cannot override it. Function scope uses a function id UUID in `scope_id`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "memories"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "key",
+                  "value": "<string>",
+                  "description": "(Required) Memory key. Must be at most 512 UTF-8 bytes."
+                },
+                {
+                  "disabled": false,
+                  "key": "scope_type",
+                  "value": "<string>",
+                  "description": "Explicit scope type. Omit to use automatic scope resolution. Pass `function` with `scope_id=<function-id>`, or `org` with no `scope_id`. Function-authenticated requests cannot override their automatic Function scope."
+                },
+                {
+                  "disabled": false,
+                  "key": "scope_id",
+                  "value": "<uuid>",
+                  "description": "Function id UUID when `scope_type=function`. Not valid with `scope_type=org`. Function-authenticated requests may only use their own Function id."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                "key": "x-primitive-function-id",
+                "value": "<uuid>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "443096a4-d288-49ab-85ea-802e317c2dba",
+              "name": "Memory record with value.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"f9cc4779-82ec-59be-c914-3734192a6421\",\n    \"key\": \"string\",\n    \"scope\": {\n      \"type\": \"function\",\n      \"id\": \"d3017b24-232f-0f28-5b7a-832ae3141120\"\n    },\n    \"value\": null,\n    \"version\": \"2723\",\n    \"created_at\": \"1977-10-24T20:27:10.257Z\",\n    \"updated_at\": \"1982-07-09T00:17:05.133Z\",\n    \"last_read_at\": \"2022-06-28T15:50:40.325Z\",\n    \"read_count\": \"8803\",\n    \"write_count\": \"5803\",\n    \"expires_at\": \"1973-09-10T21:47:45.303Z\",\n    \"created_by\": \"string\",\n    \"updated_by\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "20b15f7e-aabd-431f-9e12-0694f9e00ca8",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4a392b9f-17b3-440f-811a-1410ac9dbdc5",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1f4fc58e-8dae-4d8d-b670-e545d2a9fcd2",
+              "name": "Usage credits are exhausted or payment is required.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Payment Required",
+              "code": 402,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"feature_disabled\",\n    \"message\": \"string\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"string\",\n        \"suggested_subdomain\": \"string\"\n      },\n      \"required_entitlements\": [\n        \"string\",\n        \"string\"\n      ],\n      \"sent_email_id\": \"string\",\n      \"content_hash\": \"string\",\n      \"client_idempotency_key\": \"string\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      },\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"confirm_domain\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      }\n    ],\n    \"request_id\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "362b9bf5-fb53-4614-9bcc-14bda21f42e9",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d37ca5e6-5a8f-4e00-b866-e1b3d201f16b",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d0bddc0e-a3be-4a40-a248-074d06df315f",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "9249"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ec615d58-4330-4fa1-a143-d1cd04c07a51",
+          "name": "Delete a memory",
+          "request": {
+            "name": "Delete a memory",
+            "description": {
+              "content": "Delete one active memory by key and scope. Function-authenticated requests use their own Function id and cannot override it. Deletes are idempotent without `if_version`; a stale `if_version` returns `memory_conflict`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "memories"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "key",
+                  "value": "<string>",
+                  "description": "(Required) Memory key. Must be at most 512 UTF-8 bytes."
+                },
+                {
+                  "disabled": false,
+                  "key": "scope_type",
+                  "value": "<string>",
+                  "description": "Explicit scope type. Omit to use automatic scope resolution. Pass `function` with `scope_id=<function-id>`, or `org` with no `scope_id`. Function-authenticated requests cannot override their automatic Function scope."
+                },
+                {
+                  "disabled": false,
+                  "key": "scope_id",
+                  "value": "<uuid>",
+                  "description": "Function id UUID when `scope_type=function`. Not valid with `scope_type=org`. Function-authenticated requests may only use their own Function id."
+                },
+                {
+                  "disabled": false,
+                  "key": "if_version",
+                  "value": "<string>",
+                  "description": "Optional compare-and-delete version."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                "key": "x-primitive-function-id",
+                "value": "<uuid>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "c24882c3-87f3-42f6-be7f-631c7377c9b1",
+              "name": "Delete result.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"deleted\": false,\n    \"key\": \"string\",\n    \"scope\": {\n      \"type\": \"org\",\n      \"id\": \"588361ce-3f52-7356-2868-948e7fdc6960\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9234c0b6-eb8c-49f8-ad27-fad874b869e9",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b70a1e57-5aeb-46be-a798-9e3a20d76520",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a0367948-8c16-4904-b988-89a218c58f0b",
+              "name": "Usage credits are exhausted or payment is required.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Payment Required",
+              "code": 402,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"feature_disabled\",\n    \"message\": \"string\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"string\",\n        \"suggested_subdomain\": \"string\"\n      },\n      \"required_entitlements\": [\n        \"string\",\n        \"string\"\n      ],\n      \"sent_email_id\": \"string\",\n      \"content_hash\": \"string\",\n      \"client_idempotency_key\": \"string\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      },\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"confirm_domain\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      }\n    ],\n    \"request_id\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "af10b2f7-e001-4904-8c78-e5e9e29a1aa9",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3141d018-3557-47e3-ace3-0e4bc2edfc2e",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ac0626f6-5a52-4750-bfe7-e0eaa167498c",
+              "name": "The request conflicts with the current state of the resource",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"conflict\",\n    \"message\": \"settlement already in progress\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8dd83ba7-9c13-4d93-81b2-a0cfab3cbf9f",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "if_version",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "9249"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "d571d177-9d79-4544-91ed-c436ab5e546d",
+          "name": "Search memories",
+          "request": {
+            "name": "Search memories",
+            "description": {
+              "content": "List active memories in a scope by lexicographic key prefix. Results are ordered by key ascending. This is prefix search, not free-text search. Function-authenticated requests use their own Function id and cannot override it. Pass `include_value=false` to return metadata only.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "memories",
+                "search"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "prefix",
+                  "value": "",
+                  "description": "Key prefix to match. Empty string lists all active memories in the selected scope."
+                },
+                {
+                  "disabled": false,
+                  "key": "cursor",
+                  "value": "<string>",
+                  "description": "Key cursor from a previous response meta.cursor."
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of results per page"
+                },
+                {
+                  "disabled": false,
+                  "key": "include_value",
+                  "value": "true",
+                  "description": "Pass `false` to omit the `value` field and return metadata only."
+                },
+                {
+                  "disabled": false,
+                  "key": "updated_after",
+                  "value": "<dateTime>",
+                  "description": "Only include memories updated at or after this timestamp."
+                },
+                {
+                  "disabled": false,
+                  "key": "updated_before",
+                  "value": "<dateTime>",
+                  "description": "Only include memories updated at or before this timestamp."
+                },
+                {
+                  "disabled": false,
+                  "key": "scope_type",
+                  "value": "<string>",
+                  "description": "Explicit scope type. Omit to use automatic scope resolution. Pass `function` with `scope_id=<function-id>`, or `org` with no `scope_id`. Function-authenticated requests cannot override their automatic Function scope."
+                },
+                {
+                  "disabled": false,
+                  "key": "scope_id",
+                  "value": "<uuid>",
+                  "description": "Function id UUID when `scope_type=function`. Not valid with `scope_type=org`. Function-authenticated requests may only use their own Function id."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                "key": "x-primitive-function-id",
+                "value": "<uuid>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "2a5b691d-d0e6-4612-9b8d-8d52ff246bf7",
+              "name": "Paginated memory records.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefix",
+                      "value": ""
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "include_value",
+                      "value": "true"
+                    },
+                    {
+                      "key": "updated_after",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "updated_before",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"e9aaf83f-2bd9-6a93-1f7e-8855291690c4\",\n      \"key\": \"string\",\n      \"scope\": {\n        \"type\": \"org\",\n        \"id\": \"1454c16d-13aa-e9f1-0817-9af9f7055614\"\n      },\n      \"version\": \"4547\",\n      \"created_at\": \"1959-12-06T03:05:21.602Z\",\n      \"updated_at\": \"1952-09-20T16:58:02.216Z\",\n      \"last_read_at\": \"1995-05-08T19:14:30.048Z\",\n      \"read_count\": \"36\",\n      \"write_count\": \"8546664\",\n      \"expires_at\": \"2005-03-24T05:59:41.152Z\",\n      \"created_by\": \"string\",\n      \"updated_by\": \"string\",\n      \"value\": null\n    },\n    {\n      \"id\": \"03e000a3-3ced-0c38-00ad-9c0bcafbad29\",\n      \"key\": \"string\",\n      \"scope\": {\n        \"type\": \"function\",\n        \"id\": \"237c09d5-1107-aff0-2fef-d2148cfc5660\"\n      },\n      \"version\": \"35\",\n      \"created_at\": \"1981-11-07T16:06:51.796Z\",\n      \"updated_at\": \"1948-07-11T06:06:41.988Z\",\n      \"last_read_at\": \"1949-06-18T19:50:13.311Z\",\n      \"read_count\": \"4\",\n      \"write_count\": \"9\",\n      \"expires_at\": \"2021-12-03T21:49:26.813Z\",\n      \"created_by\": \"string\",\n      \"updated_by\": \"string\",\n      \"value\": null\n    }\n  ],\n  \"meta\": {\n    \"total\": 8115,\n    \"limit\": 3823,\n    \"cursor\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9c643e9d-e6bf-45e8-b0f0-0b7c90962263",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefix",
+                      "value": ""
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "include_value",
+                      "value": "true"
+                    },
+                    {
+                      "key": "updated_after",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "updated_before",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3330eda3-2fc3-4928-b08d-68bbcbb31f92",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefix",
+                      "value": ""
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "include_value",
+                      "value": "true"
+                    },
+                    {
+                      "key": "updated_after",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "updated_before",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5a6d4065-a548-4906-8fcf-1ea49b5fa724",
+              "name": "Usage credits are exhausted or payment is required.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefix",
+                      "value": ""
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "include_value",
+                      "value": "true"
+                    },
+                    {
+                      "key": "updated_after",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "updated_before",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Payment Required",
+              "code": 402,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"feature_disabled\",\n    \"message\": \"string\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"string\",\n        \"suggested_subdomain\": \"string\"\n      },\n      \"required_entitlements\": [\n        \"string\",\n        \"string\"\n      ],\n      \"sent_email_id\": \"string\",\n      \"content_hash\": \"string\",\n      \"client_idempotency_key\": \"string\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      },\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"confirm_domain\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      }\n    ],\n    \"request_id\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0644d022-dc54-4c0e-9dfd-ca0fe642c582",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefix",
+                      "value": ""
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "include_value",
+                      "value": "true"
+                    },
+                    {
+                      "key": "updated_after",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "updated_before",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d236c7df-e61c-44eb-9f0c-1c5d7197a5f3",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefix",
+                      "value": ""
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "include_value",
+                      "value": "true"
+                    },
+                    {
+                      "key": "updated_after",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "updated_before",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b66bafd6-d495-45bd-b73a-80187071ff83",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "memories",
+                    "search"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefix",
+                      "value": ""
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "include_value",
+                      "value": "true"
+                    },
+                    {
+                      "key": "updated_after",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "updated_before",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "scope_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope_id",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional function id UUID used as the default scope for non-function-authenticated requests when query scope parameters are omitted.",
+                    "key": "x-primitive-function-id",
+                    "value": "<uuid>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "9249"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.primitive.dev/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "2960d632-9978-4ff6-b3fd-549491a7ff06",
+    "name": "Primitive Account Memories API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump.\n\nContact Support:\n Name: Primitive",
+      "type": "text/plain"
+    }
+  }
+}

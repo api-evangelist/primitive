@@ -1,0 +1,2837 @@
+{
+  "item": [
+    {
+      "id": "0b3f36c2-abca-4837-b2f8-53e2896f02b8",
+      "name": "Sending",
+      "description": {
+        "content": "Send outbound emails through the Primitive API",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "4ee85c52-f208-4f06-b463-2a808cd98356",
+          "name": "Reply to an inbound email",
+          "request": {
+            "name": "Reply to an inbound email",
+            "description": {
+              "content": "Sends an outbound reply to the inbound email identified by `id`.\nThreading headers (`In-Reply-To`, `References`), recipient\nderivation (Reply-To, then From, then bare sender), and the\n`Re:` subject prefix are all derived server-side from the\nstored inbound row. The request body carries only the message\nbody, optional From override, optional attachments, and optional\n`wait` flag; passing any header or recipient override is\nrejected by the schema (`additionalProperties: false`).\n\nForwards through the same gates as `/send-mail`: the response\nstatus, error envelope, and `idempotent_replay` flag mirror\nthe send-mail contract verbatim.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "protocol": "https",
+              "path": [
+                "v1",
+                "emails",
+                ":id",
+                "reply"
+              ],
+              "host": [
+                "api",
+                "primitive",
+                "dev"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) Resource UUID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "38ef970c-cabc-4ec4-84bc-cb2edc1ea734",
+              "name": "Outbound relay result",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"string\",\n    \"status\": \"deferred\",\n    \"from\": \"string\",\n    \"queue_id\": \"string\",\n    \"accepted\": [\n      \"string\",\n      \"string\"\n    ],\n    \"rejected\": [\n      \"string\",\n      \"string\"\n    ],\n    \"client_idempotency_key\": \"string\",\n    \"request_id\": \"string\",\n    \"content_hash\": \"string\",\n    \"idempotent_replay\": false,\n    \"delivery_status\": \"delivered\",\n    \"smtp_response_code\": 8326,\n    \"smtp_response_text\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "00180b71-d9aa-4a48-b08d-e183ad1eff23",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a802ff75-917e-4848-a66e-fda08dfd09a7",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4b3ac2f8-ae29-4f14-be1a-e49653a2f0ba",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1530d9b0-257c-45a7-a233-071481879d95",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "83560ec3-aa4c-4532-9b4e-f315c008f96c",
+              "name": "The request was well-formed but could not be processed. For Payments\nthis covers a missing payout address, a failed payment verification, a\nspend-policy decline, or an expired challenge; `error.code` distinguishes\nthem.\n",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"payment_declined\",\n    \"message\": \"payment exceeds the per-payment cap\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "615a974c-e2a7-4ed9-9909-92286c47d53e",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "3822"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e9bd36d9-ec35-4c60-ba57-d90523083369",
+              "name": "Primitive encountered an internal error",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"Internal server error\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ec511ee0-a730-4ec9-a5f0-c5ab323bb7dd",
+              "name": "Primitive could not complete the downstream SMTP request",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"outbound_unreachable\",\n    \"message\": \"Outbound SMTP service request failed\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "751d15c6-09f5-423b-9fd4-b8e204962be9",
+              "name": "Primitive is temporarily unable to process the request",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "emails",
+                    ":id",
+                    "reply"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"from\": \"<string>\",\n  \"wait\": \"<boolean>\",\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"outbound_capacity_exhausted\",\n    \"message\": \"Outbound capacity is temporarily exhausted\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c377f724-c0c8-4032-b934-45604a673fa9",
+          "name": "List send-permission rules",
+          "request": {
+            "name": "List send-permission rules",
+            "description": {
+              "content": "Returns a flat list of rules describing every recipient the\ncaller may send to. Each rule has a `type`, a kind-specific\npayload, and a human-readable `description`. If any rule\nmatches the recipient, /send-mail will accept the send under\nthe recipient-scope check.\n\nThe endpoint is the answer to \"where can I send\" without\nexposing internal entitlement names. Agents that don't\nrecognize a `type` can still read the `description` prose\nand act on it.\n\nRule kinds, ordered broadest-first so an agent can stop\nscanning at the first match:\n\n  1. `any_recipient` (one entry, only when the org can send\n     anywhere): every other rule below it is redundant.\n  2. `managed_zone` (always emitted, one per Primitive-managed\n     zone): sends to any address at *.primitive.email or\n     *.email.works always succeed; no entitlement required.\n  3. `your_domain` (one per active verified outbound domain\n     owned by the org): sends to that domain are approved.\n  4. `address` (one per address that has authenticated\n     inbound mail to the org, capped at `meta.address_cap`):\n     sends to that exact address are approved.\n\nThe list is informational, not an authorization check.\n/send-mail remains the source of truth on whether an\nindividual send will succeed (it also enforces the\nfrom-address and the `send_mail` entitlement, which are\nnot recipient-scope concerns and are not represented here).\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "send-permissions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d21eb4c0-ac55-409b-8099-d9d23caba954",
+              "name": "Send-permission rules for the caller's org",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-permissions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"type\": \"any_recipient\",\n      \"description\": \"string\"\n    },\n    {\n      \"type\": \"any_recipient\",\n      \"description\": \"string\"\n    }\n  ],\n  \"meta\": {\n    \"address_cap\": 7537,\n    \"truncated\": false\n  },\n  \"success\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "dbe070ac-8699-4068-949b-8ca25250b79f",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-permissions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "8b0d0d20-3319-478c-9cf2-0b7de182ae33",
+          "name": "Send outbound email",
+          "request": {
+            "name": "Send outbound email",
+            "description": {
+              "content": "Sends an outbound email through Primitive's outbound relay. By default\nthe request returns once the relay accepts the message for delivery.\nSet `wait: true` to wait for the first downstream SMTP delivery outcome.\n\n**Host routing.** /send-mail is served by the canonical API host\n(`https://api.primitive.dev/v1`) so the request body can carry\ninline attachments up to ~30 MiB raw. The legacy dashboard\ncompatibility host (`https://www.primitive.dev/api/v1`) also accepts\n/send-mail, but Vercel request body limits apply before proxying.\nThe typed SDKs route /send-mail to the canonical API host\nautomatically.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "protocol": "https",
+              "path": [
+                "v1",
+                "send-mail"
+              ],
+              "host": [
+                "api",
+                "primitive",
+                "dev"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "b6547f79-9a9e-4afa-a8fe-3f98b3f57ab6",
+              "name": "Outbound relay result",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "disabled": false,
+                  "description": "Effective idempotency key for this request. When the caller supplies an `Idempotency-Key` request header the same value is echoed; otherwise the server derives one from the canonical payload hash. Use this to correlate a request to its stored sent-email record via the `idempotency_key` filter on `GET /sent-emails`.",
+                  "key": "Idempotency-Key",
+                  "value": "string"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"string\",\n    \"status\": \"deferred\",\n    \"from\": \"string\",\n    \"queue_id\": \"string\",\n    \"accepted\": [\n      \"string\",\n      \"string\"\n    ],\n    \"rejected\": [\n      \"string\",\n      \"string\"\n    ],\n    \"client_idempotency_key\": \"string\",\n    \"request_id\": \"string\",\n    \"content_hash\": \"string\",\n    \"idempotent_replay\": false,\n    \"delivery_status\": \"delivered\",\n    \"smtp_response_code\": 8326,\n    \"smtp_response_text\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "fb20e9f7-ff43-4d01-b1c2-828b8761affc",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "53fb12cc-3cfe-421e-961e-de9eb26d8335",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c0c9dceb-072b-47c9-a129-1d669d973788",
+              "name": "Authenticated caller lacks permission for the operation",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6314b8ed-757f-400e-b7e1-42646c97c210",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "3822"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b4bd579e-dbee-4dad-a176-1053b03e16ed",
+              "name": "Primitive encountered an internal error",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"internal_error\",\n    \"message\": \"Internal server error\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "61f78f56-f371-4388-bbff-87151a408a0c",
+              "name": "Primitive could not complete the downstream SMTP request",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Gateway",
+              "code": 502,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"outbound_unreachable\",\n    \"message\": \"Outbound SMTP service request failed\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "66cc7398-f878-4ed2-b4f5-2be2722e0dc1",
+              "name": "Primitive is temporarily unable to process the request",
+              "originalRequest": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "v1",
+                    "send-mail"
+                  ],
+                  "host": [
+                    "api",
+                    "primitive",
+                    "dev"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional customer-supplied idempotency key. If omitted, Primitive\nderives one from the canonical request payload and echoes the\neffective value in the `Idempotency-Key` response header.\n",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"outbound_capacity_exhausted\",\n    \"message\": \"Outbound capacity is temporarily exhausted\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b77149f0-667a-40f7-883a-8b5ae9da94a3",
+          "name": "List outbound sent emails",
+          "request": {
+            "name": "List outbound sent emails",
+            "description": {
+              "content": "Returns a paginated list of OUTBOUND emails the caller's\norg has sent via /send-mail (and /emails/{id}/reply, which\nforwards through /send-mail). Includes every recorded\nattempt, including gate-denied attempts that the agent\nnever called and rows still in `queued` state.\n\nFor inbound mail received at your verified domains, see\n/emails. There is no unified send/receive history endpoint;\nthe two surfaces are intentionally separate because the\nunderlying tables, statuses, and lifecycle differ.\n\nEmail bodies (`body_text`, `body_html`) are NOT included on\nlist rows so a 50-row page can't balloon into a multi-MB\nresponse when sends are near the 5MB body cap. Use\n/sent-emails/{id} to fetch a single row with bodies, or\ncross-reference by `client_idempotency_key` if the caller\nalready has the body locally.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "sent-emails"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "cursor",
+                  "value": "<string>",
+                  "description": "Pagination cursor from a previous response's `meta.cursor` field.\nFormat: `{ISO-datetime}|{id}`\n"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of results per page"
+                },
+                {
+                  "disabled": false,
+                  "key": "status",
+                  "value": "<string>",
+                  "description": "Filter to rows in this status. Useful for polling\nqueued rows that haven't transitioned, auditing\ngate-denied attempts, or listing only successful\ndeliveries.\n"
+                },
+                {
+                  "disabled": false,
+                  "key": "request_id",
+                  "value": "<uuid>",
+                  "description": "Filter to the row matching a specific server-issued\n`request_id`. The /send-mail response surfaces\n`request_id` on every send; this lookup lets the\ncaller find the historical row for a given live call\nwithout remembering its `id`.\n"
+                },
+                {
+                  "disabled": false,
+                  "key": "idempotency_key",
+                  "value": "<string>",
+                  "description": "Filter to rows with the given `client_idempotency_key`.\nMultiple rows can share a key (a retry that hit the\nidempotent-replay path returns the same row, but a\nretry with a DIFFERENT canonical payload under the\nsame key is rejected by /send-mail before the row is\nwritten, so duplicates are bounded).\n"
+                },
+                {
+                  "disabled": false,
+                  "key": "date_from",
+                  "value": "<dateTime>",
+                  "description": "Inclusive lower bound on `created_at`."
+                },
+                {
+                  "disabled": false,
+                  "key": "date_to",
+                  "value": "<dateTime>",
+                  "description": "Inclusive upper bound on `created_at`."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "54ae8e1b-28e0-4649-9148-2a19f2171808",
+              "name": "Page of sent-email summaries",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sent-emails"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "status",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "request_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "idempotency_key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "date_from",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "date_to",
+                      "value": "<dateTime>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"76313f7f-9baa-314c-7801-ed57072904b0\",\n      \"status\": \"gate_denied\",\n      \"status_changed_at\": \"1985-09-23T20:26:12.607Z\",\n      \"created_at\": \"2016-06-22T14:24:01.943Z\",\n      \"updated_at\": \"2009-07-14T10:24:56.302Z\",\n      \"content_hash\": \"string\",\n      \"from_header\": \"string\",\n      \"from_address\": \"string\",\n      \"to_header\": \"string\",\n      \"to_address\": \"string\",\n      \"subject\": \"string\",\n      \"body_size_bytes\": 425,\n      \"client_idempotency_key\": \"string\",\n      \"content_discarded_at\": \"1961-08-02T22:56:55.748Z\",\n      \"message_id\": \"string\",\n      \"in_reply_to\": \"string\",\n      \"email_references\": \"string\",\n      \"in_reply_to_email_id\": \"0089c818-5da5-9ddb-5738-a667f26454af\",\n      \"thread_id\": \"43fe4fde-c5ec-d09b-c4d4-bea1925394ce\",\n      \"queue_id\": \"string\",\n      \"smtp_response_code\": 6032,\n      \"smtp_response_text\": \"string\",\n      \"smtp_enhanced_status_code\": \"string\",\n      \"dkim_selector\": \"string\",\n      \"dkim_domain\": \"string\",\n      \"error_code\": \"string\",\n      \"error_message\": \"string\",\n      \"gates\": [\n        {\n          \"name\": \"send_to_confirmed_domains\",\n          \"reason\": \"recipient_unauthenticated\",\n          \"message\": \"string\",\n          \"subject\": \"string\",\n          \"fix\": {\n            \"action\": \"sender_must_fix_authentication\",\n            \"subject\": \"string\"\n          },\n          \"docs_url\": \"string\"\n        },\n        {\n          \"name\": \"send_to_known_addresses\",\n          \"reason\": \"recipient_unauthenticated\",\n          \"message\": \"string\",\n          \"subject\": \"string\",\n          \"fix\": {\n            \"action\": \"confirm_domain\",\n            \"subject\": \"string\"\n          },\n          \"docs_url\": \"string\"\n        }\n      ],\n      \"request_id\": \"string\"\n    },\n    {\n      \"id\": \"9517a92e-f782-4ad0-fc8e-38c88bcad02f\",\n      \"status\": \"queued\",\n      \"status_changed_at\": \"2021-03-25T19:41:25.267Z\",\n      \"created_at\": \"2019-11-09T16:54:23.696Z\",\n      \"updated_at\": \"2022-01-05T22:27:08.801Z\",\n      \"content_hash\": \"string\",\n      \"from_header\": \"string\",\n      \"from_address\": \"string\",\n      \"to_header\": \"string\",\n      \"to_address\": \"string\",\n      \"subject\": \"string\",\n      \"body_size_bytes\": 314,\n      \"client_idempotency_key\": \"string\",\n      \"content_discarded_at\": \"1997-04-14T12:14:13.355Z\",\n      \"message_id\": \"string\",\n      \"in_reply_to\": \"string\",\n      \"email_references\": \"string\",\n      \"in_reply_to_email_id\": \"32a544b1-6ebd-76cf-7658-efd0e892932a\",\n      \"thread_id\": \"82b0e3b5-4a2b-c2cf-3edc-cf257f1d75cc\",\n      \"queue_id\": \"string\",\n      \"smtp_response_code\": 6981,\n      \"smtp_response_text\": \"string\",\n      \"smtp_enhanced_status_code\": \"string\",\n      \"dkim_selector\": \"string\",\n      \"dkim_domain\": \"string\",\n      \"error_code\": \"string\",\n      \"error_message\": \"string\",\n      \"gates\": [\n        {\n          \"name\": \"send_to_confirmed_domains\",\n          \"reason\": \"recipient_unauthenticated\",\n          \"message\": \"string\",\n          \"subject\": \"string\",\n          \"fix\": {\n            \"action\": \"confirm_domain\",\n            \"subject\": \"string\"\n          },\n          \"docs_url\": \"string\"\n        },\n        {\n          \"name\": \"send_to_known_addresses\",\n          \"reason\": \"domain_not_confirmed\",\n          \"message\": \"string\",\n          \"subject\": \"string\",\n          \"fix\": {\n            \"action\": \"confirm_domain\",\n            \"subject\": \"string\"\n          },\n          \"docs_url\": \"string\"\n        }\n      ],\n      \"request_id\": \"string\"\n    }\n  ],\n  \"meta\": {\n    \"total\": 7362,\n    \"limit\": 430,\n    \"cursor\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1a9beb87-87c3-4155-937e-2084423fd259",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sent-emails"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "status",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "request_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "idempotency_key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "date_from",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "date_to",
+                      "value": "<dateTime>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8493e212-7f91-4366-b153-8a46328fe16b",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sent-emails"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "status",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "request_id",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "idempotency_key",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "date_from",
+                      "value": "<dateTime>"
+                    },
+                    {
+                      "key": "date_to",
+                      "value": "<dateTime>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ff160162-5c8b-4e2d-ba01-b64a36d99df0",
+          "name": "Get a sent email by id",
+          "request": {
+            "name": "Get a sent email by id",
+            "description": {
+              "content": "Returns the full sent-email record by id, including\n`body_text` and `body_html` (omitted from the listing\nendpoint to keep paginated responses small). Use this when\ndiagnosing a specific send, e.g. inspecting the receiver's\nSMTP response on a `bounced` row or pulling the gate\ndenial detail on a `gate_denied` row.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "sent-emails",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) Resource UUID"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "dd52b0d8-d0e7-49a5-a300-5e52876ef05f",
+              "name": "Sent-email detail",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sent-emails",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"392db863-3d7d-e378-4e08-34f4839299d0\",\n    \"status\": \"wait_timeout\",\n    \"status_changed_at\": \"1987-08-14T06:08:37.314Z\",\n    \"created_at\": \"2001-03-02T05:37:43.797Z\",\n    \"updated_at\": \"1964-05-08T14:11:27.782Z\",\n    \"content_hash\": \"string\",\n    \"from_header\": \"string\",\n    \"from_address\": \"string\",\n    \"to_header\": \"string\",\n    \"to_address\": \"string\",\n    \"subject\": \"string\",\n    \"body_size_bytes\": 6140,\n    \"client_idempotency_key\": \"string\",\n    \"content_discarded_at\": \"1992-10-28T07:42:26.854Z\",\n    \"message_id\": \"string\",\n    \"in_reply_to\": \"string\",\n    \"email_references\": \"string\",\n    \"in_reply_to_email_id\": \"78c9a046-673a-4553-a290-78466de39d54\",\n    \"thread_id\": \"611600d2-ad0d-116b-3062-ec4a66678389\",\n    \"queue_id\": \"string\",\n    \"smtp_response_code\": 7996,\n    \"smtp_response_text\": \"string\",\n    \"smtp_enhanced_status_code\": \"string\",\n    \"dkim_selector\": \"string\",\n    \"dkim_domain\": \"string\",\n    \"error_code\": \"string\",\n    \"error_message\": \"string\",\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_unauthenticated\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      },\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"domain_not_confirmed\",\n        \"message\": \"string\",\n        \"subject\": \"string\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"string\"\n        },\n        \"docs_url\": \"string\"\n      }\n    ],\n    \"request_id\": \"string\",\n    \"body_text\": \"string\",\n    \"body_html\": \"string\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "92d7c886-1e7e-4a99-968b-60a97249af0e",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sent-emails",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8b4c7c28-2f4f-463e-8736-5aff35e4e7ed",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sent-emails",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f65dabfe-a4d5-4b69-bdd2-5e4c34774fdf",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sent-emails",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) Resource UUID"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e93d3526-54f2-44a9-9a4a-e6450aaec0ea",
+          "name": "Try send-mail without authentication (simulation)",
+          "request": {
+            "name": "Try send-mail without authentication (simulation)",
+            "description": {
+              "content": "Unauthenticated sandbox for `POST /send-mail`. Accepts the same request body, validates it identically, and returns a realistic synthetic success envelope with `demo: true`. **No email is sent, queued, or stored.** Use this to exercise the send flow without credentials; to send real mail, sign up at https://primitive.dev/signup for an API key and call `POST /send-mail` with `Authorization: Bearer prim_<key>`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "send-mail",
+                "demo"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"<string>\",\n  \"to\": \"<string>\",\n  \"subject\": \"<string>\",\n  \"body_text\": \"<string>\",\n  \"body_html\": \"<string>\",\n  \"in_reply_to\": \"<string>\",\n  \"references\": [\n    \"<string>\",\n    \"<string>\"\n  ],\n  \"attachments\": [\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    },\n    {\n      \"filename\": \"<string>\",\n      \"content_base64\": \"<string>\",\n      \"content_type\": \"<string>\"\n    }\n  ],\n  \"wait\": \"<boolean>\",\n  \"wait_timeout_ms\": \"<integer>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "79dbda40-8826-4532-8faf-308e958d2b0e",
+              "name": "Simulated send accepted. Identical shape to a fresh asynchronous /send-mail response, plus a top-level `demo` flag. No mail was sent.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "demo"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"agent@your-subdomain.primitive.email\",\n  \"to\": \"someone@example.com\",\n  \"subject\": \"Hello from my agent\",\n  \"body_text\": \"This is a test send via the public demo endpoint.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"demo\": true,\n  \"note\": \"Simulated response. No email was sent. Sign up at https://primitive.dev/signup for an API key, then POST the same body to /v1/send-mail with Authorization: Bearer prim_<key>.\",\n  \"data\": {\n    \"id\": \"3f1c0a9e-2b7d-4e5a-9c6f-8d2e1a4b5c6d\",\n    \"status\": \"queued\",\n    \"from\": \"agent@your-subdomain.primitive.email\",\n    \"queue_id\": \"demo_9a3f1c0a\",\n    \"accepted\": [\n      \"someone@example.com\"\n    ],\n    \"rejected\": [],\n    \"client_idempotency_key\": null,\n    \"request_id\": \"7b2e4d6a-1c3f-4a5b-8d9e-0f1a2b3c4d5e\",\n    \"content_hash\": \"a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90\",\n    \"idempotent_replay\": false,\n    \"dedup_reason\": null\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d3f6d025-0e15-4f36-8d55-1230cf101bc7",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "demo"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"agent@your-subdomain.primitive.email\",\n  \"to\": \"someone@example.com\",\n  \"subject\": \"Hello from my agent\",\n  \"body_text\": \"This is a test send via the public demo endpoint.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "11cb5698-fa73-4e4b-8307-f50803e2b4fb",
+              "name": "Request body is too large.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "demo"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"agent@your-subdomain.primitive.email\",\n  \"to\": \"someone@example.com\",\n  \"subject\": \"Hello from my agent\",\n  \"body_text\": \"This is a test send via the public demo endpoint.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Request body is too large\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5c19b38d-d4d5-4b91-8108-f24fa6a1a5fd",
+              "name": "Content-Type must be application/json.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "demo"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"agent@your-subdomain.primitive.email\",\n  \"to\": \"someone@example.com\",\n  \"subject\": \"Hello from my agent\",\n  \"body_text\": \"This is a test send via the public demo endpoint.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unsupported Media Type",
+              "code": 415,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Content-Type must be application/json\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "81f393b5-cbad-403c-a4d0-586c7b7be598",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "demo"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"agent@your-subdomain.primitive.email\",\n  \"to\": \"someone@example.com\",\n  \"subject\": \"Hello from my agent\",\n  \"body_text\": \"This is a test send via the public demo endpoint.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "3822"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c9aa71e6-4678-4ed3-af1f-e5e3d8be93fb",
+          "name": "Send a batch of emails in one request",
+          "request": {
+            "name": "Send a batch of emails in one request",
+            "description": {
+              "content": "Send up to 100 independent messages in a single call. Each message uses the same body schema and the same send path as `POST /send-mail`, so auth, validation, rate limiting, and idempotency apply per message. Messages are processed independently: one failing does not fail the others — every message gets an entry in `results` carrying either `data` (on success) or `error` (on failure), with the original `index`.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "send-mail",
+                "batch"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"messages\": [\n    {\n      \"from\": \"<string>\",\n      \"to\": \"<string>\",\n      \"subject\": \"<string>\",\n      \"body_text\": \"<string>\",\n      \"body_html\": \"<string>\",\n      \"in_reply_to\": \"<string>\",\n      \"references\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"attachments\": [\n        {\n          \"filename\": \"<string>\",\n          \"content_base64\": \"<string>\",\n          \"content_type\": \"<string>\"\n        },\n        {\n          \"filename\": \"<string>\",\n          \"content_base64\": \"<string>\",\n          \"content_type\": \"<string>\"\n        }\n      ],\n      \"wait\": \"<boolean>\",\n      \"wait_timeout_ms\": \"<integer>\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "be62991e-9b6d-41ae-869b-fee4d4c1c088",
+              "name": "Per-message results. The request as a whole returns HTTP 200 even when individual messages fail; inspect each `results` entry.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "batch"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"messages\": [\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"a@example.com\",\n      \"subject\": \"Hi A\",\n      \"body_text\": \"Hello A\"\n    },\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"b@example.com\",\n      \"subject\": \"Hi B\",\n      \"body_text\": \"Hello B\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Maximum number of requests allowed in the current window.",
+                  "key": "ratelimit-limit",
+                  "value": "120"
+                },
+                {
+                  "disabled": false,
+                  "description": "Remaining requests in the current window.",
+                  "key": "ratelimit-remaining",
+                  "value": "118"
+                },
+                {
+                  "disabled": false,
+                  "description": "Unix timestamp (seconds) when the current window resets.",
+                  "key": "ratelimit-reset",
+                  "value": "1700000060"
+                },
+                {
+                  "disabled": false,
+                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                  "key": "ratelimit-policy",
+                  "value": "120;w=60"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"count\": 9466,\n    \"results\": [\n      {\n        \"index\": 7275,\n        \"success\": true,\n        \"data\": {\n          \"id\": \"string\",\n          \"status\": \"deferred\",\n          \"from\": \"string\",\n          \"queue_id\": \"string\",\n          \"accepted\": [\n            \"string\",\n            \"string\"\n          ],\n          \"rejected\": [\n            \"string\",\n            \"string\"\n          ],\n          \"client_idempotency_key\": \"string\",\n          \"request_id\": \"string\",\n          \"content_hash\": \"string\",\n          \"idempotent_replay\": true,\n          \"delivery_status\": \"delivered\",\n          \"smtp_response_code\": 989,\n          \"smtp_response_text\": \"string\"\n        },\n        \"error\": {\n          \"code\": \"string\",\n          \"message\": \"string\"\n        }\n      },\n      {\n        \"index\": 8021,\n        \"success\": false,\n        \"data\": {\n          \"id\": \"string\",\n          \"status\": \"unknown\",\n          \"from\": \"string\",\n          \"queue_id\": \"string\",\n          \"accepted\": [\n            \"string\",\n            \"string\"\n          ],\n          \"rejected\": [\n            \"string\",\n            \"string\"\n          ],\n          \"client_idempotency_key\": \"string\",\n          \"request_id\": \"string\",\n          \"content_hash\": \"string\",\n          \"idempotent_replay\": true,\n          \"delivery_status\": \"deferred\",\n          \"smtp_response_code\": 2636,\n          \"smtp_response_text\": \"string\"\n        },\n        \"error\": {\n          \"code\": \"string\",\n          \"message\": \"string\"\n        }\n      }\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "890e58eb-a953-4f27-98c4-ecfd4c8e13e3",
+              "name": "Invalid request parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "batch"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"messages\": [\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"a@example.com\",\n      \"subject\": \"Hi A\",\n      \"body_text\": \"Hello A\"\n    },\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"b@example.com\",\n      \"subject\": \"Hi B\",\n      \"body_text\": \"Hello B\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6dd1419d-783c-4cbc-b329-480b88b0e5a2",
+              "name": "Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "batch"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"messages\": [\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"a@example.com\",\n      \"subject\": \"Hi A\",\n      \"body_text\": \"Hello A\"\n    },\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"b@example.com\",\n      \"subject\": \"Hi B\",\n      \"body_text\": \"Hello B\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5302feb2-1b9d-4662-b22b-d7886ed25296",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "send-mail",
+                    "batch"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"messages\": [\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"a@example.com\",\n      \"subject\": \"Hi A\",\n      \"body_text\": \"Hello A\"\n    },\n    {\n      \"from\": \"agent@your-subdomain.primitive.email\",\n      \"to\": \"b@example.com\",\n      \"subject\": \"Hi B\",\n      \"body_text\": \"Hello B\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "3822"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.primitive.dev/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "06d156e3-b35a-4178-9f2d-4c77d0b18380",
+    "name": "Primitive Account Sending API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump.\n\nContact Support:\n Name: Primitive",
+      "type": "text/plain"
+    }
+  }
+}

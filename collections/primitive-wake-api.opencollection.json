@@ -1,0 +1,281 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Wake API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Wake",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List wake schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/wake/schedules",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns the org's wake.dispatch schedules."
+        },
+        {
+          "info": {
+            "name": "Create a wake schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/wake/schedules",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Create a cron schedule that sends a wake.dispatch command to one of your\nown function addresses. `from` and `to` must differ (no self-dispatch);\nthe cron expression and IANA timezone are validated and the first fire\ntime is computed without firing immediately.\n"
+        },
+        {
+          "info": {
+            "name": "Get a wake schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/wake/schedules/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Get a wake schedule"
+        },
+        {
+          "info": {
+            "name": "Update a wake schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.primitive.dev/v1/wake/schedules/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Update a schedule's command, args, cadence, addresses, note, or enabled\nstate. Changing the cadence (or re-enabling) recomputes the next fire time.\n"
+        },
+        {
+          "info": {
+            "name": "Delete a wake schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.primitive.dev/v1/wake/schedules/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Delete a wake schedule"
+        },
+        {
+          "info": {
+            "name": "Run a wake schedule now",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/wake/schedules/:id/run",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Fire the schedule immediately, sending one wake.dispatch via the same\nsigned-send path as a scheduled fire. Does not change the schedule's next\nfire time.\n"
+        },
+        {
+          "info": {
+            "name": "List wake authorizations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/wake/authorizations",
+            "params": [
+              {
+                "name": "recipient_endpoint_id",
+                "value": "",
+                "type": "query",
+                "description": "Only return grants for this target endpoint"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns the per-target allowlist grants that authorize which senders may\nwake a function. Optionally filter by the target endpoint.\n"
+        },
+        {
+          "info": {
+            "name": "Create a wake authorization",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/wake/authorizations",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Grant a sender domain (and optionally a specific address and command set)\npermission to wake a target function. The domain must be fully-qualified.\n"
+        },
+        {
+          "info": {
+            "name": "Update a wake authorization",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.primitive.dev/v1/wake/authorizations/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Toggle a wake authorization's enabled state."
+        },
+        {
+          "info": {
+            "name": "Delete a wake authorization",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.primitive.dev/v1/wake/authorizations/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Resource UUID"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Delete a wake authorization"
+        },
+        {
+          "info": {
+            "name": "List recent wake dispatches",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/wake/dispatches",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of rows to return (1-200, default 50)"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Read-only audit of recent wake.dispatch interactions for the org."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,84 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Demo API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Demo",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Start a sample asynchronous job without authentication",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/demo/jobs",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ]
+          },
+          "docs": "Public, no-auth demo of the asynchronous-job pattern. Starts a synthetic job and returns `202 Accepted` with a `Location` header (and `data.status_url`) pointing at the job-status resource. Poll `GET /demo/jobs/{id}` until the status is terminal. No real work runs; the status is a fixed sample."
+        },
+        {
+          "info": {
+            "name": "Poll a sample asynchronous job without authentication",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/demo/jobs/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Job id returned by POST /demo/jobs."
+              }
+            ]
+          },
+          "docs": "Public, no-auth demo. Returns the status of a synthetic job started by `POST /demo/jobs` — the poll half of the async-job pattern. No real work runs; the status is a fixed sample."
+        },
+        {
+          "info": {
+            "name": "List sample emails without authentication",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/demo/emails"
+          },
+          "docs": "Public, no-auth demo. Returns synthetic email objects shaped exactly like the authenticated `GET /emails` response (same `EmailSummary` schema), so an arriving agent can read the data model before obtaining credentials. No real tenant data is exposed; every object is a fixed sample. Rate-limited per IP."
+        },
+        {
+          "info": {
+            "name": "Get one sample email without authentication",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/demo/emails/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Any value; the demo returns a fixed sample."
+              }
+            ]
+          },
+          "docs": "Public, no-auth demo. Returns a single synthetic email shaped exactly like the authenticated `GET /emails/{id}` response (`EmailDetail` schema). No real tenant data is exposed. Rate-limited per IP."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

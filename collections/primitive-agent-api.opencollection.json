@@ -1,0 +1,177 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Agent API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Agent",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Start agent account signup",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agent/signup/start",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Starts an agent-native signup session. `signup_code` is optional;\nomit it to sign up without one. The API creates a pending signup\nsession, sends an email verification code, and returns an opaque\nsignup token used by the resend and verify steps. This endpoint\ndoes not require an API key.\n"
+        },
+        {
+          "info": {
+            "name": "Resend agent signup verification code",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agent/signup/resend",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Sends a new email verification code for a pending agent signup session.\nThis endpoint does not require an API key.\n"
+        },
+        {
+          "info": {
+            "name": "Verify agent signup and create OAuth tokens",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agent/signup/verify",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Verifies the email code for an agent signup session and creates\nthe account when needed. When the session was started with a\n`signup_code`, the reserved code is redeemed; sessions started\nwithout a code skip the redemption step. An org-scoped OAuth\nsession for CLI authentication is minted and the raw tokens are\nreturned exactly once. For existing users, the optional `org_id`\nselects which accessible workspace should receive the new\nsession (no signup-code redemption is performed for existing\nuse"
+        },
+        {
+          "info": {
+            "name": "Create an emailless agent account",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agent/accounts",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates an emailless agent account without authentication and returns a\none-time API key (prefixed `prim_`) plus a provisioned managed inbox.\nThe account is on the `agent` plan: reply-only (it can send only to\naddresses that have already sent it authenticated mail) with tight send\nlimits. Use the returned `api_key` as a Bearer token on later calls. The\naccount can be upgraded to a full developer account by confirming an\nemail through the claim flow. This endpoint does not require an API key.\n"
+        },
+        {
+          "info": {
+            "name": "Start an agent account email claim",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agent/claim/start",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Begins upgrading an emailless `agent` account into a full `developer`\naccount by confirming an email address. Authenticated by the agent's own\nAPI key (the org is taken from the credential). Sends a verification\ncode to the supplied email and returns the claim session id plus resend\ntiming. Submit the code to `/agent/claim/verify` to complete the\nupgrade. Confirming an email that already belongs to a Primitive account\nis rejected.\n"
+        },
+        {
+          "info": {
+            "name": "Verify an agent account email claim",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agent/claim/verify",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Confirms the verification code emailed by `/agent/claim/start` and\nupgrades the account to the `developer` plan. The org id, API key, and\nmanaged inbox all carry over; the send cap lifts. Authenticated by the\nagent's own API key.\n"
+        },
+        {
+          "info": {
+            "name": "Create a browser claim link",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/agent/claim/link",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Mints an opaque, single-use link an agent can hand to a human to\ncomplete the email-confirmation upgrade in a browser. Authenticated by\nthe agent's own API key. `claim_url` is null when the API host cannot\nresolve a web origin to build the link.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

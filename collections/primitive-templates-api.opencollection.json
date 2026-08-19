@@ -1,0 +1,130 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Primitive Account Templates API",
+    "version": "1.0.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Templates",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List function templates",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/templates",
+            "params": [
+              {
+                "name": "q",
+                "value": "",
+                "type": "query",
+                "description": "Search templates by title, summary, or slug."
+              },
+              {
+                "name": "tag",
+                "value": "",
+                "type": "query",
+                "description": "Filter templates by an exact tag."
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "Cursor from a previous response `data.next_cursor` value."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of templates to return. The server caps this at 100."
+              }
+            ]
+          },
+          "docs": "List approved Function templates available for browsing and installation. Results are cacheable and paginated with `data.next_cursor`."
+        },
+        {
+          "info": {
+            "name": "Get a function template",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/templates/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Template slug from the template manifest."
+              }
+            ]
+          },
+          "docs": "Fetch one approved Function template by slug, including its manifest snapshot and README. The stored source files used for install are not returned."
+        },
+        {
+          "info": {
+            "name": "Install a function template",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.primitive.dev/v1/templates/:id/install",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Template slug from the template manifest."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Start a one-shot deploy of an approved deploy-mode Function template. The response returns an install record immediately; poll `GET /templates/installs/{id}` for progress."
+        },
+        {
+          "info": {
+            "name": "Get template install status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.primitive.dev/v1/templates/installs/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Template install UUID."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Fetch the current state of a template install. Reads may advance the self-test phase when a reply effect has been observed."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

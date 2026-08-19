@@ -1,0 +1,566 @@
+{
+  "item": [
+    {
+      "id": "a5e854a5-94b8-4730-b505-e5c936c01eeb",
+      "name": "Demo",
+      "description": {
+        "content": "Public, no-account sandbox operations that mirror authenticated endpoints with synthetic data so an agent can learn the request and response shapes before signing up.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "499e3f26-93ec-4f66-8598-3f05ad9595de",
+          "name": "Start a sample asynchronous job without authentication",
+          "request": {
+            "name": "Start a sample asynchronous job without authentication",
+            "description": {
+              "content": "Public, no-auth demo of the asynchronous-job pattern. Starts a synthetic job and returns `202 Accepted` with a `Location` header (and `data.status_url`) pointing at the job-status resource. Poll `GET /demo/jobs/{id}` until the status is terminal. No real work runs; the status is a fixed sample.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "demo",
+                "jobs"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "1c302fb0-1a8b-4186-b048-7f9dbf0ba7d5",
+              "name": "Job accepted. Poll the returned status URL for progress.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "jobs"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Accepted",
+              "code": 202,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "URL of the job-status resource to poll.",
+                  "key": "Location",
+                  "value": "https://dTWxyXvmHOqnKvArwcgmeUwXIalf.qvVllnl4anuyQmdUQT1JmNovgEGYRpCdtWEcnJ"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"demo\": true,\n  \"data\": {\n    \"id\": \"string\",\n    \"status\": \"completed\",\n    \"status_url\": \"https://SIAJzWTxEBzmysD.lxzIGox1CRC3T1RCS7FkJyg\",\n    \"type\": \"string\",\n    \"created_at\": \"1995-06-07T15:38:26.522Z\"\n  },\n  \"note\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "59f294ae-5a27-44cb-9786-c6140aac39f9",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "jobs"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "2845"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "6087aa63-5096-4a4f-b65b-a598f67527fb",
+          "name": "Poll a sample asynchronous job without authentication",
+          "request": {
+            "name": "Poll a sample asynchronous job without authentication",
+            "description": {
+              "content": "Public, no-auth demo. Returns the status of a synthetic job started by `POST /demo/jobs` — the poll half of the async-job pattern. No real work runs; the status is a fixed sample.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "demo",
+                "jobs",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) Job id returned by POST /demo/jobs."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "0cb627b9-458c-4957-882c-abf2fdcd681d",
+              "name": "Current job status.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "jobs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Job id returned by POST /demo/jobs."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"demo\": false,\n  \"data\": {\n    \"id\": \"string\",\n    \"status\": \"failed\",\n    \"progress\": 9289,\n    \"type\": \"string\",\n    \"created_at\": \"2025-08-17T13:28:58.631Z\",\n    \"estimated_completion_at\": \"1988-08-29T05:37:01.245Z\"\n  },\n  \"note\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ad67588d-f338-495d-a6cf-74a58549c9eb",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "jobs",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Job id returned by POST /demo/jobs."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "2845"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "aaf86533-a822-46af-9a31-9404fe7813a3",
+          "name": "List sample emails without authentication",
+          "request": {
+            "name": "List sample emails without authentication",
+            "description": {
+              "content": "Public, no-auth demo. Returns synthetic email objects shaped exactly like the authenticated `GET /emails` response (same `EmailSummary` schema), so an arriving agent can read the data model before obtaining credentials. No real tenant data is exposed; every object is a fixed sample. Rate-limited per IP.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "demo",
+                "emails"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "d513b23e-45ee-4035-8bf6-ed543b4e8535",
+              "name": "Synthetic list of emails, same shape as the authenticated /emails response.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "emails"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"demo\": false,\n  \"data\": [\n    {\n      \"id\": \"9f3b6df6-7499-dac2-8a80-7c212a2cbbcd\",\n      \"status\": \"pending\",\n      \"sender\": \"string\",\n      \"recipient\": \"string\",\n      \"domain\": \"string\",\n      \"created_at\": \"1954-11-30T22:50:47.917Z\",\n      \"received_at\": \"1985-08-28T20:25:29.322Z\",\n      \"webhook_attempt_count\": 198,\n      \"message_id\": \"string\",\n      \"domain_id\": \"42a97f0d-ff19-7e4d-b8c2-392236f39c95\",\n      \"org_id\": \"0567e2e0-f8ad-c666-b32e-4b13b291a30d\",\n      \"subject\": \"string\",\n      \"spam_score\": 1330.9727037636333,\n      \"raw_size_bytes\": 7555,\n      \"webhook_status\": \"exhausted\",\n      \"thread_id\": \"cd22debf-3c02-073e-19e6-9770113adc84\"\n    },\n    {\n      \"id\": \"0a17a693-83b1-3c93-0365-98c9f5410c9a\",\n      \"status\": \"completed\",\n      \"sender\": \"string\",\n      \"recipient\": \"string\",\n      \"domain\": \"string\",\n      \"created_at\": \"2023-06-05T05:36:31.594Z\",\n      \"received_at\": \"1961-06-15T00:35:29.909Z\",\n      \"webhook_attempt_count\": 213,\n      \"message_id\": \"string\",\n      \"domain_id\": \"3cde74ee-d95e-6ed4-2604-c370e0fb32f6\",\n      \"org_id\": \"1a90d510-1504-bcc6-58e5-32664d76bc5d\",\n      \"subject\": \"string\",\n      \"spam_score\": 1923.2818227503678,\n      \"raw_size_bytes\": 822,\n      \"webhook_status\": \"pending\",\n      \"thread_id\": \"38d28005-32cd-1c77-4a60-0d550d45606c\"\n    }\n  ],\n  \"note\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "80d1f195-aa03-40fc-8884-aff15939a601",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "emails"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "2845"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "dd7780e2-a2ff-41b7-9e47-94ed96ee9cc4",
+          "name": "Get one sample email without authentication",
+          "request": {
+            "name": "Get one sample email without authentication",
+            "description": {
+              "content": "Public, no-auth demo. Returns a single synthetic email shaped exactly like the authenticated `GET /emails/{id}` response (`EmailDetail` schema). No real tenant data is exposed. Rate-limited per IP.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "demo",
+                "emails",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) Any value; the demo returns a fixed sample."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "43346d8d-2561-4662-bacf-ac7ac185b610",
+              "name": "Synthetic email detail, same shape as the authenticated /emails/{id} response.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "emails",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Any value; the demo returns a fixed sample."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"demo\": true,\n  \"data\": {\n    \"id\": \"9a5793d6-f08b-9e27-6b62-50f3be4f9c7e\",\n    \"sender\": \"string\",\n    \"recipient\": \"string\",\n    \"status\": \"pending\",\n    \"domain\": \"string\",\n    \"created_at\": \"2024-01-25T17:00:26.468Z\",\n    \"received_at\": \"1974-01-21T05:22:39.453Z\",\n    \"webhook_attempt_count\": 7849,\n    \"from_email\": \"string\",\n    \"to_email\": \"string\",\n    \"replies\": [\n      {\n        \"id\": \"244a941b-77fe-1527-4486-8f639db69bda\",\n        \"status\": \"gate_denied\",\n        \"to_address\": \"string\",\n        \"created_at\": \"1970-05-31T22:36:21.700Z\",\n        \"subject\": \"string\",\n        \"queue_id\": \"string\"\n      },\n      {\n        \"id\": \"2d915311-66df-b3df-5cab-0b13dd8334d8\",\n        \"status\": \"deferred\",\n        \"to_address\": \"string\",\n        \"created_at\": \"2002-03-26T17:56:17.942Z\",\n        \"subject\": \"string\",\n        \"queue_id\": \"string\"\n      }\n    ],\n    \"parsed\": {\n      \"status\": \"complete\",\n      \"body_text\": \"string\",\n      \"body_html\": \"string\",\n      \"reply_to\": [\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        },\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        }\n      ],\n      \"cc\": [\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        },\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        }\n      ],\n      \"bcc\": [\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        },\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        }\n      ],\n      \"to_addresses\": [\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        },\n        {\n          \"address\": \"string\",\n          \"name\": \"string\"\n        }\n      ],\n      \"in_reply_to\": [\n        \"string\",\n        \"string\"\n      ],\n      \"references\": [\n        \"string\",\n        \"string\"\n      ],\n      \"attachments\": [\n        {\n          \"size_bytes\": 6459,\n          \"filename\": \"string\",\n          \"content_type\": \"string\",\n          \"sha256\": \"string\",\n          \"part_index\": 1918\n        },\n        {\n          \"size_bytes\": 8060,\n          \"filename\": \"string\",\n          \"content_type\": \"string\",\n          \"sha256\": \"string\",\n          \"part_index\": 2574\n        }\n      ],\n      \"error\": {\n        \"code\": \"string\",\n        \"message\": \"string\",\n        \"retryable\": false\n      }\n    },\n    \"auth\": {\n      \"spf\": \"string\",\n      \"dmarc\": \"string\",\n      \"dmarcSpfAligned\": true,\n      \"dmarcDkimAligned\": true,\n      \"dkimSignatures\": [\n        {\n          \"domain\": \"string\",\n          \"selector\": \"string\",\n          \"result\": \"string\",\n          \"aligned\": true,\n          \"keyBits\": 1155,\n          \"algo\": \"string\"\n        },\n        {\n          \"domain\": \"string\",\n          \"selector\": \"string\",\n          \"result\": \"string\",\n          \"aligned\": false,\n          \"keyBits\": 5366,\n          \"algo\": \"string\"\n        }\n      ],\n      \"dmarcPolicy\": \"string\",\n      \"dmarcFromDomain\": \"string\",\n      \"dmarcSpfStrict\": true,\n      \"dmarcDkimStrict\": true\n    },\n    \"message_id\": \"string\",\n    \"domain_id\": \"4c319f02-c927-d05c-1cd9-583473146791\",\n    \"org_id\": \"274afae3-d3d4-5cdd-6697-dcb783b2105c\",\n    \"subject\": \"string\",\n    \"body_text\": \"string\",\n    \"body_html\": \"string\",\n    \"spam_score\": 4061.720732399671,\n    \"raw_size_bytes\": 2361,\n    \"raw_sha256\": \"string\",\n    \"rejection_reason\": \"string\",\n    \"webhook_status\": \"failed\",\n    \"webhook_last_attempt_at\": \"2008-03-10T23:19:26.155Z\",\n    \"webhook_last_status_code\": 939,\n    \"webhook_last_error\": \"string\",\n    \"webhook_fired_at\": \"2020-11-14T16:22:35.560Z\",\n    \"smtp_helo\": \"string\",\n    \"smtp_mail_from\": \"string\",\n    \"smtp_rcpt_to\": [\n      \"string\",\n      \"string\"\n    ],\n    \"from_header\": \"string\",\n    \"content_discarded_at\": \"2018-01-22T12:19:49.332Z\",\n    \"content_discarded_by_delivery_id\": \"string\",\n    \"from_known_address\": true,\n    \"reply_to_sent_email_id\": \"f33548ce-958a-c732-d269-1e86b37dcb73\",\n    \"thread_id\": \"2d806b30-782c-647b-d10d-ce98c4aa37ce\"\n  },\n  \"note\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9995ac63-75a1-445a-9826-698479629f9a",
+              "name": "Rate limit exceeded",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "demo",
+                    "emails",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "id",
+                      "description": "(Required) Any value; the demo returns a fixed sample."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds to wait before retrying",
+                  "key": "Retry-After",
+                  "value": "2845"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.primitive.dev/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "e0dd2c23-2676-4228-8412-0b014038622d",
+    "name": "Primitive Account Demo API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump.\n\nContact Support:\n Name: Primitive",
+      "type": "text/plain"
+    }
+  }
+}
