@@ -27,6 +27,8 @@ apis:
   name: Primitive Agent API
   description: Agent signup and authentication
   tags:
+  - Agents
+  tags_raw:
   - Agent
   properties:
   - type: OpenAPI
@@ -78,7 +80,8 @@ apis:
 - aid: primitive:primitive-endpoints-api
   name: Primitive Endpoints API
   description: Manage webhook endpoints that receive email events
-  tags:
+  tags: []
+  tags_raw:
   - Endpoints
   properties:
   - type: OpenAPI
