@@ -98,6 +98,8 @@ apis:
   name: Primitive Emails API
   description: List, inspect, and manage received emails
   tags:
+  - Email
+  tags_raw:
   - Emails
   properties:
   - type: OpenAPI
@@ -250,6 +252,8 @@ apis:
   name: Primitive Service API
   description: Operational endpoints such as the unauthenticated health/liveness probe.
   tags:
+  - Services
+  tags_raw:
   - Service
   properties:
   - type: OpenAPI
