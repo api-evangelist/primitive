@@ -1,28 +1,7 @@
 {
   "provider": "primitive",
   "sources": [
-    "primitive-account-api-openapi.yml",
-    "primitive-agent-api-openapi.yml",
-    "primitive-cli-api-openapi.yml",
-    "primitive-demo-api-openapi.yml",
-    "primitive-discovery-api-openapi.yml",
-    "primitive-domains-api-openapi.yml",
-    "primitive-emails-api-openapi.yml",
-    "primitive-endpoints-api-openapi.yml",
-    "primitive-filters-api-openapi.yml",
-    "primitive-functions-api-openapi.yml",
-    "primitive-inbox-api-openapi.yml",
-    "primitive-memories-api-openapi.yml",
-    "primitive-payments-api-openapi.yml",
-    "primitive-registries-api-openapi.yml",
-    "primitive-routes-api-openapi.yml",
-    "primitive-search-api-openapi.yml",
-    "primitive-sending-api-openapi.yml",
-    "primitive-service-api-openapi.yml",
-    "primitive-templates-api-openapi.yml",
-    "primitive-threads-api-openapi.yml",
-    "primitive-wake-api-openapi.yml",
-    "primitive-webhook-deliveries-api-openapi.yml"
+    "_original/primitive-openapi-original.json"
   ],
   "outputs": [
     "primitive-account-api-openapi.yml",
@@ -51,6 +30,33 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "primitive-openapi-original.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "primitive-account-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-agent-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-cli-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-demo-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-discovery-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-domains-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-emails-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-endpoints-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-filters-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-functions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-inbox-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-memories-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-payments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-registries-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-routes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-search-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-sending-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-service-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-templates-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-threads-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-wake-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "primitive-webhook-deliveries-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
