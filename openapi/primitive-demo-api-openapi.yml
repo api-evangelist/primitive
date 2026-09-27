@@ -935,6 +935,23 @@ paths:
           $ref: '#/components/responses/RateLimited'
           description: Demo rate limit reached.
 components:
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
   schemas:
     GateFix:
       type: object
@@ -1101,23 +1118,6 @@ components:
       - reason
       - message
       - subject
-  responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: rate_limit_exceeded
-              message: Rate limit exceeded
   securitySchemes:
     BearerAuth:
       type: http

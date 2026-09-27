@@ -396,17 +396,6 @@ components:
       - action
       - subject
   responses:
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -423,6 +412,17 @@ components:
             error:
               code: rate_limit_exceeded
               message: Rate limit exceeded
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   securitySchemes:
     BearerAuth:
       type: http

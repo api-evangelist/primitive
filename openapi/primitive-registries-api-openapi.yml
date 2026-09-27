@@ -1222,8 +1222,8 @@ paths:
           description: Resource not found
 components:
   responses:
-    NotFound:
-      description: Resource not found
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
       content:
         application/json:
           schema:
@@ -1231,8 +1231,19 @@ components:
           example:
             success: false
             error:
-              code: not_found
-              message: Resource not found
+              code: forbidden
+              message: Insufficient permissions
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
     UnprocessableEntity:
       description: 'The request was well-formed but could not be processed. For Payments
 
@@ -1252,6 +1263,17 @@ components:
             error:
               code: payment_declined
               message: payment exceeds the per-payment cap
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
     Unauthorized:
       description: Invalid or missing API key
       content:
@@ -1263,28 +1285,6 @@ components:
             error:
               code: unauthorized
               message: Invalid or missing API key
-    Conflict:
-      description: The request conflicts with the current state of the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: conflict
-              message: settlement already in progress
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
   schemas:
     ErrorResponse:
       type: object

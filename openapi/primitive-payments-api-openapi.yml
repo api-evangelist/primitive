@@ -1770,8 +1770,8 @@ paths:
           description: Rate limit exceeded
 components:
   responses:
-    NotFound:
-      description: Resource not found
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
       content:
         application/json:
           schema:
@@ -1779,8 +1779,19 @@ components:
           example:
             success: false
             error:
-              code: not_found
-              message: Resource not found
+              code: forbidden
+              message: Insufficient permissions
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
     UnprocessableEntity:
       description: 'The request was well-formed but could not be processed. For Payments
 
@@ -1800,8 +1811,8 @@ components:
             error:
               code: payment_declined
               message: payment exceeds the per-payment cap
-    Unauthorized:
-      description: Invalid or missing API key
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
@@ -1809,19 +1820,8 @@ components:
           example:
             success: false
             error:
-              code: unauthorized
-              message: Invalid or missing API key
-    Conflict:
-      description: The request conflicts with the current state of the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: conflict
-              message: settlement already in progress
+              code: not_found
+              message: Resource not found
     BadGateway:
       description: Primitive could not complete the downstream SMTP request
       content:
@@ -1833,28 +1833,6 @@ components:
             error:
               code: outbound_unreachable
               message: Outbound SMTP service request failed
-    ValidationError:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: validation_error
-              message: Invalid domain format
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -1871,6 +1849,28 @@ components:
             error:
               code: rate_limit_exceeded
               message: Rate limit exceeded
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   schemas:
     ErrorResponse:
       type: object

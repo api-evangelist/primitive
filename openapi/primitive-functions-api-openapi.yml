@@ -3024,91 +3024,6 @@ paths:
       - BearerAuth: []
 components:
   responses:
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: not_found
-              message: Resource not found
-    UnprocessableEntity:
-      description: 'The request was well-formed but could not be processed. For Payments
-
-        this covers a missing payout address, a failed payment verification, a
-
-        spend-policy decline, or an expired challenge; `error.code` distinguishes
-
-        them.
-
-        '
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: payment_declined
-              message: payment exceeds the per-payment cap
-    FailedDependency:
-      description: The operation depends on another service or step that failed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: deploy_failed
-              message: Function deploy failed
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
-    Conflict:
-      description: The request conflicts with the current state of the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: conflict
-              message: settlement already in progress
-    BadGateway:
-      description: Primitive could not complete the downstream SMTP request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: outbound_unreachable
-              message: Outbound SMTP service request failed
-    ValidationError:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: validation_error
-              message: Invalid domain format
     ServiceUnavailable:
       description: Primitive is temporarily unable to process the request
       content:
@@ -3131,6 +3046,69 @@ components:
             error:
               code: forbidden
               message: Insufficient permissions
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
+    UnprocessableEntity:
+      description: 'The request was well-formed but could not be processed. For Payments
+
+        this covers a missing payout address, a failed payment verification, a
+
+        spend-policy decline, or an expired challenge; `error.code` distinguishes
+
+        them.
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: payment_declined
+              message: payment exceeds the per-payment cap
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    BadGateway:
+      description: Primitive could not complete the downstream SMTP request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: outbound_unreachable
+              message: Outbound SMTP service request failed
+    FailedDependency:
+      description: The operation depends on another service or step that failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: deploy_failed
+              message: Function deploy failed
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -3147,6 +3125,28 @@ components:
             error:
               code: rate_limit_exceeded
               message: Rate limit exceeded
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   schemas:
     ErrorResponse:
       type: object

@@ -2708,8 +2708,8 @@ paths:
           maxLength: 255
 components:
   responses:
-    NotFound:
-      description: Resource not found
+    ServiceUnavailable:
+      description: Primitive is temporarily unable to process the request
       content:
         application/json:
           schema:
@@ -2717,8 +2717,19 @@ components:
           example:
             success: false
             error:
-              code: not_found
-              message: Resource not found
+              code: outbound_capacity_exhausted
+              message: Outbound capacity is temporarily exhausted
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
     UnprocessableEntity:
       description: 'The request was well-formed but could not be processed. For Payments
 
@@ -2738,6 +2749,61 @@ components:
             error:
               code: payment_declined
               message: payment exceeds the per-payment cap
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    BadGateway:
+      description: Primitive could not complete the downstream SMTP request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: outbound_unreachable
+              message: Outbound SMTP service request failed
+    InternalError:
+      description: Primitive encountered an internal error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: internal_error
+              message: Internal server error
+    UnsupportedMediaType:
+      description: Content-Type must be application/json.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Content-Type must be application/json
+    PayloadTooLarge:
+      description: Request body is too large.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Request body is too large
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -2754,83 +2820,6 @@ components:
             error:
               code: rate_limit_exceeded
               message: Rate limit exceeded
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
-    BadGateway:
-      description: Primitive could not complete the downstream SMTP request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: outbound_unreachable
-              message: Outbound SMTP service request failed
-    ServiceUnavailable:
-      description: Primitive is temporarily unable to process the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: outbound_capacity_exhausted
-              message: Outbound capacity is temporarily exhausted
-    PayloadTooLarge:
-      description: Request body is too large.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: validation_error
-              message: Request body is too large
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
-    UnsupportedMediaType:
-      description: Content-Type must be application/json.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: validation_error
-              message: Content-Type must be application/json
-    InternalError:
-      description: Primitive encountered an internal error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: internal_error
-              message: Internal server error
     ValidationError:
       description: Invalid request parameters
       content:
@@ -2842,6 +2831,17 @@ components:
             error:
               code: validation_error
               message: Invalid domain format
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   schemas:
     ErrorResponse:
       type: object

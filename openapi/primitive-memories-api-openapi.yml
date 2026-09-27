@@ -975,6 +975,28 @@ paths:
           description: Rate limit exceeded
 components:
   responses:
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
     NotFound:
       description: Resource not found
       content:
@@ -986,6 +1008,12 @@ components:
             error:
               code: not_found
               message: Resource not found
+    PaymentRequired:
+      description: Usage credits are exhausted or payment is required.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -1002,45 +1030,6 @@ components:
             error:
               code: rate_limit_exceeded
               message: Rate limit exceeded
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
-    Conflict:
-      description: The request conflicts with the current state of the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: conflict
-              message: settlement already in progress
-    PaymentRequired:
-      description: Usage credits are exhausted or payment is required.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
     ValidationError:
       description: Invalid request parameters
       content:
@@ -1052,20 +1041,18 @@ components:
             error:
               code: validation_error
               message: Invalid domain format
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   schemas:
-    MemoryJsonValue:
-      description: JSON value accepted by Primitive Memories. The server accepts strings, numbers, booleans, null, arrays, and objects, validates nested values, and rejects values that do not serialize as JSON.
-      oneOf:
-      - type: 'null'
-      - type: string
-      - type: number
-      - type: boolean
-      - type: array
-        items:
-          $ref: '#/components/schemas/MemoryJsonValue'
-      - type: object
-        additionalProperties:
-          $ref: '#/components/schemas/MemoryJsonValue'
     ErrorResponse:
       type: object
       properties:
@@ -1215,6 +1202,19 @@ components:
       - reason
       - message
       - subject
+    MemoryJsonValue:
+      description: JSON value accepted by Primitive Memories. The server accepts strings, numbers, booleans, null, arrays, and objects, validates nested values, and rejects values that do not serialize as JSON.
+      oneOf:
+      - type: 'null'
+      - type: string
+      - type: number
+      - type: boolean
+      - type: array
+        items:
+          $ref: '#/components/schemas/MemoryJsonValue'
+      - type: object
+        additionalProperties:
+          $ref: '#/components/schemas/MemoryJsonValue'
     GateFix:
       type: object
       properties:
