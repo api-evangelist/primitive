@@ -935,23 +935,6 @@ paths:
           $ref: '#/components/responses/RateLimited'
           description: Demo rate limit reached.
 components:
-  responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: rate_limit_exceeded
-              message: Rate limit exceeded
   schemas:
     GateFix:
       type: object
@@ -968,6 +951,38 @@ components:
           description: Entity the action applies to.
       required:
       - action
+      - subject
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
       - subject
     ErrorResponse:
       type: object
@@ -1086,38 +1101,23 @@ components:
       required:
       - success
       - error
-    GateDenial:
-      type: object
-      properties:
-        name:
-          type: string
-          enum:
-          - send_to_confirmed_domains
-          - send_to_known_addresses
-          description: Public recipient-scope gate name that denied the send.
-        reason:
-          type: string
-          enum:
-          - domain_not_confirmed
-          - recipient_unauthenticated
-          - recipient_not_known
-          description: Stable machine-readable denial reason.
-        message:
-          type: string
-          description: Human-readable explanation of the gate denial.
-        subject:
-          type: string
-          description: Domain or address the gate evaluated.
-        fix:
-          $ref: '#/components/schemas/GateFix'
-        docs_url:
-          type: string
-          description: Public docs URL with more context.
-      required:
-      - name
-      - reason
-      - message
-      - subject
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
   securitySchemes:
     BearerAuth:
       type: http

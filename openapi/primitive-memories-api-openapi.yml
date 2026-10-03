@@ -975,28 +975,6 @@ paths:
           description: Rate limit exceeded
 components:
   responses:
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
-    Conflict:
-      description: The request conflicts with the current state of the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: conflict
-              message: settlement already in progress
     NotFound:
       description: Resource not found
       content:
@@ -1008,6 +986,28 @@ components:
             error:
               code: not_found
               message: Resource not found
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
     PaymentRequired:
       description: Usage credits are exhausted or payment is required.
       content:
@@ -1041,8 +1041,8 @@ components:
             error:
               code: validation_error
               message: Invalid domain format
-    Unauthorized:
-      description: Invalid or missing API key
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
       content:
         application/json:
           schema:
@@ -1050,9 +1050,70 @@ components:
           example:
             success: false
             error:
-              code: unauthorized
-              message: Invalid or missing API key
+              code: forbidden
+              message: Insufficient permissions
   schemas:
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
+      - subject
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+    MemoryJsonValue:
+      description: JSON value accepted by Primitive Memories. The server accepts strings, numbers, booleans, null, arrays, and objects, validates nested values, and rejects values that do not serialize as JSON.
+      oneOf:
+      - type: 'null'
+      - type: string
+      - type: number
+      - type: boolean
+      - type: array
+        items:
+          $ref: '#/components/schemas/MemoryJsonValue'
+      - type: object
+        additionalProperties:
+          $ref: '#/components/schemas/MemoryJsonValue'
     ErrorResponse:
       type: object
       properties:
@@ -1170,67 +1231,6 @@ components:
       required:
       - success
       - error
-    GateDenial:
-      type: object
-      properties:
-        name:
-          type: string
-          enum:
-          - send_to_confirmed_domains
-          - send_to_known_addresses
-          description: Public recipient-scope gate name that denied the send.
-        reason:
-          type: string
-          enum:
-          - domain_not_confirmed
-          - recipient_unauthenticated
-          - recipient_not_known
-          description: Stable machine-readable denial reason.
-        message:
-          type: string
-          description: Human-readable explanation of the gate denial.
-        subject:
-          type: string
-          description: Domain or address the gate evaluated.
-        fix:
-          $ref: '#/components/schemas/GateFix'
-        docs_url:
-          type: string
-          description: Public docs URL with more context.
-      required:
-      - name
-      - reason
-      - message
-      - subject
-    MemoryJsonValue:
-      description: JSON value accepted by Primitive Memories. The server accepts strings, numbers, booleans, null, arrays, and objects, validates nested values, and rejects values that do not serialize as JSON.
-      oneOf:
-      - type: 'null'
-      - type: string
-      - type: number
-      - type: boolean
-      - type: array
-        items:
-          $ref: '#/components/schemas/MemoryJsonValue'
-      - type: object
-        additionalProperties:
-          $ref: '#/components/schemas/MemoryJsonValue'
-    GateFix:
-      type: object
-      properties:
-        action:
-          type: string
-          enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
-        subject:
-          type: string
-          description: Entity the action applies to.
-      required:
-      - action
-      - subject
   securitySchemes:
     BearerAuth:
       type: http
