@@ -308,28 +308,6 @@ paths:
           maxLength: 255
 components:
   responses:
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: not_found
-              message: Resource not found
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
     ValidationError:
       description: Invalid request parameters
       content:
@@ -341,6 +319,17 @@ components:
             error:
               code: validation_error
               message: Invalid domain format
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -357,55 +346,18 @@ components:
             error:
               code: rate_limit_exceeded
               message: Rate limit exceeded
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   schemas:
-    GateDenial:
-      type: object
-      properties:
-        name:
-          type: string
-          enum:
-          - send_to_confirmed_domains
-          - send_to_known_addresses
-          description: Public recipient-scope gate name that denied the send.
-        reason:
-          type: string
-          enum:
-          - domain_not_confirmed
-          - recipient_unauthenticated
-          - recipient_not_known
-          description: Stable machine-readable denial reason.
-        message:
-          type: string
-          description: Human-readable explanation of the gate denial.
-        subject:
-          type: string
-          description: Domain or address the gate evaluated.
-        fix:
-          $ref: '#/components/schemas/GateFix'
-        docs_url:
-          type: string
-          description: Public docs URL with more context.
-      required:
-      - name
-      - reason
-      - message
-      - subject
-    GateFix:
-      type: object
-      properties:
-        action:
-          type: string
-          enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
-        subject:
-          type: string
-          description: Entity the action applies to.
-      required:
-      - action
-      - subject
     ErrorResponse:
       type: object
       properties:
@@ -523,6 +475,54 @@ components:
       required:
       - success
       - error
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+    GateDenial:
+      type: object
+      properties:
+        name:
+          type: string
+          enum:
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
+        subject:
+          type: string
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
+      required:
+      - name
+      - reason
+      - message
+      - subject
   securitySchemes:
     BearerAuth:
       type: http
