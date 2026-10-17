@@ -229,35 +229,23 @@ paths:
           $ref: '#/components/responses/RateLimited'
           description: Rate limit exceeded
 components:
-  responses:
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: rate_limit_exceeded
-              message: Rate limit exceeded
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
   schemas:
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
     ErrorResponse:
       type: object
       properties:
@@ -375,22 +363,6 @@ components:
       required:
       - success
       - error
-    GateFix:
-      type: object
-      properties:
-        action:
-          type: string
-          enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
-        subject:
-          type: string
-          description: Entity the action applies to.
-      required:
-      - action
-      - subject
     GateDenial:
       type: object
       properties:
@@ -423,6 +395,34 @@ components:
       - reason
       - message
       - subject
+  responses:
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   securitySchemes:
     BearerAuth:
       type: http

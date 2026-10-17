@@ -1770,8 +1770,8 @@ paths:
           description: Rate limit exceeded
 components:
   responses:
-    ValidationError:
-      description: Invalid request parameters
+    BadGateway:
+      description: Primitive could not complete the downstream SMTP request
       content:
         application/json:
           schema:
@@ -1779,8 +1779,8 @@ components:
           example:
             success: false
             error:
-              code: validation_error
-              message: Invalid domain format
+              code: outbound_unreachable
+              message: Outbound SMTP service request failed
     UnprocessableEntity:
       description: 'The request was well-formed but could not be processed. For Payments
 
@@ -1800,8 +1800,8 @@ components:
             error:
               code: payment_declined
               message: payment exceeds the per-payment cap
-    NotFound:
-      description: Resource not found
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
       content:
         application/json:
           schema:
@@ -1809,8 +1809,8 @@ components:
           example:
             success: false
             error:
-              code: not_found
-              message: Resource not found
+              code: forbidden
+              message: Insufficient permissions
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -1827,8 +1827,8 @@ components:
             error:
               code: rate_limit_exceeded
               message: Rate limit exceeded
-    Unauthorized:
-      description: Invalid or missing API key
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
@@ -1836,10 +1836,10 @@ components:
           example:
             success: false
             error:
-              code: unauthorized
-              message: Invalid or missing API key
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
+              code: not_found
+              message: Resource not found
+    ValidationError:
+      description: Invalid request parameters
       content:
         application/json:
           schema:
@@ -1847,8 +1847,8 @@ components:
           example:
             success: false
             error:
-              code: forbidden
-              message: Insufficient permissions
+              code: validation_error
+              message: Invalid domain format
     Conflict:
       description: The request conflicts with the current state of the resource
       content:
@@ -1860,8 +1860,8 @@ components:
             error:
               code: conflict
               message: settlement already in progress
-    BadGateway:
-      description: Primitive could not complete the downstream SMTP request
+    Unauthorized:
+      description: Invalid or missing API key
       content:
         application/json:
           schema:
@@ -1869,9 +1869,25 @@ components:
           example:
             success: false
             error:
-              code: outbound_unreachable
-              message: Outbound SMTP service request failed
+              code: unauthorized
+              message: Invalid or missing API key
   schemas:
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
     ErrorResponse:
       type: object
       properties:
@@ -1989,22 +2005,6 @@ components:
       required:
       - success
       - error
-    GateFix:
-      type: object
-      properties:
-        action:
-          type: string
-          enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
-        subject:
-          type: string
-          description: Entity the action applies to.
-      required:
-      - action
-      - subject
     GateDenial:
       type: object
       properties:

@@ -2166,90 +2166,23 @@ paths:
       security:
       - BearerAuth: []
 components:
-  responses:
-    InternalError:
-      description: Primitive encountered an internal error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: internal_error
-              message: Internal server error
-    ValidationError:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: validation_error
-              message: Invalid domain format
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: not_found
-              message: Resource not found
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: rate_limit_exceeded
-              message: Rate limit exceeded
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
-    GatewayTimeout:
-      description: Primitive timed out while waiting for a downstream operation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: internal_error
-              message: Downstream operation timed out
   schemas:
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
     ErrorResponse:
       type: object
       properties:
@@ -2367,22 +2300,6 @@ components:
       required:
       - success
       - error
-    GateFix:
-      type: object
-      properties:
-        action:
-          type: string
-          enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
-        subject:
-          type: string
-          description: Entity the action applies to.
-      required:
-      - action
-      - subject
     GateDenial:
       type: object
       properties:
@@ -2415,6 +2332,89 @@ components:
       - reason
       - message
       - subject
+  responses:
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    InternalError:
+      description: Primitive encountered an internal error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: internal_error
+              message: Internal server error
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+    GatewayTimeout:
+      description: Primitive timed out while waiting for a downstream operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: internal_error
+              message: Downstream operation timed out
   securitySchemes:
     BearerAuth:
       type: http

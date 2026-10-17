@@ -936,37 +936,21 @@ paths:
           description: Demo rate limit reached.
 components:
   schemas:
-    GateDenial:
+    GateFix:
       type: object
       properties:
-        name:
+        action:
           type: string
           enum:
-          - send_to_confirmed_domains
-          - send_to_known_addresses
-          description: Public recipient-scope gate name that denied the send.
-        reason:
-          type: string
-          enum:
-          - domain_not_confirmed
-          - recipient_unauthenticated
-          - recipient_not_known
-          description: Stable machine-readable denial reason.
-        message:
-          type: string
-          description: Human-readable explanation of the gate denial.
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
         subject:
           type: string
-          description: Domain or address the gate evaluated.
-        fix:
-          $ref: '#/components/schemas/GateFix'
-        docs_url:
-          type: string
-          description: Public docs URL with more context.
+          description: Entity the action applies to.
       required:
-      - name
-      - reason
-      - message
+      - action
       - subject
     ErrorResponse:
       type: object
@@ -1085,21 +1069,37 @@ components:
       required:
       - success
       - error
-    GateFix:
+    GateDenial:
       type: object
       properties:
-        action:
+        name:
           type: string
           enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
+          - send_to_confirmed_domains
+          - send_to_known_addresses
+          description: Public recipient-scope gate name that denied the send.
+        reason:
+          type: string
+          enum:
+          - domain_not_confirmed
+          - recipient_unauthenticated
+          - recipient_not_known
+          description: Stable machine-readable denial reason.
+        message:
+          type: string
+          description: Human-readable explanation of the gate denial.
         subject:
           type: string
-          description: Entity the action applies to.
+          description: Domain or address the gate evaluated.
+        fix:
+          $ref: '#/components/schemas/GateFix'
+        docs_url:
+          type: string
+          description: Public docs URL with more context.
       required:
-      - action
+      - name
+      - reason
+      - message
       - subject
   responses:
     RateLimited:

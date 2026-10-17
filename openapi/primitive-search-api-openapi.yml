@@ -400,79 +400,23 @@ paths:
           minLength: 1
           maxLength: 255
 components:
-  responses:
-    InternalError:
-      description: Primitive encountered an internal error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: internal_error
-              message: Internal server error
-    ValidationError:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: validation_error
-              message: Invalid domain format
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: rate_limit_exceeded
-              message: Rate limit exceeded
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
-    ServiceUnavailable:
-      description: Primitive is temporarily unable to process the request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: outbound_capacity_exhausted
-              message: Outbound capacity is temporarily exhausted
   schemas:
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
     ErrorResponse:
       type: object
       properties:
@@ -590,22 +534,6 @@ components:
       required:
       - success
       - error
-    GateFix:
-      type: object
-      properties:
-        action:
-          type: string
-          enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
-        subject:
-          type: string
-          description: Entity the action applies to.
-      required:
-      - action
-      - subject
     GateDenial:
       type: object
       properties:
@@ -638,6 +566,78 @@ components:
       - reason
       - message
       - subject
+  responses:
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    InternalError:
+      description: Primitive encountered an internal error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: internal_error
+              message: Internal server error
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    ServiceUnavailable:
+      description: Primitive is temporarily unable to process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: outbound_capacity_exhausted
+              message: Outbound capacity is temporarily exhausted
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   securitySchemes:
     BearerAuth:
       type: http

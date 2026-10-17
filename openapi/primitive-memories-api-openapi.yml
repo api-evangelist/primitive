@@ -974,85 +974,36 @@ paths:
           $ref: '#/components/responses/RateLimited'
           description: Rate limit exceeded
 components:
-  responses:
-    ValidationError:
-      description: Invalid request parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: validation_error
-              message: Invalid domain format
-    PaymentRequired:
-      description: Usage credits are exhausted or payment is required.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    RateLimited:
-      description: Rate limit exceeded
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: rate_limit_exceeded
-              message: Rate limit exceeded
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: not_found
-              message: Resource not found
-    Unauthorized:
-      description: Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: unauthorized
-              message: Invalid or missing API key
-    Forbidden:
-      description: Authenticated caller lacks permission for the operation
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: forbidden
-              message: Insufficient permissions
-    Conflict:
-      description: The request conflicts with the current state of the resource
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            success: false
-            error:
-              code: conflict
-              message: settlement already in progress
   schemas:
+    GateFix:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - confirm_domain
+          - sender_must_fix_authentication
+          - wait_for_inbound
+          description: Suggested next action for the caller.
+        subject:
+          type: string
+          description: Entity the action applies to.
+      required:
+      - action
+      - subject
+    MemoryJsonValue:
+      description: JSON value accepted by Primitive Memories. The server accepts strings, numbers, booleans, null, arrays, and objects, validates nested values, and rejects values that do not serialize as JSON.
+      oneOf:
+      - type: 'null'
+      - type: string
+      - type: number
+      - type: boolean
+      - type: array
+        items:
+          $ref: '#/components/schemas/MemoryJsonValue'
+      - type: object
+        additionalProperties:
+          $ref: '#/components/schemas/MemoryJsonValue'
     ErrorResponse:
       type: object
       properties:
@@ -1170,22 +1121,6 @@ components:
       required:
       - success
       - error
-    GateFix:
-      type: object
-      properties:
-        action:
-          type: string
-          enum:
-          - confirm_domain
-          - sender_must_fix_authentication
-          - wait_for_inbound
-          description: Suggested next action for the caller.
-        subject:
-          type: string
-          description: Entity the action applies to.
-      required:
-      - action
-      - subject
     GateDenial:
       type: object
       properties:
@@ -1218,19 +1153,84 @@ components:
       - reason
       - message
       - subject
-    MemoryJsonValue:
-      description: JSON value accepted by Primitive Memories. The server accepts strings, numbers, booleans, null, arrays, and objects, validates nested values, and rejects values that do not serialize as JSON.
-      oneOf:
-      - type: 'null'
-      - type: string
-      - type: number
-      - type: boolean
-      - type: array
-        items:
-          $ref: '#/components/schemas/MemoryJsonValue'
-      - type: object
-        additionalProperties:
-          $ref: '#/components/schemas/MemoryJsonValue'
+  responses:
+    PaymentRequired:
+      description: Usage credits are exhausted or payment is required.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Authenticated caller lacks permission for the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: forbidden
+              message: Insufficient permissions
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: rate_limit_exceeded
+              message: Rate limit exceeded
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: not_found
+              message: Resource not found
+    ValidationError:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: validation_error
+              message: Invalid domain format
+    Conflict:
+      description: The request conflicts with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: conflict
+              message: settlement already in progress
+    Unauthorized:
+      description: Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: unauthorized
+              message: Invalid or missing API key
   securitySchemes:
     BearerAuth:
       type: http
