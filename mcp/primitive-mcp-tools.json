@@ -40,19 +40,21 @@
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": []
         },
         "outputSchema": {
           "type": "object",
+          "description": "The account: plan, limits, managed inbox.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -60,9 +62,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -71,44 +75,54 @@
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Account id."
                     },
                     "email": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Owner email; null for a no-signup account."
                     },
                     "plan": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Plan name."
                     },
                     "managed_inbox_address": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Managed inbox domain, not a mailbox."
                     },
                     "sender_address": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Default sender mailbox."
                     },
                     "limits": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Caps: send_per_hour, send_per_day, api_per_minute."
                     },
                     "entitlements": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Granted capabilities, such as send_mail."
                     },
                     "onboarding_completed": {
                       "type": [
                         "boolean",
                         "null"
-                      ]
+                      ],
+                      "description": "Setup finished."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -156,19 +170,21 @@
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": []
         },
         "outputSchema": {
           "type": "object",
+          "description": "Whether inbound mail is set up.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -176,9 +192,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -187,35 +205,46 @@
                   ],
                   "properties": {
                     "ready": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Mail is received and processed."
                     },
                     "receiving_ready": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "A domain receives mail."
                     },
                     "processing_ready": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Mail is routed somewhere."
                     },
                     "summary": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Plain-language status."
                     },
                     "next_actions": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Steps left: kind, message, command."
                     },
                     "domains": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Inbound domains: id, domain, status, email_count."
                     },
                     "endpoints": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Webhook endpoint counts: total, enabled."
                     },
                     "functions": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Function counts: total, deployed, failed."
                     },
                     "recent_emails": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "total, latest_received_at."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -263,19 +292,21 @@
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": []
         },
         "outputSchema": {
           "type": "object",
+          "description": "Where you can send from, and to whom.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -283,9 +314,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -294,26 +327,34 @@
                   ],
                   "properties": {
                     "ready": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Some domain can send."
                     },
                     "summary": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Plain-language status."
                     },
                     "sendable_domains": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Domains you can send from now."
                     },
                     "domains": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Your domains: id, domain, status."
                     },
                     "next_actions": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Steps left: kind, message, command."
                     },
                     "can_send_to": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Who you may email: summary, any_recipient, rules."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -353,30 +394,30 @@
           "properties": {
             "cursor": {
               "type": "string",
-              "description": "Backward (history) pagination cursor from a previous response's `meta.cursor` field: returns emails OLDER than this position, newest-first. Not a date: to filter by time use `date_from` or `date_to`. Mutually exclusive with `since`."
+              "description": "History cursor: the meta.cursor of the page before. Returns emails OLDER than it, newest first. Not a date (use date_from or date_to); not with since."
             },
             "since": {
               "type": "string",
-              "description": "Forward-tail cursor: `start`, or a `meta.cursor` value from a previous response (format `{ISO datetime}|{UUID}`). Returns emails strictly NEWER than this position, oldest-first, for lossless polling of just-arrived mail; `start` reads from the first email. Not a date: to filter by time use `date_from` or `date_to`. Mutually exclusive with `cursor`."
+              "description": "Tail cursor: start (from the first email), or a meta.cursor. Returns emails NEWER than it, oldest first, to poll new mail without gaps. Not a date; not with cursor."
             },
             "wait": {
               "type": "integer",
               "minimum": 0,
               "maximum": 30,
               "default": 0,
-              "description": "Seconds to hold the request open for new mail instead of returning an empty page at once. Requires `since`. Returns as soon as matching mail arrives, or an empty page when the wait elapses."
+              "description": "Seconds to wait for new mail when there is none yet, so a poll with since returns as soon as mail arrives."
             },
             "limit": {
               "type": "integer",
               "minimum": 1,
               "maximum": 100,
               "default": 50,
-              "description": "Most emails to return in one page."
+              "description": "Rows per page. Ask for fewer when you only need the latest few."
             },
             "domain_id": {
               "type": "string",
               "format": "uuid",
-              "description": "Filter to emails received on a specific verified domain."
+              "description": "One of your receiving domains, by the id getInboxStatus returns."
             },
             "status": {
               "type": "string",
@@ -386,42 +427,44 @@
                 "completed",
                 "rejected"
               ],
-              "description": "Filter to emails in this processing status."
+              "description": "Processing stage: pending or accepted while in progress, completed when done, rejected if a filter or check refused it."
             },
             "search": {
               "type": "string",
               "maxLength": 500,
-              "description": "Words to match in the sender, recipient or subject. To search bodies, use searchEmails."
+              "description": "Words to look for in the sender, recipient or subject. To search bodies, use searchEmails."
             },
             "date_from": {
               "type": "string",
-              "description": "Inclusive lower bound on created_at. An ISO 8601 date-time with Z or a UTC offset (\"2026-10-01T09:00:00Z\", \"2026-10-01T09:00:00-04:00\"), or a calendar date (\"2026-10-01\"), which starts at 00:00 UTC. A time with no offset is read as UTC."
+              "description": "Only rows whose created_at is at or after this date or time (UTC unless it has an offset)."
             },
             "date_to": {
               "type": "string",
-              "description": "Inclusive upper bound on created_at. An ISO 8601 date-time with Z or a UTC offset (\"2026-10-01T09:00:00Z\", \"2026-10-01T09:00:00-04:00\"), or a calendar date (\"2026-10-01\"), which runs to the end of that day, UTC. A time with no offset is read as UTC."
+              "description": "Only rows whose created_at is at or before this; a bare date covers that whole day (UTC)."
             },
             "full": {
               "type": "boolean",
               "default": false,
-              "description": "Set true for the record as stored. By default the result is a compact view for reading, which leaves out per-row delivery, webhook and classification state (message_id, domain and org ids, spam score, sizes, webhook status)."
+              "description": "Return the stored record, with delivery, webhook and classification state, instead of the compact view for reading."
             },
             "api_key": {
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           }
         },
         "outputSchema": {
           "type": "object",
+          "description": "A page of inbound emails.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -429,9 +472,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -440,89 +485,111 @@
                   ],
                   "items": {
                     "type": "object",
+                    "description": "One email; full adds stored fields.",
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Email id, for getEmail."
                       },
                       "thread_id": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Conversation it belongs to."
                       },
                       "received_at": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Arrival time."
                       },
                       "from": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "From header."
                       },
                       "to": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Recipient."
                       },
                       "subject": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Subject line."
                       },
                       "status": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Processing stage."
                       },
                       "snippet": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Start of the body."
                       },
                       "awaiting": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Whose turn: you or them."
                       },
                       "automated": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Sent by a machine."
                       },
                       "attachment_count": {
                         "type": [
                           "number",
                           "string"
-                        ]
+                        ],
+                        "description": "Attachments; left out when none."
                       },
                       "reply_count": {
                         "type": [
                           "number",
                           "string"
-                        ]
+                        ],
+                        "description": "Replies you sent to it."
                       },
                       "created_at": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Stored time."
                       },
                       "sender": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Envelope sender."
                       },
                       "recipient": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Envelope recipient."
                       },
                       "from_email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Sender address."
                       },
                       "to_email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Recipient address."
                       },
                       "spam_score": {
                         "type": [
                           "number",
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Higher is spammier."
                       }
                     }
                   }
                 },
-                "error": {},
+                "error": {
+                  "description": "Why refused."
+                },
                 "meta": {
                   "type": [
                     "object",
                     "null"
-                  ]
+                  ],
+                  "description": "cursor for the next page, and total."
                 }
               }
             }
@@ -562,7 +629,7 @@
       {
         "name": "searchEmails",
         "title": "Search inbound emails",
-        "description": "Find particular inbound emails. Use this when you are looking for specific messages: a full-text query (q) over subject, body, sender and recipient, or structured filters on sender, recipient, subject, body, attachments, spam score, or the sent email they reply to. Results can be ranked by relevance or date and carry a body snippet. To page through the inbox newest first, or to wait for mail that has not arrived yet, use listEmails instead. Each row is id, thread_id, received_at, from, to, subject, status, a snippet of the body and attachment_count when there are attachments; open one with getEmail.",
+        "description": "Find particular inbound emails. Use this when you are looking for specific messages: a full-text query (q) over subject, body, sender and recipient, or structured filters on sender, recipient, subject, body, attachments, spam score, or the sent email they reply to. Results can be ranked by relevance or date and carry a body snippet. To page through the inbox newest first, or to wait for mail that has not arrived yet, use listEmails instead. Each row is id, thread_id, received_at, from, to, subject, status, direction, awaiting and a snippet of the body, with attachment_count, reply_count and automated when they apply; open one with getEmail.",
         "inputSchema": {
           "type": "object",
           "additionalProperties": false,
@@ -570,37 +637,37 @@
             "q": {
               "type": "string",
               "maxLength": 500,
-              "description": "Full-text query matched across subject, body, sender, and recipient. Every word must match, so fewer words find more; put a phrase in double quotes. An upper-case OR between words, phrases, or subject: / body: terms accepts either (invoice OR receipt). OR binds tighter than the implicit AND: acme invoice OR receipt means acme and either invoice or receipt. OR cannot join the other field filters, and there is no NOT. Field filters can be written inline: from:, to:, subject:, body:, has:attachment, before:, after:, domain:, status:, awaiting:, automated:."
+              "description": "What you are looking for, matched in the subject, body, sender and recipient. Every word has to appear, so fewer words find more. Quote a phrase, put an upper-case OR between alternatives, and add filters such as from:, subject: or has:attachment."
             },
             "from": {
               "type": "string",
               "maxLength": 255,
-              "description": "Filter to emails from this sender address or domain."
+              "description": "Who sent it: a full address, or a domain for everyone there."
             },
             "to": {
               "type": "string",
               "maxLength": 255,
-              "description": "Filter to emails addressed to this recipient."
+              "description": "Which of your addresses it was sent to."
             },
             "subject": {
               "type": "string",
               "maxLength": 500,
-              "description": "Filter to emails whose subject contains this string."
+              "description": "Text that appears in the subject."
             },
             "body": {
               "type": "string",
               "maxLength": 2000,
-              "description": "Filter to emails whose body contains this string."
+              "description": "Text that appears in the message body."
             },
             "domain_id": {
               "type": "string",
               "format": "uuid",
-              "description": "Filter to emails received on a specific verified domain."
+              "description": "One of your receiving domains, by the id getInboxStatus returns."
             },
             "reply_to_sent_email_id": {
               "type": "string",
               "format": "uuid",
-              "description": "Filter to inbound emails that are replies to a specific sent email ID."
+              "description": "Find the replies to one of your sends, by the id sendEmail or listSentEmails returned."
             },
             "status": {
               "type": "string",
@@ -610,15 +677,15 @@
                 "completed",
                 "rejected"
               ],
-              "description": "Filter to emails in this processing status."
+              "description": "Processing stage: pending or accepted while in progress, completed when done, rejected if a filter or check refused it."
             },
             "date_from": {
               "type": "string",
-              "description": "Inclusive lower bound on received_at. An ISO 8601 date-time with Z or a UTC offset (\"2026-10-01T09:00:00Z\", \"2026-10-01T09:00:00-04:00\"), or a calendar date (\"2026-10-01\"), which starts at 00:00 UTC. A time with no offset is read as UTC."
+              "description": "Only rows whose received_at is at or after this date or time (UTC unless it has an offset)."
             },
             "date_to": {
               "type": "string",
-              "description": "Inclusive upper bound on received_at. An ISO 8601 date-time with Z or a UTC offset (\"2026-10-01T09:00:00Z\", \"2026-10-01T09:00:00-04:00\"), or a calendar date (\"2026-10-01\"), which runs to the end of that day, UTC. A time with no offset is read as UTC."
+              "description": "Only rows whose received_at is at or before this; a bare date covers that whole day (UTC)."
             },
             "has_attachment": {
               "type": "boolean",
@@ -639,19 +706,19 @@
                 "received_at_desc",
                 "received_at_asc"
               ],
-              "description": "Sort order. Defaults to relevance when there is text to rank against (q, subject or body) and to received_at_desc otherwise; relevance without any such text is treated as received_at_desc. Use received_at_asc with date_from for polling new mail."
+              "description": "Order of results. Left out, best matches come first when there is text to rank (q, subject or body), otherwise newest first. Use received_at_asc with date_from to poll for new mail."
             },
             "cursor": {
               "type": "string",
               "maxLength": 200,
-              "description": "Pagination cursor from a previous response's `meta.cursor` field."
+              "description": "Where the next page starts: the meta.cursor of the page before."
             },
             "limit": {
               "type": "integer",
               "minimum": 1,
               "maximum": 100,
               "default": 50,
-              "description": "Most emails to return in one page."
+              "description": "Rows per page. Ask for fewer when you only need the top matches."
             },
             "snippet": {
               "type": "boolean",
@@ -666,18 +733,20 @@
             "full": {
               "type": "boolean",
               "default": false,
-              "description": "Set true for the record as stored. By default the result is a compact view for reading, which leaves out per-row delivery, webhook and classification state (message_id, domain and org ids, spam score, sizes, webhook status)."
+              "description": "Return the stored record, with delivery, webhook and classification state, instead of the compact view for reading."
             }
           }
         },
         "outputSchema": {
           "type": "object",
+          "description": "Inbound emails matching the search.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -685,9 +754,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -696,104 +767,133 @@
                   ],
                   "items": {
                     "type": "object",
+                    "description": "One match; full adds stored fields.",
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Email id, for getEmail."
                       },
                       "thread_id": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Conversation it belongs to."
                       },
                       "received_at": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Arrival time."
                       },
                       "from": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "From header."
                       },
                       "to": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Recipient."
                       },
                       "subject": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Subject line."
                       },
                       "status": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Processing stage."
                       },
                       "snippet": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Start of the body."
                       },
                       "awaiting": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Whose turn: you or them."
                       },
                       "automated": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Sent by a machine."
                       },
                       "attachment_count": {
                         "type": [
                           "number",
                           "string"
-                        ]
+                        ],
+                        "description": "Attachments; left out when none."
                       },
                       "reply_count": {
                         "type": [
                           "number",
                           "string"
-                        ]
+                        ],
+                        "description": "Replies you sent to it."
                       },
                       "created_at": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Stored time."
                       },
                       "sender": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Envelope sender."
                       },
                       "recipient": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Envelope recipient."
                       },
                       "from_email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Sender address."
                       },
                       "to_email": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Recipient address."
                       },
                       "spam_score": {
                         "type": [
                           "number",
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Higher is spammier."
                       },
                       "direction": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Always inbound."
                       },
                       "score": {
                         "type": [
                           "number",
                           "string"
-                        ]
+                        ],
+                        "description": "Relevance; full only."
+                      },
+                      "highlights": {
+                        "type": "object",
+                        "description": "Matched fragments: subject, body."
                       }
                     }
                   }
                 },
-                "error": {},
+                "error": {
+                  "description": "Why refused."
+                },
                 "meta": {
                   "type": [
                     "object",
                     "null"
-                  ]
+                  ],
+                  "description": "cursor for the next page, total, sort; partial if cut short."
                 },
                 "facets": {
                   "type": [
                     "object",
                     "null"
-                  ]
+                  ],
+                  "description": "With include_facets: by_sender, by_domain, by_status."
                 }
               }
             }
@@ -848,14 +948,14 @@
             "full": {
               "type": "boolean",
               "default": false,
-              "description": "Set true for the record as stored. By default the result is a compact view for reading, which leaves out the HTML body, link targets, quoted history, authentication results, routing and webhook delivery state."
+              "description": "Return the stored record, with the HTML body, links, quoted history and authentication results, instead of the compact view for reading."
             },
             "max_chars": {
               "type": "integer",
               "minimum": 500,
               "maximum": 100000,
               "default": 16000,
-              "description": "Most characters of body_text to return in this call; read the rest with offset. Not used with full."
+              "description": "How much of body_text to return per call; read the rest with offset. Not used with full."
             },
             "offset": {
               "type": "integer",
@@ -865,13 +965,14 @@
             },
             "links": {
               "type": "string",
-              "description": "Which link targets to return, as a links array of { n, url }: \"all\", or a comma-separated list of [n] numbers such as \"3,7\" (at most 50). Omit for none. Not used with full."
+              "pattern": "^(all|\\s*[1-9]\\d{0,14}\\s*(,\\s*[1-9]\\d{0,14}\\s*){0,49})(?![\\s\\S])",
+              "description": "Link targets to include in `links`: all of them, or the [n] numbers you want. Leave it out for none. Not used with full."
             },
             "api_key": {
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": [
@@ -880,12 +981,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "One inbound email.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -893,9 +996,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -913,13 +1018,16 @@
                       ]
                     },
                     "received_at": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Arrival time."
                     },
                     "from": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "From header."
                     },
                     "to": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Recipient."
                     },
                     "subject": {
                       "type": [
@@ -931,59 +1039,70 @@
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Preview text."
                     },
                     "parse_status": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "pending or processing: read again shortly."
                     },
                     "body_text": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "No quoted history unless full."
                     },
                     "body_html": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "HTML body, full only."
                     },
                     "body_chars": {
                       "type": [
                         "number",
                         "string"
-                      ]
+                      ],
+                      "description": "Whole body length."
                     },
                     "body_next_offset": {
                       "type": [
                         "number",
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Next offset; null at the end."
                     },
                     "quoted_chars_removed": {
                       "type": [
                         "number",
                         "string"
-                      ]
+                      ],
+                      "description": "Quoted text left out."
                     },
                     "link_count": {
                       "type": [
                         "number",
                         "string"
-                      ]
+                      ],
+                      "description": "Links in the body."
                     },
                     "links": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Requested link targets."
                     },
                     "attachments": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Each has a part_index."
                     },
                     "status": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Processing stage."
                     },
                     "from_email": {
                       "type": "string"
@@ -992,14 +1111,18 @@
                       "type": "string"
                     },
                     "auth": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "SPF, DKIM, DMARC results."
                     },
                     "replies": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Replies sent to it."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -1069,7 +1192,7 @@
             },
             "wait": {
               "type": "boolean",
-              "description": "When true, wait for the first SMTP delivery outcome before returning."
+              "description": "Set true to return only once the recipient's mail server has answered (or 30 seconds pass), with the outcome in the result. Left out, the reply returns without the delivery outcome; read it later with getSentEmail."
             },
             "attachments": {
               "type": "array",
@@ -1083,13 +1206,13 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 255,
-                    "description": "Attachment filename including extension."
+                    "description": "Name the recipient sees, with its extension."
                   },
                   "content_type": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 255,
-                    "description": "MIME type of the attachment (e.g. \"application/pdf\"). Inferred from the filename when omitted."
+                    "description": "What kind of file it is. Worked out from the filename when left out."
                   },
                   "content_id": {
                     "type": "string",
@@ -1102,7 +1225,8 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 44040192,
-                    "description": "Base64-encoded attachment content."
+                    "contentEncoding": "base64",
+                    "description": "The contents of the file."
                   }
                 },
                 "required": [
@@ -1115,7 +1239,7 @@
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": [
@@ -1124,12 +1248,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "The sent reply.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -1137,9 +1263,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -1148,63 +1276,79 @@
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Sent email id, for awaitReply."
                     },
                     "status": {
                       "type": "string"
                     },
                     "from": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Sender used."
                     },
                     "accepted": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Recipients taken."
                     },
                     "rejected": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Recipients refused."
                     },
                     "request_id": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "For support."
                     },
                     "idempotent_replay": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Nothing new was sent."
                     },
                     "scheduled_at": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "When it goes out."
                     },
                     "delivery_status": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Outcome, with wait."
                     },
                     "smtp_response_code": {
                       "type": [
                         "number",
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Remote server code."
                     },
                     "smtp_response_text": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Remote server reply."
                     },
                     "idempotency": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "How a replay matched."
                     },
                     "sender": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Sender used when from was not."
                     },
                     "reply": {
                       "type": [
                         "object",
                         "null"
-                      ]
+                      ],
+                      "description": "Reply, with await_reply."
                     },
                     "reply_wait": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Outcome of await_reply."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -1252,7 +1396,7 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 255,
-              "description": "Client-supplied idempotency key. Retrying with the same key returns the original result without re-sending. Without a key, an identical send (same content and recipients) inside the same 5-minute window is NOT sent again: the result is that of the earlier send (its stored error if that send failed), with idempotent_replay true and idempotency.key_source \"auto_content\". Pass a new key to send identical content again."
+              "description": "A name you choose for this send, so a retry with it returns the first result instead of sending twice. Without one, a recent identical send is replayed rather than resent."
             },
             "await_reply": {
               "type": "boolean",
@@ -1263,7 +1407,7 @@
               "type": "string",
               "minLength": 3,
               "maxLength": 998,
-              "description": "Sender mailbox. Omit it to send from your account's managed inbox address, the sender_address that createEmailAddress and getAccount return. Set it only to send from another mailbox on a domain your account has verified for sending."
+              "description": "Sender mailbox. Omit it to send from your managed inbox; set it only for a mailbox on a domain verified for sending."
             },
             "to": {
               "oneOf": [
@@ -1283,7 +1427,7 @@
                   }
                 }
               ],
-              "description": "Recipient address (display-name form allowed), or an array of addresses for one message to several recipients. Each array entry is exactly one address. to, cc and bcc together take at most 100 addresses."
+              "description": "Who receives it: one address, or a list for one message to several people. to, cc and bcc share one recipient limit."
             },
             "cc": {
               "oneOf": [
@@ -1303,7 +1447,7 @@
                   }
                 }
               ],
-              "description": "Optional CC recipients: one address or an array of addresses. Counts toward the 100 addresses to, cc and bcc share."
+              "description": "People copied on the message; every recipient sees them."
             },
             "bcc": {
               "oneOf": [
@@ -1323,7 +1467,7 @@
                   }
                 }
               ],
-              "description": "Optional BCC recipients: one address or an array of addresses. Counts toward the 100 addresses to, cc and bcc share."
+              "description": "People copied privately; no other recipient sees them."
             },
             "reply_to": {
               "oneOf": [
@@ -1343,13 +1487,13 @@
                   }
                 }
               ],
-              "description": "Optional Reply-To header: where replies should go. Adds no recipients and does not count toward the recipient cap."
+              "description": "Where replies should go (the Reply-To header). Adds no recipients."
             },
             "subject": {
               "type": "string",
               "minLength": 1,
               "maxLength": 998,
-              "description": "Email subject line."
+              "description": "What the email is about, shown as its subject."
             },
             "body_text": {
               "type": "string",
@@ -1363,7 +1507,7 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 998,
-              "description": "Message-ID of the email being replied to, for threading (e.g. \"<abc@example.com>\")."
+              "description": "Message-ID of the email this answers, so it threads, such as \"<abc@example.com>\"."
             },
             "references": {
               "type": "array",
@@ -1373,12 +1517,12 @@
                 "minLength": 1,
                 "maxLength": 998
               },
-              "description": "List of Message-IDs for the References header, oldest-first."
+              "description": "Message-IDs of the earlier messages in the thread, oldest first, so it threads."
             },
             "attachments": {
               "type": "array",
               "maxItems": 100,
-              "description": "Optional file attachments. Not allowed on scheduled sends (scheduled_at).",
+              "description": "Files to attach. Not allowed with scheduled_at.",
               "items": {
                 "type": "object",
                 "additionalProperties": false,
@@ -1387,13 +1531,13 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 255,
-                    "description": "Attachment filename including extension."
+                    "description": "Name the recipient sees, with its extension."
                   },
                   "content_type": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 255,
-                    "description": "MIME type of the attachment (e.g. \"application/pdf\"). Inferred from the filename when omitted."
+                    "description": "What kind of file it is. Worked out from the filename when left out."
                   },
                   "content_id": {
                     "type": "string",
@@ -1406,7 +1550,8 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 44040192,
-                    "description": "Base64-encoded attachment content."
+                    "contentEncoding": "base64",
+                    "description": "The contents of the file."
                   }
                 },
                 "required": [
@@ -1418,7 +1563,7 @@
             "tags": {
               "type": "array",
               "maxItems": 10,
-              "description": "Optional metadata tags with unique names, stored on the send record for correlation and filtering via listSentEmails. Never rendered into headers and never delivered.",
+              "description": "Labels with unique names, kept on the send record to find it later with listSentEmails. Never put in headers or delivered.",
               "items": {
                 "type": "object",
                 "additionalProperties": false,
@@ -1428,14 +1573,14 @@
                     "minLength": 1,
                     "maxLength": 64,
                     "pattern": "^[A-Za-z0-9_-]+$",
-                    "description": "Tag name."
+                    "description": "What the label records, such as campaign."
                   },
                   "value": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 256,
                     "pattern": "^[A-Za-z0-9_-]+$",
-                    "description": "Tag value. Use \"true\" for a bare marker tag."
+                    "description": "Its value for this send, such as spring_launch."
                   }
                 },
                 "required": [
@@ -1447,23 +1592,24 @@
             "scheduled_at": {
               "type": "string",
               "format": "date-time",
-              "description": "Schedule the send for a future time, at most 30 days out (e.g. \"2026-08-01T09:00:00Z\"). Cannot be combined with wait or with attachments. A scheduled send can be canceled before dispatch with the management tools at /mcp/full."
+              "description": "When to send it, if not now: up to 30 days ahead. Not with wait or attachments; cancel it before it goes out with the tools at /mcp/full."
             },
             "wait": {
               "type": "boolean",
-              "description": "When true, wait for the first SMTP delivery outcome before returning. Respects wait_timeout_ms. Cannot be combined with scheduled_at."
+              "description": "Set true to return only once the recipient's mail server has answered (or wait_timeout_ms passes), with the outcome in the result. Left out, the call returns without the delivery outcome; read it later with getSentEmail. Not with scheduled_at."
             },
             "wait_timeout_ms": {
               "type": "number",
               "minimum": 1000,
               "maximum": 30000,
-              "description": "Milliseconds to wait for delivery confirmation when wait is true. Defaults to 10000."
+              "default": 30000,
+              "description": "How long wait holds the call for the delivery outcome, in milliseconds."
             },
             "api_key": {
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": [
@@ -1473,12 +1619,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "The sent email.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -1486,9 +1634,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -1497,63 +1647,79 @@
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Sent email id, for awaitReply."
                     },
                     "status": {
                       "type": "string"
                     },
                     "from": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Sender used."
                     },
                     "accepted": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Recipients taken."
                     },
                     "rejected": {
-                      "type": "array"
+                      "type": "array",
+                      "description": "Recipients refused."
                     },
                     "request_id": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "For support."
                     },
                     "idempotent_replay": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Nothing new was sent."
                     },
                     "scheduled_at": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "When it goes out."
                     },
                     "delivery_status": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Outcome, with wait."
                     },
                     "smtp_response_code": {
                       "type": [
                         "number",
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Remote server code."
                     },
                     "smtp_response_text": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Remote server reply."
                     },
                     "idempotency": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "How a replay matched."
                     },
                     "sender": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Sender used when from was not."
                     },
                     "reply": {
                       "type": [
                         "object",
                         "null"
-                      ]
+                      ],
+                      "description": "Reply, with await_reply."
                     },
                     "reply_wait": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Outcome of await_reply."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -1599,14 +1765,14 @@
           "properties": {
             "cursor": {
               "type": "string",
-              "description": "Pagination cursor from a previous response's `meta.cursor` field."
+              "description": "Where the next page starts: the meta.cursor of the page before."
             },
             "limit": {
               "type": "integer",
               "minimum": 1,
               "maximum": 100,
               "default": 50,
-              "description": "Most sent emails to return in one page."
+              "description": "Rows per page. Ask for fewer when you only need recent sends."
             },
             "status": {
               "type": "string",
@@ -1638,27 +1804,29 @@
             },
             "date_from": {
               "type": "string",
-              "description": "Inclusive lower bound on created_at. An ISO 8601 date-time with Z or a UTC offset (\"2026-10-01T09:00:00Z\", \"2026-10-01T09:00:00-04:00\"), or a calendar date (\"2026-10-01\"), which starts at 00:00 UTC. A time with no offset is read as UTC."
+              "description": "Only rows whose created_at is at or after this date or time (UTC unless it has an offset)."
             },
             "date_to": {
               "type": "string",
-              "description": "Inclusive upper bound on created_at. An ISO 8601 date-time with Z or a UTC offset (\"2026-10-01T09:00:00Z\", \"2026-10-01T09:00:00-04:00\"), or a calendar date (\"2026-10-01\"), which runs to the end of that day, UTC. A time with no offset is read as UTC."
+              "description": "Only rows whose created_at is at or before this; a bare date covers that whole day (UTC)."
             },
             "full": {
               "type": "boolean",
               "default": false,
-              "description": "Set true for the record as stored. By default the result is a compact view for reading, which leaves out idempotency and content hashes, message ids, signing details and, for a delivered row, the SMTP response."
+              "description": "Return the stored record, with hashes, message ids and signing details, instead of the compact view for reading."
             }
           }
         },
         "outputSchema": {
           "type": "object",
+          "description": "A page of sent emails.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -1666,9 +1834,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -1677,110 +1847,133 @@
                   ],
                   "items": {
                     "type": "object",
+                    "description": "One send; full adds stored fields.",
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Sent email id, for getSentEmail."
                       },
                       "thread_id": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Conversation it belongs to."
                       },
                       "created_at": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "When it was sent or queued."
                       },
                       "status": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Delivery state, such as delivered or bounced."
                       },
                       "from": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Sender."
                       },
                       "to": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Recipients."
                       },
                       "subject": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Subject line."
                       },
                       "snippet": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Start of the body."
                       },
                       "scheduled_at": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "When it goes out."
                       },
                       "canceled_at": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "When canceled."
                       },
                       "in_reply_to_email_id": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Inbound email it answers."
                       },
                       "error_code": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Why not delivered."
                       },
                       "error_message": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Detail of the error."
                       },
                       "gates": {
                         "type": [
                           "array",
                           "null"
-                        ]
+                        ],
+                        "description": "Rules that refused it: name, reason."
                       },
                       "smtp_response_code": {
                         "type": [
                           "number",
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Remote server code."
                       },
                       "smtp_response_text": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "Remote server reply."
                       },
                       "from_address": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Envelope sender."
                       },
                       "to_address": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Envelope recipient."
                       },
                       "request_id": {
                         "type": [
                           "string",
                           "null"
-                        ]
+                        ],
+                        "description": "For support."
                       }
                     }
                   }
                 },
-                "error": {},
+                "error": {
+                  "description": "Why refused."
+                },
                 "meta": {
                   "type": [
                     "object",
                     "null"
-                  ]
+                  ],
+                  "description": "cursor for the next page, and total."
                 }
               }
             }
@@ -1829,7 +2022,7 @@
             "full": {
               "type": "boolean",
               "default": false,
-              "description": "Set true for the record as stored. By default the result is a compact view for reading, which leaves out the HTML body, quoted history, idempotency and content hashes, signing details and, for a delivered send, the SMTP response."
+              "description": "Return the stored record, with the HTML body, quoted history and signing details, instead of the compact view for reading."
             }
           },
           "required": [
@@ -1838,12 +2031,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "One sent email.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -1851,9 +2046,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -1862,98 +2059,117 @@
                   ],
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Sent email id, for getSentEmail."
                     },
                     "thread_id": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Conversation it belongs to."
                     },
                     "created_at": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "When it was sent or queued."
                     },
                     "status": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Delivery state, such as delivered or bounced."
                     },
                     "from": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Sender."
                     },
                     "to": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Recipients."
                     },
                     "subject": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Subject line."
                     },
                     "snippet": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Start of the body."
                     },
                     "scheduled_at": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "When it goes out."
                     },
                     "canceled_at": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "When canceled."
                     },
                     "in_reply_to_email_id": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Inbound email it answers."
                     },
                     "error_code": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Why not delivered."
                     },
                     "error_message": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Detail of the error."
                     },
                     "gates": {
                       "type": [
                         "array",
                         "null"
-                      ]
+                      ],
+                      "description": "Rules that refused it: name, reason."
                     },
                     "smtp_response_code": {
                       "type": [
                         "number",
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Remote server code."
                     },
                     "smtp_response_text": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Remote server reply."
                     },
                     "from_address": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Envelope sender."
                     },
                     "to_address": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Envelope recipient."
                     },
                     "request_id": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "For support."
                     },
                     "body_text": {
                       "type": [
@@ -1965,22 +2181,26 @@
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "HTML body, full only."
                     },
                     "body_source": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Body the text came from."
                     },
                     "quoted_chars_removed": {
                       "type": [
                         "number",
                         "string"
-                      ]
+                      ],
+                      "description": "Quoted text left out."
                     },
                     "attachments": {
                       "type": "array"
                     },
                     "attachments_complete": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "False if some may be missing."
                     },
                     "cc": {
                       "type": [
@@ -2008,7 +2228,9 @@
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -2056,20 +2278,20 @@
             "wait": {
               "type": "boolean",
               "default": true,
-              "description": "When true, long-poll until a reply arrives or wait_timeout_ms elapses. Defaults to true. Set false only for a single immediate poll."
+              "description": "Hold the call until a reply arrives or wait_timeout_ms passes. Set false only for one immediate check."
             },
             "wait_timeout_ms": {
               "type": "number",
               "minimum": 1000,
               "maximum": 30000,
               "default": 30000,
-              "description": "Milliseconds to wait when wait is true."
+              "description": "How long wait holds the call for a reply, in milliseconds."
             },
             "api_key": {
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": [
@@ -2078,12 +2300,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "The reply to a send, if any.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -2091,9 +2315,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -2102,23 +2328,29 @@
                   ],
                   "properties": {
                     "sent_email_id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "The send waited on."
                     },
                     "reply": {
                       "type": [
                         "object",
                         "null"
-                      ]
+                      ],
+                      "description": "The reply; null if none yet."
                     },
                     "waited": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "A wait happened."
                     },
                     "timed_out": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Wait ended with no reply."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -2159,12 +2391,12 @@
             "id": {
               "type": "string",
               "format": "uuid",
-              "description": "ID of any inbound email in the conversation."
+              "description": "Any inbound email in the thread, by its id from listEmails or searchEmails."
             },
             "full": {
               "type": "boolean",
               "default": false,
-              "description": "Set true for the record as stored. By default the result is a compact view for reading, which leaves out link targets, the quoted history each reply repeats and per-turn message ids and classification."
+              "description": "Return the stored record, with links, quoted history and message ids, instead of the compact view for reading."
             }
           },
           "required": [
@@ -2173,12 +2405,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "The whole thread.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -2186,9 +2420,11 @@
                 "string",
                 "null"
               ],
+              "description": "API body.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -2200,38 +2436,43 @@
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Thread id."
                     },
                     "subject": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Thread subject."
                     },
                     "message_count": {
                       "type": [
                         "number",
                         "string"
-                      ]
+                      ],
+                      "description": "Messages in the thread."
                     },
                     "truncated": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "description": "Message cap reached."
                     },
                     "quoted_chars_removed": {
                       "type": [
                         "number",
                         "string"
-                      ]
+                      ],
+                      "description": "Quoted text left out."
                     },
                     "messages": {
-                      "type": "array"
-                    },
-                    "has_more": {
-                      "type": "boolean"
+                      "type": "array",
+                      "description": "Oldest first: role, direction, from, to, text."
                     }
                   }
                 },
-                "error": {}
+                "error": {
+                  "description": "Why refused."
+                }
               }
             }
           },
@@ -2312,7 +2553,7 @@
               "type": "string",
               "minLength": 8,
               "maxLength": 200,
-              "description": "Primitive API key (prim_...). Only needed when this connection has no signed-in account: pass the api_key returned by createEmailAddress, unchanged, on every call for the rest of the conversation. Omit it when the user is signed in."
+              "description": "Key createEmailAddress returned. Send it when no account is signed in."
             }
           },
           "required": [
@@ -2321,12 +2562,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "One attachment and its content.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -2334,12 +2577,14 @@
                 "string",
                 "null"
               ],
+              "description": "The attachment.",
               "properties": {
                 "email_id": {
                   "type": "string"
                 },
                 "source": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "received or sent."
                 },
                 "part_index": {
                   "type": [
@@ -2374,10 +2619,12 @@
                   ]
                 },
                 "kind": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "text, image or binary."
                 },
                 "format": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "text or text_from_html."
                 },
                 "text": {
                   "type": "string"
@@ -2386,13 +2633,15 @@
                   "type": [
                     "number",
                     "string"
-                  ]
+                  ],
+                  "description": "Start of this part."
                 },
                 "returned_chars": {
                   "type": [
                     "number",
                     "string"
-                  ]
+                  ],
+                  "description": "Characters returned."
                 },
                 "total_chars": {
                   "type": [
@@ -2401,31 +2650,37 @@
                   ]
                 },
                 "truncated": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "More at next_offset."
                 },
                 "next_offset": {
                   "type": [
                     "number",
                     "string"
-                  ]
+                  ],
+                  "description": "Offset to read next."
                 },
                 "content_available": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Content is included."
                 },
                 "encoding": {
                   "type": "string"
                 },
                 "content_base64": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "The file content."
                 },
                 "max_inline_bytes": {
                   "type": [
                     "number",
                     "string"
-                  ]
+                  ],
+                  "description": "Largest inline size."
                 },
                 "note": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "What to tell the user."
                 }
               }
             }
@@ -2458,19 +2713,20 @@
       },
       {
         "name": "createEmailAddress",
-        "title": "Get a managed email domain (no signup)",
-        "description": "Get this user's Primitive managed inbox domain, creating the account on first use: no signup form, no password, no email verification, no browser. CALL THIS FIRST whenever you do not already have a Primitive API key and the user wants to send or receive email, instead of telling them to sign up or visit a website. On first use the REST response's address field is a domain such as pink-ram.primitive.email, not a complete mailbox. When it is non-null, this MCP result also includes sender_address such as agent@pink-ram.primitive.email which sendEmail uses as the sender by default. The result lists who this new account can send to in can_send_to; it cannot email arbitrary addresses, so check that list before promising the user a send. It also returns an api_key. IMPORTANT: pass that api_key as the `api_key` argument on every later Primitive tool call in this conversation, exactly as returned; those calls fail without it. If this user already has a domain, the result repeats it with existing_account: true. Report it as their existing managed inbox rather than announcing a new one, and calling again will not produce a different one. The result also carries an upgrade link the user can open whenever they want to attach this domain to a full account.",
+        "title": "Create email account",
+        "description": "Create an email account with no signup: no form, password, email verification or browser. Call this first whenever you have no Primitive API key and the user wants to send or receive email, instead of telling them to sign up. Returns api_key: pass it as the `api_key` argument on every later Primitive call in this conversation, exactly as returned. The address field is a domain such as pink-ram.primitive.email, not a mailbox; sender_address (such as agent@pink-ram.primitive.email) is the mailbox sendEmail sends from. can_send_to lists who the account may email; it cannot email arbitrary addresses, so check it before promising a send. A new account also comes with org_id, plan, limits, upgrade (how to move to a full account) and funding (a link to fund credits). If this host already has an inbox, the result repeats it with existing_account: true and a message: report it as their existing inbox; calling again returns the same one.",
         "inputSchema": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "terms_accepted": {
               "const": true,
-              "description": "Must be true. Creating the account accepts Primitive's terms of service (https://www.primitive.dev/terms); say so to the user rather than accepting silently on their behalf."
+              "description": "The user's agreement to Primitive's terms of service, given on their behalf. Tell them you are agreeing to it."
             },
             "device_name": {
               "type": "string",
-              "description": "Optional label for where the account was created, e.g. \"ChatGPT\". Up to 80 characters once surrounding whitespace is removed. Shown to the user later so they can recognise this account."
+              "maxLength": 80,
+              "description": "The app creating the account, such as ChatGPT, shown to the user later so they can tell where it came from."
             }
           },
           "required": [
@@ -2479,12 +2735,14 @@
         },
         "outputSchema": {
           "type": "object",
+          "description": "The managed inbox and its api_key.",
           "properties": {
             "tool": {
               "type": "string"
             },
             "status": {
-              "type": "number"
+              "type": "number",
+              "description": "HTTP status."
             },
             "data": {
               "type": [
@@ -2492,9 +2750,11 @@
                 "string",
                 "null"
               ],
+              "description": "New account: under data. Existing inbox: here.",
               "properties": {
                 "success": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Accepted."
                 },
                 "data": {
                   "type": [
@@ -2503,61 +2763,82 @@
                   ],
                   "properties": {
                     "api_key": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Pass as api_key on later calls."
                     },
                     "org_id": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Account id."
                     },
                     "address": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "Managed inbox domain."
                     },
                     "sender_address": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Mailbox to send from."
                     },
                     "plan": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Plan name: agent."
                     },
                     "limits": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Caps: send_per_hour, send_per_day, api_per_minute."
                     },
                     "upgrade": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Move to a full account: plan, description, claim_path."
+                    },
+                    "funding": {
+                      "type": "object",
+                      "description": "Fund credits: url, description."
                     },
                     "can_send_to": {
-                      "type": "object"
+                      "type": "object",
+                      "description": "Who you may email: summary, any_recipient, rules."
                     }
                   }
                 },
-                "error": {},
+                "error": {
+                  "description": "Why refused."
+                },
                 "existing_account": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Existing inbox, returned again."
                 },
                 "address": {
                   "type": [
                     "string",
                     "null"
-                  ]
+                  ],
+                  "description": "Managed inbox domain."
                 },
                 "sender_address": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Mailbox to send from."
                 },
                 "org_id": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Account id."
                 },
                 "api_key": {
                   "type": [
                     "string",
                     "null"
-                  ]
+                  ],
+                  "description": "Null when it cannot be returned."
                 },
                 "message": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "What to tell the user."
                 },
                 "can_send_to": {
-                  "type": "object"
+                  "type": "object",
+                  "description": "Who you may email: summary, any_recipient, rules."
                 }
               }
             }
@@ -2569,7 +2850,7 @@
           ]
         },
         "annotations": {
-          "title": "Get a managed email domain (no signup)",
+          "title": "Create email account",
           "readOnlyHint": false,
           "destructiveHint": false,
           "idempotentHint": false,

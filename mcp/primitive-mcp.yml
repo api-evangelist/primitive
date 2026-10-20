@@ -145,16 +145,18 @@ deployment:
   source: catalog MCP census
 tool_quality:
   tool_count: 14
-  tokens_total: 12977
-  tokens_per_tool_median: 829
+  tokens_total: 14505
+  tokens_per_tool_median: 948
   heavy_tools:
   - name: sendEmail
-    tokens: 2176
+    tokens: 2149
   - name: searchEmails
-    tokens: 1596
+    tokens: 1731
+  - name: replyToEmail
+    tokens: 1297
   - name: listEmails
-    tokens: 1272
-  heavy_tool_count: 3
+    tokens: 1291
+  heavy_tool_count: 4
   params_total: 90
   params_undescribed: 0
   params_described_pct: 100.0
