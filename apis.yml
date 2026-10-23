@@ -302,6 +302,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: PostmanWorkspace
+  url: https://www.postman.com/kinlaneapi/primitive/overview
 - type: CapabilityMap
   url: capabilities/primitive-capability-edges.yml
   name: Primitive Business Capability Map
