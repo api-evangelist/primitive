@@ -1,1508 +1,1719 @@
 {
+  "info": {
+    "_postman_id": "98419c31-8b88-4376-8803-d6c2ef53ad0c",
+    "name": "Primitive CLI API",
+    "description": "Primitive is email infrastructure for AI agents.\n\nContact Support:\n Name: Primitive",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-10-22T01:21:52.000Z",
+    "updatedAt": "2026-10-22T01:21:53.000Z",
+    "lastUpdatedBy": "35240",
+    "uid": "35240-98419c31-8b88-4376-8803-d6c2ef53ad0c"
+  },
   "item": [
     {
-      "id": "5f57899a-c3f9-4229-b400-fe88c5c2cedd",
-      "name": "CLI",
-      "description": {
-        "content": "Browser-assisted CLI authentication",
-        "type": "text/plain"
-      },
+      "name": "cli",
       "item": [
         {
-          "id": "cd7c5e40-9531-4671-938c-17fca68c7e64",
-          "name": "Start CLI browser login",
-          "request": {
-            "name": "Start CLI browser login",
-            "description": {
-              "content": "Starts a browser-assisted CLI login session. The response includes a\ndevice code for polling and a user code that the user approves in the\nbrowser. This endpoint does not require an API key.\n",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "cli",
-                "login",
-                "start"
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "disabled": false,
-                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                "key": "Idempotency-Key",
-                "value": "<string>"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": null,
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": \"string\"\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
+          "name": "login",
+          "item": [
             {
-              "id": "a951d02e-d151-4a10-bbee-6d1618a77b6e",
-              "name": "CLI login session created",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "login",
-                    "start"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
+              "name": "start",
+              "item": [
+                {
+                  "name": "Start CLI browser login",
+                  "id": "a91f9cf7-86e0-42cb-b02f-0d72898c649f",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
                   },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": true,\n    \"key_1\": false,\n    \"key_2\": true,\n    \"key_3\": true\n  }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Created",
-              "code": 201,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Always `no-store`",
-                  "key": "Cache-Control",
-                  "value": "string"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"device_code\": \"string\",\n    \"user_code\": \"QJSS-BRVC\",\n    \"verification_uri\": \"string\",\n    \"verification_uri_complete\": \"string\",\n    \"expires_in\": 583,\n    \"interval\": 6815\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "a9515928-30a8-4d83-93f4-518153e9835e",
-              "name": "Invalid request parameters",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "login",
-                    "start"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": true,\n    \"key_1\": false,\n    \"key_2\": true,\n    \"key_3\": true\n  }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "96a4e60b-ed81-4b9b-9cfd-5055e01fa29a",
-              "name": "Rate limit exceeded",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "login",
-                    "start"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": true,\n    \"key_1\": false,\n    \"key_2\": true,\n    \"key_3\": true\n  }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Too Many Requests",
-              "code": 429,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Seconds to wait before retrying",
-                  "key": "Retry-After",
-                  "value": "4817"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "94d9c412-b860-4eff-89d5-531ab9e3cccd",
-          "name": "Poll CLI browser login",
-          "request": {
-            "name": "Poll CLI browser login",
-            "description": {
-              "content": "Polls a CLI login session until the browser approval either succeeds,\nis denied, expires, or is polled too quickly. The OAuth token set is\ncreated only after approval and is returned exactly once.\n",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "cli",
-                "login",
-                "poll"
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "disabled": false,
-                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                "key": "Idempotency-Key",
-                "value": "<string>"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": null,
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"device_code\": \"<string>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "a562180d-cc70-4a7e-aa20-515d46ee314c",
-              "name": "CLI login approved and OAuth token set created",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "login",
-                    "poll"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"device_code\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Always `no-store`",
-                  "key": "Cache-Control",
-                  "value": "string"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"api_key\": \"string\",\n    \"key_id\": \"b8cf1307-adcc-c77f-074e-7307ec9d41c6\",\n    \"key_prefix\": \"string\",\n    \"access_token\": \"string\",\n    \"refresh_token\": \"string\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 6617,\n    \"auth_method\": \"oauth\",\n    \"oauth_grant_id\": \"451c6be9-8e40-4793-5354-813ad3eddd63\",\n    \"oauth_client_id\": \"string\",\n    \"org_id\": \"0fb5dcfc-b7e4-addc-6d2b-033d74d9bb8e\",\n    \"org_name\": \"string\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "b11e17b7-e885-4e12-91ca-0daf02282b03",
-              "name": "Invalid request parameters",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "login",
-                    "poll"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"device_code\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "c0963fd8-5d09-41c7-9efd-ab5d2f4b31cc",
-              "name": "Authenticated caller lacks permission for the operation",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "login",
-                    "poll"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"device_code\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Forbidden",
-              "code": 403,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "cf19f114-02f9-45e0-8483-7283798bc0b9",
-          "name": "Start CLI account signup",
-          "request": {
-            "name": "Start CLI account signup",
-            "description": {
-              "content": "Starts a terminal-native CLI signup. `signup_code` is optional;\nomit it to sign up without one. The API creates a pending signup\nsession, sends an email verification code, and returns an opaque\nsignup token used by the resend and verify steps. This endpoint\ndoes not require an API key.\n",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "cli",
-                "signup",
-                "start"
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "disabled": false,
-                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                "key": "Idempotency-Key",
-                "value": "<string>"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": null,
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": \"string\"\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "a7d9b15c-06b4-4b24-9fbe-a82604f16d23",
-              "name": "CLI signup session created and verification email sent",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "start"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": false\n  }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Created",
-              "code": 201,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Always `no-store`",
-                  "key": "Cache-Control",
-                  "value": "string"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"signup_token\": \"string\",\n    \"email\": \"iBFx@OPoAKlgRnweXohlzjuegKRGYOrlLPwC.uz\",\n    \"expires_in\": 2984,\n    \"resend_after\": 9866,\n    \"verification_code_length\": 4309\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "64de614a-7ee8-49ac-acd2-7ec18e38858b",
-              "name": "Invalid request parameters",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "start"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": false\n  }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "43dcbc0d-88bc-457a-b2db-eafa82b5769a",
-              "name": "Rate limit exceeded",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "start"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"key_0\": false\n  }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Too Many Requests",
-              "code": 429,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Seconds to wait before retrying",
-                  "key": "Retry-After",
-                  "value": "4817"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "4b14cf4f-26d2-428f-b8e3-0c09c82f5563",
-          "name": "Resend CLI signup verification code",
-          "request": {
-            "name": "Resend CLI signup verification code",
-            "description": {
-              "content": "Sends a new email verification code for a pending CLI signup session.\nThis endpoint does not require an API key.\n",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "cli",
-                "signup",
-                "resend"
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "disabled": false,
-                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                "key": "Idempotency-Key",
-                "value": "<string>"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": null,
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"signup_token\": \"<string>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "ec699c6e-db21-4bb4-b4ac-04c3448e2283",
-              "name": "Verification email resent",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "resend"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"signup_token\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Always `no-store`",
-                  "key": "Cache-Control",
-                  "value": "string"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"email\": \"xSVnpYKJOwb4@KZRrpFzyPNslvdYOK.wco\",\n    \"expires_in\": 6714,\n    \"resend_after\": 9155,\n    \"verification_code_length\": 9967\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "14ec3d92-1080-42bd-a389-507983aedba0",
-              "name": "Invalid request parameters",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "resend"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"signup_token\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "e506176f-6951-4c46-a798-9a0bf5a03ec7",
-              "name": "Rate limit exceeded",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "resend"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"signup_token\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Too Many Requests",
-              "code": 429,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Seconds to wait before retrying",
-                  "key": "Retry-After",
-                  "value": "4817"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "d4effc60-9e03-42e8-99ef-12c739052e2b",
-          "name": "Verify CLI signup and create OAuth session",
-          "request": {
-            "name": "Verify CLI signup and create OAuth session",
-            "description": {
-              "content": "Verifies the email code for a CLI signup session and creates the\naccount. When the session was started with a `signup_code`, the\nreserved code is redeemed; sessions started without a code skip\nthe redemption step. Either way an org-scoped OAuth CLI session\nis created and the token set is returned exactly once. This\nendpoint does not require an API key.\n",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "cli",
-                "signup",
-                "verify"
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "disabled": false,
-                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                "key": "Idempotency-Key",
-                "value": "<string>"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": null,
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "134055c3-e603-4094-aeb2-9349012d363c",
-              "name": "CLI signup verified and OAuth token set created",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "verify"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Always `no-store`",
-                  "key": "Cache-Control",
-                  "value": "string"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"data\": {\n    \"api_key\": \"string\",\n    \"key_id\": \"b8cf1307-adcc-c77f-074e-7307ec9d41c6\",\n    \"key_prefix\": \"string\",\n    \"access_token\": \"string\",\n    \"refresh_token\": \"string\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 6617,\n    \"auth_method\": \"oauth\",\n    \"oauth_grant_id\": \"451c6be9-8e40-4793-5354-813ad3eddd63\",\n    \"oauth_client_id\": \"string\",\n    \"org_id\": \"0fb5dcfc-b7e4-addc-6d2b-033d74d9bb8e\",\n    \"org_name\": \"string\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "a6595f32-4ec5-4b9d-9d5e-4b36d37536b1",
-              "name": "Invalid request parameters",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "verify"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "c79a8684-7eea-468c-802c-768c8952b3e2",
-              "name": "Rate limit exceeded",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "signup",
-                    "verify"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Too Many Requests",
-              "code": 429,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Seconds to wait before retrying",
-                  "key": "Retry-After",
-                  "value": "4817"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"rate_limit_exceeded\",\n    \"message\": \"Rate limit exceeded\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            }
-          ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
-        },
-        {
-          "id": "643b15e4-770c-4939-abba-5c1f032e62b6",
-          "name": "Revoke the current CLI OAuth session",
-          "request": {
-            "name": "Revoke the current CLI OAuth session",
-            "description": {
-              "content": "Revokes the OAuth grant used to authenticate the request. API-key\nauthenticated legacy logout requests succeed without deleting server API\nkeys so old local CLI state can be cleared safely.\n",
-              "type": "text/plain"
-            },
-            "url": {
-              "path": [
-                "cli",
-                "logout"
-              ],
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "query": [],
-              "variable": []
-            },
-            "header": [
-              {
-                "disabled": false,
-                "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                "key": "Idempotency-Key",
-                "value": "<string>"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "method": "POST",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{bearerToken}}"
-                }
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "id": "2d61ef5f-c241-4706-b2f8-395c08bc0627",
-              "name": "CLI logout completed",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "logout"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: bearer",
-                      "type": "text/plain"
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"sit6\": -80576752,\n    \"in_3\": -28629179,\n    \"ex_4\": true\n  }\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
                     },
-                    "key": "Authorization",
-                    "value": "Bearer <token>"
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/login/start",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "login",
+                        "start"
+                      ]
+                    },
+                    "description": "Starts a browser-assisted CLI login session. The response includes a\ndevice code for polling and a user code that the user approves in the\nbrowser. This endpoint does not require an API key."
                   },
+                  "response": [
+                    {
+                      "id": "57bd0af2-b4eb-4ac4-bb5f-29f4ecff7d33",
+                      "name": "CLI login session created",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"sit6\": -80576752,\n    \"in_3\": -28629179,\n    \"ex_4\": true\n  }\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/login/start",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "login",
+                            "start"
+                          ]
+                        }
+                      },
+                      "status": "Created",
+                      "code": 201,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Always `no-store`",
+                            "type": "text/plain"
+                          },
+                          "key": "Cache-Control",
+                          "value": "<string>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"data\": {\n    \"device_code\": \"<string>\",\n    \"user_code\": \"ZFPX-FJHJ\",\n    \"verification_uri\": \"<string>\",\n    \"verification_uri_complete\": \"<string>\",\n    \"expires_in\": \"<integer>\",\n    \"interval\": \"<integer>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-57bd0af2-b4eb-4ac4-bb5f-29f4ecff7d33"
+                    },
+                    {
+                      "id": "b12d4c80-5cf1-4a06-b028-9d72c9c185ba",
+                      "name": "Invalid request parameters",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"sit6\": -80576752,\n    \"in_3\": -28629179,\n    \"ex_4\": true\n  }\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/login/start",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "login",
+                            "start"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-b12d4c80-5cf1-4a06-b028-9d72c9c185ba"
+                    },
+                    {
+                      "id": "d3525319-1146-413b-b1b8-19c9d3b0c054",
+                      "name": "Rate limit exceeded",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"sit6\": -80576752,\n    \"in_3\": -28629179,\n    \"ex_4\": true\n  }\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/login/start",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "login",
+                            "start"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Seconds to wait before retrying",
+                            "type": "text/plain"
+                          },
+                          "key": "Retry-After",
+                          "value": "<integer>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-d3525319-1146-413b-b1b8-19c9d3b0c054"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-a91f9cf7-86e0-42cb-b02f-0d72898c649f"
+                }
+              ],
+              "id": "c1f12f98-bb6a-4a64-8047-ca49714504ae",
+              "createdAt": "2026-10-22T01:21:53.000Z",
+              "updatedAt": "2026-10-22T01:21:53.000Z",
+              "uid": "35240-c1f12f98-bb6a-4a64-8047-ca49714504ae"
+            },
+            {
+              "name": "poll",
+              "item": [
+                {
+                  "name": "Poll CLI browser login",
+                  "id": "abe86244-cda7-4347-b02a-e856f10b3afe",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"device_code\": \"<string>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/login/poll",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "login",
+                        "poll"
+                      ]
+                    },
+                    "description": "Polls a CLI login session until the browser approval either succeeds,\nis denied, expires, or is polled too quickly. The OAuth token set is\ncreated only after approval and is returned exactly once."
+                  },
+                  "response": [
+                    {
+                      "id": "6d2d6095-bf48-4a8d-804c-e6c1f6e2dda8",
+                      "name": "CLI login approved and OAuth token set created",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"device_code\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/login/poll",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "login",
+                            "poll"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Always `no-store`",
+                            "type": "text/plain"
+                          },
+                          "key": "Cache-Control",
+                          "value": "<string>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"data\": {\n    \"api_key\": \"<string>\",\n    \"key_id\": \"<uuid>\",\n    \"key_prefix\": \"<string>\",\n    \"access_token\": \"<string>\",\n    \"refresh_token\": \"<string>\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": \"<integer>\",\n    \"auth_method\": \"oauth\",\n    \"oauth_grant_id\": \"<uuid>\",\n    \"oauth_client_id\": \"<string>\",\n    \"org_id\": \"<uuid>\",\n    \"org_name\": \"<string,null>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-6d2d6095-bf48-4a8d-804c-e6c1f6e2dda8"
+                    },
+                    {
+                      "id": "553335f9-3979-4ee3-9902-63a053272065",
+                      "name": "Invalid request parameters",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"device_code\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/login/poll",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "login",
+                            "poll"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-553335f9-3979-4ee3-9902-63a053272065"
+                    },
+                    {
+                      "id": "4397ccce-6e44-4232-b354-71b01539a650",
+                      "name": "Authenticated caller lacks permission for the operation",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"device_code\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/login/poll",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "login",
+                            "poll"
+                          ]
+                        }
+                      },
+                      "status": "Forbidden",
+                      "code": 403,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-4397ccce-6e44-4232-b354-71b01539a650"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-abe86244-cda7-4347-b02a-e856f10b3afe"
+                }
+              ],
+              "id": "7b0f71f7-b3aa-44ad-bcd6-2c90783b6008",
+              "createdAt": "2026-10-22T01:21:53.000Z",
+              "updatedAt": "2026-10-22T01:21:53.000Z",
+              "uid": "35240-7b0f71f7-b3aa-44ad-bcd6-2c90783b6008"
+            }
+          ],
+          "id": "07283a85-1b3d-4060-b863-b3dd2a666b6d",
+          "createdAt": "2026-10-22T01:21:53.000Z",
+          "updatedAt": "2026-10-22T01:21:53.000Z",
+          "uid": "35240-07283a85-1b3d-4060-b863-b3dd2a666b6d"
+        },
+        {
+          "name": "signup",
+          "item": [
+            {
+              "name": "start",
+              "item": [
+                {
+                  "name": "Start CLI account signup",
+                  "id": "d9b81d20-8d74-46a0-b4c8-dcc178694dfd",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"ada7e\": \"veniam Lorem labore enim\"\n  }\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/signup/start",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "signup",
+                        "start"
+                      ]
+                    },
+                    "description": "Starts a terminal-native CLI signup. `signup_code` is optional;\nomit it to sign up without one. The API creates a pending signup\nsession, sends an email verification code, and returns an opaque\nsignup token used by the resend and verify steps. This endpoint\ndoes not require an API key."
+                  },
+                  "response": [
+                    {
+                      "id": "0b215ce4-be0d-46f8-ae0d-259a479b6270",
+                      "name": "CLI signup session created and verification email sent",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"ada7e\": \"veniam Lorem labore enim\"\n  }\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/start",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "start"
+                          ]
+                        }
+                      },
+                      "status": "Created",
+                      "code": 201,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Always `no-store`",
+                            "type": "text/plain"
+                          },
+                          "key": "Cache-Control",
+                          "value": "<string>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"data\": {\n    \"signup_token\": \"<string>\",\n    \"email\": \"<email>\",\n    \"expires_in\": \"<integer>\",\n    \"resend_after\": \"<integer>\",\n    \"verification_code_length\": \"<integer>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-0b215ce4-be0d-46f8-ae0d-259a479b6270"
+                    },
+                    {
+                      "id": "c51c5119-36b5-43b8-b099-753e6cf37deb",
+                      "name": "Invalid request parameters",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"ada7e\": \"veniam Lorem labore enim\"\n  }\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/start",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "start"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-c51c5119-36b5-43b8-b099-753e6cf37deb"
+                    },
+                    {
+                      "id": "f6a34fc6-baec-4075-8e8f-788802495199",
+                      "name": "Rate limit exceeded",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"<email>\",\n  \"terms_accepted\": \"<boolean>\",\n  \"signup_code\": \"<string>\",\n  \"device_name\": \"<string>\",\n  \"metadata\": {\n    \"ada7e\": \"veniam Lorem labore enim\"\n  }\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/start",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "start"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Seconds to wait before retrying",
+                            "type": "text/plain"
+                          },
+                          "key": "Retry-After",
+                          "value": "<integer>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-f6a34fc6-baec-4075-8e8f-788802495199"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-d9b81d20-8d74-46a0-b4c8-dcc178694dfd"
+                }
+              ],
+              "id": "e88a0e75-f0e3-4d17-8911-8290071e63b7",
+              "createdAt": "2026-10-22T01:21:53.000Z",
+              "updatedAt": "2026-10-22T01:21:53.000Z",
+              "uid": "35240-e88a0e75-f0e3-4d17-8911-8290071e63b7"
+            },
+            {
+              "name": "resend",
+              "item": [
+                {
+                  "name": "Resend CLI signup verification code",
+                  "id": "cfdb7f8b-2754-40fb-b50f-3f6322ea164b",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"signup_token\": \"<string>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/signup/resend",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "signup",
+                        "resend"
+                      ]
+                    },
+                    "description": "Sends a new email verification code for a pending CLI signup session.\nThis endpoint does not require an API key."
+                  },
+                  "response": [
+                    {
+                      "id": "445e7d2f-d9e4-4816-8791-4e2bead2533c",
+                      "name": "Verification email resent",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"signup_token\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/resend",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "resend"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Always `no-store`",
+                            "type": "text/plain"
+                          },
+                          "key": "Cache-Control",
+                          "value": "<string>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"data\": {\n    \"email\": \"<email>\",\n    \"expires_in\": \"<integer>\",\n    \"resend_after\": \"<integer>\",\n    \"verification_code_length\": \"<integer>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-445e7d2f-d9e4-4816-8791-4e2bead2533c"
+                    },
+                    {
+                      "id": "0b72027c-ffb0-4ab2-b9da-09fa2973f095",
+                      "name": "Invalid request parameters",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"signup_token\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/resend",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "resend"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-0b72027c-ffb0-4ab2-b9da-09fa2973f095"
+                    },
+                    {
+                      "id": "f22e9492-8b2f-4b93-a6f5-3746949ac41a",
+                      "name": "Rate limit exceeded",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"signup_token\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/resend",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "resend"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Seconds to wait before retrying",
+                            "type": "text/plain"
+                          },
+                          "key": "Retry-After",
+                          "value": "<integer>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-f22e9492-8b2f-4b93-a6f5-3746949ac41a"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-cfdb7f8b-2754-40fb-b50f-3f6322ea164b"
+                }
+              ],
+              "id": "48596741-ca04-40e5-9035-d942eac1f372",
+              "createdAt": "2026-10-22T01:21:53.000Z",
+              "updatedAt": "2026-10-22T01:21:53.000Z",
+              "uid": "35240-48596741-ca04-40e5-9035-d942eac1f372"
+            },
+            {
+              "name": "verify",
+              "item": [
+                {
+                  "name": "Verify CLI signup and create OAuth session",
+                  "id": "fb89d7a7-dab3-42ee-9ba8-421d76f57d60",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/signup/verify",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "signup",
+                        "verify"
+                      ]
+                    },
+                    "description": "Verifies the email code for a CLI signup session and creates the\naccount. When the session was started with a `signup_code`, the\nreserved code is redeemed; sessions started without a code skip\nthe redemption step. Either way an org-scoped OAuth CLI session\nis created and the token set is returned exactly once. This\nendpoint does not require an API key."
+                  },
+                  "response": [
+                    {
+                      "id": "fc02981a-5011-4e1d-9b46-6c6d52e540c3",
+                      "name": "CLI signup verified and OAuth token set created",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/verify",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "verify"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Always `no-store`",
+                            "type": "text/plain"
+                          },
+                          "key": "Cache-Control",
+                          "value": "<string>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"data\": {\n    \"api_key\": \"<string>\",\n    \"key_id\": \"<uuid>\",\n    \"key_prefix\": \"<string>\",\n    \"access_token\": \"<string>\",\n    \"refresh_token\": \"<string>\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": \"<integer>\",\n    \"auth_method\": \"oauth\",\n    \"oauth_grant_id\": \"<uuid>\",\n    \"oauth_client_id\": \"<string>\",\n    \"org_id\": \"<uuid>\",\n    \"org_name\": \"<string,null>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-fc02981a-5011-4e1d-9b46-6c6d52e540c3"
+                    },
+                    {
+                      "id": "ea462d6c-0570-4cc8-9985-f611e4883160",
+                      "name": "Invalid request parameters",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/verify",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "verify"
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-ea462d6c-0570-4cc8-9985-f611e4883160"
+                    },
+                    {
+                      "id": "4f49012d-0980-4cf2-a4ec-9445c5c44c21",
+                      "name": "Rate limit exceeded",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                            "key": "Idempotency-Key",
+                            "value": "<string>"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"signup_token\": \"<string>\",\n  \"verification_code\": \"<string>\",\n  \"password\": \"<string>\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/cli/signup/verify",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "cli",
+                            "signup",
+                            "verify"
+                          ]
+                        }
+                      },
+                      "status": "Too Many Requests",
+                      "code": 429,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        },
+                        {
+                          "disabled": false,
+                          "description": {
+                            "content": "Seconds to wait before retrying",
+                            "type": "text/plain"
+                          },
+                          "key": "Retry-After",
+                          "value": "<integer>"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                      "createdAt": "2026-10-22T01:21:53.000Z",
+                      "updatedAt": "2026-10-22T01:21:53.000Z",
+                      "uid": "35240-4f49012d-0980-4cf2-a4ec-9445c5c44c21"
+                    }
+                  ],
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-fb89d7a7-dab3-42ee-9ba8-421d76f57d60"
+                }
+              ],
+              "id": "b127ae9d-c84c-4106-9631-875cb77f1b57",
+              "createdAt": "2026-10-22T01:21:53.000Z",
+              "updatedAt": "2026-10-22T01:21:53.000Z",
+              "uid": "35240-b127ae9d-c84c-4106-9631-875cb77f1b57"
+            }
+          ],
+          "id": "46ba3a39-023a-4fb6-a577-e15ab37ad61b",
+          "createdAt": "2026-10-22T01:21:53.000Z",
+          "updatedAt": "2026-10-22T01:21:53.000Z",
+          "uid": "35240-46ba3a39-023a-4fb6-a577-e15ab37ad61b"
+        },
+        {
+          "name": "logout",
+          "item": [
+            {
+              "name": "Revoke the current CLI OAuth session",
+              "id": "35cb9efb-abf7-4941-a763-84926cf5b398",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{bearerToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
                   {
-                    "disabled": false,
                     "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
                     "key": "Idempotency-Key",
                     "value": "<string>"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
                   },
                   {
                     "key": "Accept",
                     "value": "application/json"
                   }
                 ],
-                "method": "POST",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
                   "options": {
                     "raw": {
+                      "headerFamily": "json",
                       "language": "json"
                     }
                   }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "disabled": false,
-                  "description": "Maximum number of requests allowed in the current window.",
-                  "key": "ratelimit-limit",
-                  "value": "120"
                 },
-                {
-                  "disabled": false,
-                  "description": "Remaining requests in the current window.",
-                  "key": "ratelimit-remaining",
-                  "value": "118"
-                },
-                {
-                  "disabled": false,
-                  "description": "Unix timestamp (seconds) when the current window resets.",
-                  "key": "ratelimit-reset",
-                  "value": "1700000060"
-                },
-                {
-                  "disabled": false,
-                  "description": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
-                  "key": "ratelimit-policy",
-                  "value": "120;w=60"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"revoked\": false,\n    \"key_id\": \"c9657e93-79cd-04d6-5c6d-1afe99723444\",\n    \"oauth_grant_id\": \"c73a1746-ee6e-5245-6a79-a742b4fc54ae\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "7610cf70-3a72-4c5c-8ee6-4419d7f5d8d4",
-              "name": "Invalid request parameters",
-              "originalRequest": {
                 "url": {
-                  "path": [
-                    "cli",
-                    "logout"
-                  ],
+                  "raw": "{{baseUrl}}/cli/logout",
                   "host": [
                     "{{baseUrl}}"
                   ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: bearer",
-                      "type": "text/plain"
-                    },
-                    "key": "Authorization",
-                    "value": "Bearer <token>"
-                  },
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Bad Request",
-              "code": 400,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"validation_error\",\n    \"message\": \"Invalid domain format\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "e99832e6-f7de-43fd-823b-400cb61f05fc",
-              "name": "Invalid or missing API key",
-              "originalRequest": {
-                "url": {
                   "path": [
                     "cli",
                     "logout"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
+                  ]
                 },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: bearer",
-                      "type": "text/plain"
-                    },
-                    "key": "Authorization",
-                    "value": "Bearer <token>"
-                  },
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Revokes the OAuth grant used to authenticate the request. API-key\nauthenticated legacy logout requests succeed without deleting server API\nkeys so old local CLI state can be cleared safely."
               },
-              "status": "Unauthorized",
-              "code": 401,
-              "header": [
+              "response": [
                 {
-                  "key": "Content-Type",
-                  "value": "application/json"
+                  "id": "b0f69164-646b-4e56-9703-c1e32b394de0",
+                  "name": "CLI logout completed",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Maximum number of requests allowed in the current window.",
+                        "type": "text/plain"
+                      },
+                      "key": "ratelimit-limit",
+                      "value": "<integer>"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Remaining requests in the current window.",
+                        "type": "text/plain"
+                      },
+                      "key": "ratelimit-remaining",
+                      "value": "<integer>"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Unix timestamp (seconds) when the current window resets.",
+                        "type": "text/plain"
+                      },
+                      "key": "ratelimit-reset",
+                      "value": "<integer>"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Rate-limit policy in `limit;w=seconds` format, e.g. `120;w=60`.",
+                        "type": "text/plain"
+                      },
+                      "key": "ratelimit-policy",
+                      "value": "<string>"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"success\": \"<boolean>\",\n  \"data\": {\n    \"revoked\": \"<boolean>\",\n    \"key_id\": \"<uuid>\",\n    \"oauth_grant_id\": \"<uuid>\"\n  }\n}",
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-b0f69164-646b-4e56-9703-c1e32b394de0"
+                },
+                {
+                  "id": "5b69a33b-368a-4c99-8a6e-b0585d0a583a",
+                  "name": "Invalid request parameters",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-5b69a33b-368a-4c99-8a6e-b0585d0a583a"
+                },
+                {
+                  "id": "a29fe448-9bbe-49f8-b72b-52c76dd1fedd",
+                  "name": "Invalid or missing API key",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-a29fe448-9bbe-49f8-b72b-52c76dd1fedd"
+                },
+                {
+                  "id": "a69985b3-eaef-436c-accf-751bd0fe00a1",
+                  "name": "Authenticated caller lacks permission for the operation",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "Forbidden",
+                  "code": 403,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-a69985b3-eaef-436c-accf-751bd0fe00a1"
+                },
+                {
+                  "id": "c9aa4bdf-5b23-47d7-9720-2de714b97ea6",
+                  "name": "Resource not found",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
+                        "key": "Idempotency-Key",
+                        "value": "<string>"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: bearer",
+                        "key": "Authorization",
+                        "value": "Bearer <token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/cli/logout",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "cli",
+                        "logout"
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"success\": \"<boolean>\",\n  \"error\": {\n    \"code\": \"mx_conflict\",\n    \"message\": \"<string>\",\n    \"details\": {\n      \"mx_conflict\": {\n        \"provider_name\": \"<string>\",\n        \"suggested_subdomain\": \"<string>\"\n      },\n      \"required_entitlements\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"sent_email_id\": \"<string>\",\n      \"content_hash\": \"<string>\",\n      \"client_idempotency_key\": \"<string>\"\n    },\n    \"gates\": [\n      {\n        \"name\": \"send_to_confirmed_domains\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      },\n      {\n        \"name\": \"send_to_known_addresses\",\n        \"reason\": \"recipient_not_known\",\n        \"message\": \"<string>\",\n        \"subject\": \"<string>\",\n        \"fix\": {\n          \"action\": \"wait_for_inbound\",\n          \"subject\": \"<string>\"\n        },\n        \"docs_url\": \"<string>\"\n      }\n    ],\n    \"request_id\": \"<string>\"\n  }\n}",
+                  "createdAt": "2026-10-22T01:21:53.000Z",
+                  "updatedAt": "2026-10-22T01:21:53.000Z",
+                  "uid": "35240-c9aa4bdf-5b23-47d7-9720-2de714b97ea6"
                 }
               ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"unauthorized\",\n    \"message\": \"Invalid or missing API key\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "67f5d09b-636d-485a-bc6e-88fd1402c907",
-              "name": "Authenticated caller lacks permission for the operation",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "logout"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: bearer",
-                      "type": "text/plain"
-                    },
-                    "key": "Authorization",
-                    "value": "Bearer <token>"
-                  },
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Forbidden",
-              "code": 403,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"forbidden\",\n    \"message\": \"Insufficient permissions\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
-            },
-            {
-              "id": "5ad2fbf1-31ad-468a-a317-05f477264545",
-              "name": "Resource not found",
-              "originalRequest": {
-                "url": {
-                  "path": [
-                    "cli",
-                    "logout"
-                  ],
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "query": [],
-                  "variable": []
-                },
-                "header": [
-                  {
-                    "description": {
-                      "content": "Added as a part of security scheme: bearer",
-                      "type": "text/plain"
-                    },
-                    "key": "Authorization",
-                    "value": "Bearer <token>"
-                  },
-                  {
-                    "disabled": false,
-                    "description": "Optional client-supplied idempotency key. Retrying a request with the same key returns the original result instead of performing the action a second time; if omitted the server derives one from the canonical payload hash. Safe to retry network failures without duplicating side effects.",
-                    "key": "Idempotency-Key",
-                    "value": "<string>"
-                  },
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "method": "POST",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"key_id\": \"<uuid>\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "Not Found",
-              "code": 404,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"not_found\",\n    \"message\": \"Resource not found\"\n  }\n}",
-              "cookie": [],
-              "_postman_previewlanguage": "json"
+              "createdAt": "2026-10-22T01:21:53.000Z",
+              "updatedAt": "2026-10-22T01:21:53.000Z",
+              "uid": "35240-35cb9efb-abf7-4941-a763-84926cf5b398"
             }
           ],
-          "event": [],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          }
+          "id": "dae2faf0-675e-4edc-aa4a-7f1c1e1ad86e",
+          "createdAt": "2026-10-22T01:21:53.000Z",
+          "updatedAt": "2026-10-22T01:21:53.000Z",
+          "uid": "35240-dae2faf0-675e-4edc-aa4a-7f1c1e1ad86e"
         }
       ],
-      "event": []
+      "id": "16abd504-8059-4d49-ac2c-f91610b99a5b",
+      "createdAt": "2026-10-22T01:21:53.000Z",
+      "updatedAt": "2026-10-22T01:21:53.000Z",
+      "uid": "35240-16abd504-8059-4d49-ac2c-f91610b99a5b"
     }
   ],
-  "event": [],
   "variable": [
     {
-      "type": "string",
-      "value": "https://api.primitive.dev/v1",
-      "key": "baseUrl"
+      "key": "baseUrl",
+      "value": "https://api.primitive.dev/v1"
     }
-  ],
-  "info": {
-    "_postman_id": "e3e44316-73f7-45b7-acb7-d19ec2f9d3e2",
-    "name": "Primitive Account CLI API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": {
-      "content": "Primitive is email infrastructure for AI agents. The Primitive API lets you manage domains, emails, webhook endpoints,\nfilters, and account settings programmatically.\n\n## Authentication\n\nMost endpoints require a Bearer token in the `Authorization` header:\n\n```\nAuthorization: Bearer prim_<your_api_key>\nAuthorization: Bearer prim_oat_<oauth_access_token>\n```\n\nAPI keys and OAuth access tokens are org-scoped. Create and manage them in your dashboard\nunder Settings > API Keys. CLI login plus CLI/agent signup endpoints\nexplicitly declare `security: []`; they do not require an API key because\nthey are used to create OAuth CLI sessions.\n\n## Rate Limiting\n\nThe API enforces a sliding window rate limit of **120 requests per\n60 seconds** per organization. When exceeded, the API returns `429`\nwith a `Retry-After` header indicating how many seconds to wait.\n\n## Pagination\n\nList endpoints use cursor-based pagination. Responses include a\n`meta` object with `total`, `limit`, and `cursor` fields. Pass the\n`cursor` value as a query parameter to fetch the next page. When\n`cursor` is `null`, there are no more results.\n\n## Response Format\n\nAll responses use a consistent envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": { \"total\": 42, \"limit\": 50, \"cursor\": \"...\" }\n}\n```\n\nErrors follow the same pattern:\n\n```json\n{\n  \"success\": false,\n  \"error\": { \"code\": \"not_found\", \"message\": \"Email not found\" }\n}\n```\n\n## Webhook signing\n\nOutbound webhook deliveries (configured via the `endpoints` API)\nare signed so receivers can verify they came from Primitive and\nhave not been tampered with in transit. The signing scheme is\ndeliberately simple so it can be reimplemented in any language\nin a few lines. The Node SDK's `verifyWebhookSignature` helper\nis the reference implementation; the wire details below let you\nwrite a verifier in Python, Go, Ruby, etc. without reading our\nsource.\n\n**Header**: `Primitive-Signature: t=<unix-seconds>,v1=<hex>`\n\nA legacy `MyMX-Signature` header is also sent on every delivery\nwith the same value, retained for back-compatibility with\nintegrations written before the rename. New code should read\n`Primitive-Signature`.\n\n**Signed string**: `${timestamp}.${rawBody}` where `timestamp`\nis the Unix-seconds integer from the `t=` parameter and\n`rawBody` is the exact bytes of the HTTP request body BEFORE\nany JSON decoding. Verify against the raw body, not a\nre-serialized parse, or you will silently mismatch on\ninsignificant whitespace.\n\n**Signature**: HMAC-SHA256 of the signed string, hex-encoded\n(lowercase). Use the account's webhook secret as the HMAC key,\nas a UTF-8 byte sequence.\n\n**Secret**: returned by `GET /account/webhook-secret`. The\nstring looks base64-shaped (e.g. `XNHBBW8VqoBjRfNs1tkZj11jTk...`)\nbut is NOT base64; use it AS-IS as a UTF-8 string for the HMAC\nkey. Base64-decoding before HMAC will silently produce\nmismatched signatures.\n\n**Tolerance**: by convention, reject deliveries whose `t=`\ntimestamp is more than 5 minutes off your wall-clock to defend\nagainst replay attacks. The Node SDK's helper enforces this by\ndefault.\n\n**Verification recipe** (any language):\n\n```\n1. Read the raw HTTP body (do not parse).\n2. Read `Primitive-Signature: t=<ts>,v1=<sig>`.\n3. Reject if abs(now - ts) > 300 seconds.\n4. expected = HMAC_SHA256_hex(secret_utf8, f\"{ts}.{rawBody}\")\n5. Constant-time compare expected to sig. Reject if not equal.\n```\n\nFor Node, use `verifyWebhookSignature` from\n`@primitivedotdev/sdk/webhook` (or the higher-level\n`handleWebhook` helper if you want a one-liner). For other\nlanguages, the recipe above is everything you need.\n\nTest deliveries: `POST /endpoints/{id}/test` triggers a fake\ndelivery to your endpoint URL, signed with your real account\nsecret, so you can confirm verification end-to-end without\nneeding real inbound mail. The test response carries the exact\n`signature` header value sent on the wire so you can compare\nstrings directly.\n\n\n## Errors\n\nEvery error response is the same JSON envelope (`{ \"success\": false, \"error\": { \"code\", \"message\" } }`), served as `application/json` with HTTP status codes, following the RFC 7807 problem-details shape. The `error.code` is a stable machine-readable string and `error.message` is human-readable.\n\n## Authorization and roles\n\nAccess is governed by organization role-based access control. Every organization member holds one of three roles — `owner`, `admin`, or `member` — and a credential inherits a role. **API keys** always act at `member` level, regardless of the role of the user who created them, so an API key can never perform owner- or admin-only actions. **OAuth access tokens** act with the authorizing user's current organization role, resolved on each request. Every operation in this spec is part of the member-level surface, so any valid credential can call it. Organization administration that is not part of this API — billing and organization settings — requires an `owner` or `admin` and is performed in the dashboard. Fine-grained per-key scopes (e.g. a send-only or read-only key) are on the roadmap; today the role model is the unit of access control.\n\n## Versioning\n\nThe current stable API is **v1**. All endpoints are served under `/v1/` and are covered by a backward-compatibility guarantee: existing fields and status codes will not change without a deprecation notice.\n\nBreaking changes are announced at least 6 months in advance via changelog and email. Deprecated operations and fields are marked `x-deprecated: true` in the spec and carry a plain-English description of the replacement. The `v1` path prefix is guaranteed stable indefinitely; backward-compatible additions (new optional fields, new endpoints) may be made at any time without a version bump.\n\nContact Support:\n Name: Primitive",
-      "type": "text/plain"
-    }
-  }
+  ]
 }
