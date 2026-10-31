@@ -66,4 +66,114 @@
 
 Primitive is a company surfaced as a portfolio company of y-combinator and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
 
-Backed by: y-combinator
+**Areas:** Company · A2A
+
+## Primitive on APIs.io
+
+Everything profiled for Primitive is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/primitive/](https://apis.io/providers/primitive/)** — or go straight to one of the APIs or properties below.
+
+### APIs (22)
+
+- [Primitive Account API](https://apis.io/apis/primitive/primitive-account-api/) — Manage your account settings, storage, and webhook secret
+- [Primitive Agent API](https://apis.io/apis/primitive/primitive-agent-api/) — Agent signup and authentication
+- [Primitive CLI API](https://apis.io/apis/primitive/primitive-cli-api/) — Browser-assisted CLI authentication
+- [Primitive Demo API](https://apis.io/apis/primitive/primitive-demo-api/) — Public, no-account sandbox operations that mirror authenticated endpoints with synthetic data so an agent can learn the request and response shapes before…
+- [Primitive Discovery API](https://apis.io/apis/primitive/primitive-discovery-api/) — Unauthenticated entry point that lists the API base URL, how to obtain credentials, and the operations callable without a token.
+- [Primitive Domains API](https://apis.io/apis/primitive/primitive-domains-api/) — Claim, verify, and manage email domains
+- [Primitive Emails API](https://apis.io/apis/primitive/primitive-emails-api/) — List, inspect, and manage received emails
+- [Primitive Endpoints API](https://apis.io/apis/primitive/primitive-endpoints-api/) — Manage webhook endpoints that receive email events
+- [Primitive Filters API](https://apis.io/apis/primitive/primitive-filters-api/) — Manage whitelist and blocklist filter rules
+- [Primitive Functions API](https://apis.io/apis/primitive/primitive-functions-api/) — Deploy JavaScript handlers that run on inbound mail. Each function is a single ESM module whose default export is an object with an async `fetch(request,…
+- [Primitive Inbox API](https://apis.io/apis/primitive/primitive-inbox-api/) — Check inbound email setup and processing readiness
+- [Primitive Memories API](https://apis.io/apis/primitive/primitive-memories-api/) — Durable org-scoped or function-scoped JSON key-value storage for agents and functions. Keys are caller-defined. Function scope is always addressed by the…
+- [Primitive Payments API](https://apis.io/apis/primitive/primitive-payments-api/) — Collect and pay stablecoin (USDC) payments with x402. Settlement is non-custodial: funds move directly from payer to payee on-chain via an EIP-3009…
+- [Primitive Registries API](https://apis.io/apis/primitive/primitive-registries-api/) — The Agent Registry: ownable directories of agents, addressable by a registry-scoped handle. A registry's publish policy (owner_only, request, or open)…
+- [Primitive Routes API](https://apis.io/apis/primitive/primitive-routes-api/) — Recipient routing: route inbound mail to a single destination per recipient address. Rules bind an address pattern (exact or wildcard) to an endpoint;…
+- [Primitive Search API](https://apis.io/apis/primitive/primitive-search-api/) — Semantic and hybrid search across received and sent mail
+- [Primitive Sending API](https://apis.io/apis/primitive/primitive-sending-api/) — Send outbound emails through the Primitive API
+- [Primitive Service API](https://apis.io/apis/primitive/primitive-service-api/) — Operational endpoints such as the unauthenticated health/liveness probe.
+- [Primitive Templates API](https://apis.io/apis/primitive/primitive-templates-api/) — Public Function template registry reads used to browse installable agent templates.
+- [Primitive Threads API](https://apis.io/apis/primitive/primitive-threads-api/) — Conversation threads spanning received and sent emails
+- [Primitive Wake API](https://apis.io/apis/primitive/primitive-wake-api/) — Wake scheduling: schedule and send typed wake commands to your own functions over real DKIM-signed email on a cron cadence, and manage the per-target…
+- [Primitive Webhook Deliveries API](https://apis.io/apis/primitive/primitive-webhook-deliveries-api/) — View and replay webhook delivery attempts
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Primitive Webhooks](https://apis.io/asyncapis/primitive/primitive-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [dev.primitive/email](https://apis.io/servers/primitive/dev-primitive-email/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Primitive Agentic Access](https://apis.io/agentic-access/primitive/primitive-agentic-access/)
+
+#### Collections (22)
+
+Postman and Open Collection request collections.
+
+- [Primitive Account API](https://apis.io/collections/primitive/open-primitive-account-api/)
+- [Primitive Account Agent API](https://apis.io/collections/primitive/open-primitive-agent-api/)
+- [Primitive Account CLI API](https://apis.io/collections/primitive/open-primitive-cli-api/)
+- [Primitive Account Demo API](https://apis.io/collections/primitive/open-primitive-demo-api/)
+- [Primitive Account Discovery API](https://apis.io/collections/primitive/open-primitive-discovery-api/)
+- [Primitive Account Domains API](https://apis.io/collections/primitive/open-primitive-domains-api/)
+- [Primitive Account Emails API](https://apis.io/collections/primitive/open-primitive-emails-api/)
+- [Primitive Account Endpoints API](https://apis.io/collections/primitive/open-primitive-endpoints-api/)
+- [Primitive Account Filters API](https://apis.io/collections/primitive/open-primitive-filters-api/)
+- [Primitive Account Functions API](https://apis.io/collections/primitive/open-primitive-functions-api/)
+- [Primitive Account Inbox API](https://apis.io/collections/primitive/open-primitive-inbox-api/)
+- [Primitive Account Memories API](https://apis.io/collections/primitive/open-primitive-memories-api/)
+- [Primitive Account Payments API](https://apis.io/collections/primitive/open-primitive-payments-api/)
+- [Primitive Account Registries API](https://apis.io/collections/primitive/open-primitive-registries-api/)
+- [Primitive Account Routes API](https://apis.io/collections/primitive/open-primitive-routes-api/)
+- [Primitive Account Search API](https://apis.io/collections/primitive/open-primitive-search-api/)
+- [Primitive Account Sending API](https://apis.io/collections/primitive/open-primitive-sending-api/)
+- [Primitive Account Service API](https://apis.io/collections/primitive/open-primitive-service-api/)
+- [Primitive Account Templates API](https://apis.io/collections/primitive/open-primitive-templates-api/)
+- [Primitive Account Threads API](https://apis.io/collections/primitive/open-primitive-threads-api/)
+- [Primitive Account Wake API](https://apis.io/collections/primitive/open-primitive-wake-api/)
+- [Primitive Account Webhook Deliveries API](https://apis.io/collections/primitive/open-primitive-webhook-deliveries-api/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Primitive Openapi Overlay](https://apis.io/overlays/primitive/primitive-openapi-overlay/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Primitive Authentication](https://apis.io/security/primitive/primitive-authentication/)
+- [Primitive Domain Security](https://apis.io/security/primitive/primitive-domain-security/)
+- [Primitive Vulnerability Disclosure](https://apis.io/security/primitive/primitive-vulnerability-disclosure/)
+
+## API Evangelist rating
+
+**Unrated** — no public website could be reached for this company, so there was almost nothing to measure and nothing a reader could check.
+
+This is not a score of zero. No rating is published for this company. If that is wrong because something public exists that we missed, say so on this repository or email [info@apievangelist.com](mailto:info@apievangelist.com) and it will be re-run — free, and no justification needed.
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Primitive: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/primitive/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
